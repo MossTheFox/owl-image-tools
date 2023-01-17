@@ -5,6 +5,7 @@ import './i18n/config';
 import MainContainer from './ui/MainContainer';
 import WrappedThemeProvider from './ui/WrappedThemeProvider';
 import './transitions.css';
+import './main.css';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>

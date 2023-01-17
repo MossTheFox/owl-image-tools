@@ -1,0 +1,12 @@
+fieldset {
+    display: unset;
+    margin-inline: unset;
+    margin: unset;
+    padding-inline: unset;
+    padding: unset;
+    padding-block: unset;
+    border: unset;
+    min-inline-size: unset;
+
+    width: 100%;
+}

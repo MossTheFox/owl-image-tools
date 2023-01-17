@@ -14,11 +14,9 @@ function App() {
             display="flex"
             flexDirection="column"
         >
-            <Container maxWidth="lg">
-                <Box py={2}>
-                    <PanelNavigation />
-                </Box>
-            </Container>
+            <Box py={2}>
+                <PanelNavigation />
+            </Box>
         </Box>
     </Box>
 }

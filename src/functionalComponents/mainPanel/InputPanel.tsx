@@ -46,10 +46,8 @@ export default function InputPanel(props: PaperProps) {
                     将文件拖动至此处以快速导入图片。
                 </Typography>
 
+                {/* 2 Cases: Clipboard API or popup an input then let user paste */}
                 <Button startIcon={<ContentPaste />} variant="outlined">从剪贴板读取</Button>
-                <Typography variant="body2" color="textSecondary" gutterBottom>
-                    读取剪切板的文件数据。
-                </Typography>
 
                 {FS_Mode === 'publicFS' ? <>
                     <Button startIcon={<FolderOpen />} variant="outlined">打开文件夹</Button>
@@ -59,6 +57,8 @@ export default function InputPanel(props: PaperProps) {
                 }
                 {/* @ts-expect-error */}
                 <input ref={fileInputRef} type='file' webkitdirectory="1" multiple />
+
+                {/* ↓ TODO: One-time popup */}
                 <Typography variant="body2" color="textSecondary" gutterBottom>
                     浏览器的对话框可能会将操作写作 "上传"。你的文件不会离开此设备。
                 </Typography>
