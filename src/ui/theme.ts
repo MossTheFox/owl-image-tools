@@ -4,7 +4,7 @@ let darkTheme = createTheme({
     palette: {
         mode: "dark",
         primary: {
-            main: "#dbffa2"
+            main: "#d2f29f"
         },
         secondary: {
             main: "#ffc352"
@@ -39,6 +39,10 @@ let darkTheme = createTheme({
                     width: "calc(100% - 32px)",
                     maxHeight: "calc(100% - 32px)",
                     margin: "0"
+                },
+                paper: {
+                    marginLeft: '16px',
+                    marginRight: '16px',
                 }
             }
         }
@@ -87,6 +91,10 @@ let lightTheme = createTheme({
                     width: "calc(100% - 32px)",
                     maxHeight: "calc(100% - 32px)",
                     margin: "0"
+                },
+                paper: {
+                    marginLeft: '16px',
+                    marginRight: '16px',
                 }
             }
         }

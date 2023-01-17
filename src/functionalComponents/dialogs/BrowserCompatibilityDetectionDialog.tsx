@@ -1,25 +1,26 @@
-import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Typography } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Box } from "@mui/material";
 import { useCallback, useState, useMemo } from "react";
-import { compabilityTestResult, FS_Mode, storageDisabled } from "../../utils/browserCompability";
+import { clipboardSupport, compabilityTestResult, FS_Mode, isMacOriOS, storageDisabled } from "../../utils/browserCompability";
 
 /** Automatically open once on startup.
  * 
- * TODO: For firefox, allow (don't notify me next time)
- * TODO: when publicFS is supported, allow continue with storage API disabled
+ * TODO: For firefox, allow 'don't notify me next time'
+ * 
+ * Not gonna do: when publicFS is supported, allow continue with storage API disabled
  */
 export default function BrowserCompatibilityDetectionDialog() {
 
     const [open, setOpen] = useState(
         !compabilityTestResult.WASM || !compabilityTestResult.webWorker
-        || FS_Mode === 'noFS' || storageDisabled
+        || FS_Mode === 'noFS' || storageDisabled || !clipboardSupport
     );
 
-    const [severity, setSeverity] = useState(() => {
+    const severity = useMemo(() => {
         if (!compabilityTestResult.WASM || !compabilityTestResult.webWorker || storageDisabled) {
             return 'error';
         }
         return 'warning';
-    });
+    }, []);
 
     const userOSAndBrowser = useMemo(() => {
         const browser = 'whatever';
@@ -52,7 +53,8 @@ export default function BrowserCompatibilityDetectionDialog() {
                         <DialogContentText gutterBottom>对于 iOS 设备，请尝试使用 <strong>Safari 浏览器</strong>，不要使用<strong>无痕浏览</strong>模式 (此模式下，无法使用 Storage API，程序功能会受到部分影响)</DialogContentText>
                     </> : <>
                         {/* other devices */}
-                        <DialogContentText gutterBottom>请尝试使用 Chrome, Firefox 或 Microsoft Edge 浏览器。</DialogContentText>
+                        {isMacOriOS && <DialogContentText gutterBottom>请尝试使用 Safari、Google Chrome 或 Microsoft Edge 浏览器。</DialogContentText>}
+                        {!isMacOriOS && <DialogContentText gutterBottom>请尝试使用 Google Chrome 或 Microsoft Edge 浏览器。</DialogContentText>}
 
                     </>}
                     <DialogContentText gutterBottom>检测到的问题如下：</DialogContentText>
@@ -68,22 +70,33 @@ export default function BrowserCompatibilityDetectionDialog() {
                 </>}
 
             </>) : (<>
+                <DialogContentText gutterBottom>当前浏览器存在以下兼容性问题：</DialogContentText>
+
                 {/* noFS */}
-                <DialogContentText gutterBottom>当前浏览器存在兼容性问题: 不支持 File System API。</DialogContentText>
-                <DialogContentText gutterBottom><strong>这会影响图片的批量转换功能。</strong>单次的文件转换操作不会受到影响。</DialogContentText>
-                {userOSAndBrowser.isIOS ? <>
-                    <DialogContentText gutterBottom>对于 iOS 设备，请尝试使用 Safari 浏览器，且<strong>不要使用无痕浏览</strong>模式 (此模式下，无法使用必要的 Storage API 来暂存批量转换的任务)</DialogContentText>
-                    <DialogContentText>此应用程序不会追踪你的数据，所有图片转换均在你的设备上完成，不会被上传到云端。请放心。</DialogContentText>
-                    <DialogContentText>你可以随时在 Safari 浏览器的设置中，清除此站点的数据。</DialogContentText>
-                </> : <>
-                    <DialogContentText gutterBottom>可以尝试使用 Google Chrome 或 Microsoft Edge 浏览器。</DialogContentText>
-                </>}
+                {FS_Mode === 'noFS' && <Box p={1} mb={1} bgcolor={(theme) => theme.palette.action.hover} borderRadius={1}>
+                    <DialogContentText variant="h6" fontWeight='bolder' gutterBottom>不支持 File System API</DialogContentText>
+                    <DialogContentText gutterBottom><strong>这会影响图片的批量转换功能。</strong>单次的文件转换操作不会受到影响。</DialogContentText>
+                    {userOSAndBrowser.isIOS ? <>
+                        <DialogContentText gutterBottom>对于 iOS 设备，请尝试使用 Safari 浏览器，且<strong>不要使用无痕浏览</strong>模式 (此模式下，无法使用必要的 Storage API 来暂存批量转换的任务)</DialogContentText>
+                        <DialogContentText gutterBottom>此应用程序不会追踪你的数据，所有图片转换均在你的设备上完成，不会被上传到云端。请放心。</DialogContentText>
+                        <DialogContentText gutterBottom>你可以随时在 Safari 浏览器的设置中，清除此站点的数据。</DialogContentText>
+                    </> : <>
+                        {isMacOriOS && <DialogContentText gutterBottom>可以尝试使用 Safari、Google Chrome 或 Microsoft Edge 浏览器。</DialogContentText>}
+                        {!isMacOriOS && <DialogContentText gutterBottom>可以尝试使用 Google Chrome 或 Microsoft Edge 浏览器。</DialogContentText>}
+                    </>}
+                </Box>}
+                {!clipboardSupport && <Box p={1} mb={1} bgcolor={(theme) => theme.palette.action.hover} borderRadius={1}>
+                    <DialogContentText variant="h6" fontWeight='bolder' gutterBottom>不支持剪切板文件访问 API (Clipboard API)</DialogContentText>
+                    <DialogContentText gutterBottom><strong>快速读取和写入剪切板文件的操作将不可用。</strong>你会需要在导入和存储图片时手动进行操作。</DialogContentText>
+                </Box>}
+                <DialogContentText gutterBottom>这些问题不会影响部分核心功能的使用。</DialogContentText>
+
 
             </>)}
         </DialogContent>
         <DialogActions>
             {severity !== 'error' && (<>
-                <Button onClick={handleClose}>了解了</Button>
+                <Button onClick={handleClose}>好的</Button>
             </>)}
         </DialogActions>
     </Dialog>

@@ -1,5 +1,8 @@
+/**
+ * necessary APIs only.
+ */
 function compabilityTest() {
-    const TEST_KEYS = ['privateFS', 'publicFS', 'webWorker', 'WASM', /* 'localStorage' */] as const;
+    const TEST_KEYS = ['privateFS', 'publicFS', 'webWorker', 'WASM'] as const;
     const testRecords: { [key in typeof TEST_KEYS[number]]: boolean } = {
 
         // Safari 15.2+, with all other browsers ok (https://developer.mozilla.org/en-US/docs/Web/API/Navigator/storage)
@@ -13,7 +16,6 @@ function compabilityTest() {
         WASM: typeof WebAssembly !== 'undefined',
 
         // Browsers will disable localStorage when cookie is disabled. 
-        // TODO: check browser behavior... (for localStorage, privateFS, etc.)
     };
 
     return testRecords;
@@ -35,3 +37,9 @@ export const storageDisabled = (() => {
         return true;
     }
 })();
+
+export const clipboardSupport = (!!navigator.clipboard?.read && typeof ClipboardItem !== 'undefined') as boolean;
+
+export const isWebkit = typeof navigator.standalone === 'boolean';
+
+export const isMacOriOS = /iPad|iPhone|iPod|Mac/.test(navigator.userAgent);

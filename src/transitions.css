@@ -1,0 +1,24 @@
+/* Position should be absolute */
+@keyframes panel-transition-in {
+    0% {
+        left: 100%;
+        top: 10%
+    }
+
+    100% {
+        left: 0%;
+        top: 0;
+    }
+}
+
+@keyframes panel-transition-left {
+    0% {
+        left: 100%;
+        top: 10%
+    }
+
+    100% {
+        left: 0%;
+        top: 0;
+    }
+}
