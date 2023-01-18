@@ -1,8 +1,9 @@
-import { Container, Grid, Typography, Paper, Box, Divider, Button, useMediaQuery, Theme } from '@mui/material';
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { Container, Grid, Typography, Paper, Box, Divider, Button, useMediaQuery, Theme, BoxProps, SxProps } from '@mui/material';
+import { useState, useMemo, useEffect, useCallback, useContext } from 'react';
+import { panelNavigationContext } from '../context/panelNavigationContext';
 import InputPanel from './mainPanel/InputPanel';
 
-type Panels = 'input' | 'config' | 'output';
+export type Panels = 'input' | 'config' | 'output';
 
 const navOrder = ['input', 'config', 'output'] as const;
 
@@ -18,18 +19,41 @@ const leftPositionAnchorsMD = [
     '0', '33.33333%', '66.66666%'
 ] as const;
 
-// TODO: trackpad, ctrl wheel, touch screen
 
-/**
- * 
- * @param position 0 ~ 3
- */
-function getAnchorPositions(position: number) {
-
+function PanelBox({ left, width, sx, name, disabled, children }: {
+    left: string | number,
+    width: string | number,
+    sx: SxProps<Theme>,
+    name: Panels,
+    disabled: boolean,
+    children: React.ReactNode
+}) {
+    return <Box position="absolute"
+        top={0}
+        px={1}
+        width={width}
+        aria-hidden={disabled}
+        left={left}
+        sx={{
+            transition: 'all 0.25s',
+            animation: '0.125s ease-in fade-in',
+            // transform: nav === 'input' ? 'scale(1)' : 'scale(0.95)',
+            ...sx
+        }}
+    >
+        {/* ↓ disable the buttons when not being active. */}
+        <fieldset disabled={disabled}>
+            {children}
+        </fieldset>
+    </Box>;
 }
+
+
+// TODO: trackpad, ctrl wheel, touch screen
 
 export default function PanelNavigation() {
 
+    // Screen Size
     const screenSizePad = useMediaQuery((theme: Theme) => theme.breakpoints.between('sm', 'md'));
     const screenSizeDesktop = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
 
@@ -39,8 +63,18 @@ export default function PanelNavigation() {
         return 1;
     }, [screenSizePad, screenSizeDesktop]);
 
-    const [nav, setNav] = useState<Panels[]>(['input', 'config', 'output']);
+    // Current Active Panel(s)
+    const [nav, setNav] = useState<Panels[]>(() => {
+        if (screenSizeDesktop) {
+            return ['input', 'config', 'output'];
+        }
+        if (screenSizePad) {
+            return ['input', 'config'];
+        }
+        return ['input'];
+    });
 
+    // Update active panels when screen size changed
     useEffect(() => {
         if (screenSizeDesktop) {
             setNav(['input', 'config', 'output']);
@@ -53,6 +87,7 @@ export default function PanelNavigation() {
         setNav((prev) => [prev[0]]);
     }, [screenSizePad, screenSizeDesktop]);
 
+    // [Next] button
     const goNext = useCallback(() => {
         setNav((prev) => {
             let startIndex = navOrder.indexOf(prev[0]);
@@ -69,6 +104,7 @@ export default function PanelNavigation() {
         })
     }, [onScreenPanelCount]);
 
+    // [Prev] button
     const goPrev = useCallback(() => {
         setNav((prev) => {
             let startIndex = navOrder.indexOf(prev[0]);
@@ -85,13 +121,33 @@ export default function PanelNavigation() {
         })
     }, [onScreenPanelCount]);
 
+    const navigateTo = useCallback((target: Panels) => {
+        if (onScreenPanelCount === 3) {
+            setNav([...navOrder]);
+            return;
+        }
+        if (onScreenPanelCount === 2) {
+            (target === navOrder[2]) && setNav(['config', 'output']);
+            (target === navOrder[1]) && setNav(['input', 'config']);
+            (target === navOrder[0]) && setNav(['input', 'config']);
+            return;
+        }
+        setNav([target]);
+    }, [onScreenPanelCount]);
+
+    const panelNavContext = useContext(panelNavigationContext);
+    useEffect(() => {
+        panelNavContext.registerFunction(navigateTo);
+    }, [navigateTo, panelNavContext.registerFunction]);
+
+    // Width for each panel
     const widthProp = useMemo(() => {
         if (screenSizePad) return '50%';
         if (screenSizeDesktop) return '33.33333%';
         return '100%';
     }, [screenSizePad, screenSizeDesktop]);
 
-
+    // Filter (CSS filter: brightness) for each panel
     const filterProp = useMemo(() => {
         return {
             'input': nav.includes('input') ? 'brightness(100%)' : 'brightness(90%)',
@@ -101,13 +157,16 @@ export default function PanelNavigation() {
     }, [screenSizePad, screenSizeDesktop, nav]);
 
 
+    // Touch screen swipping action
     const [swipping, setSwipping] = useState(false);
 
+    // When swipping, duratio should be 0
     const transitionDuration = useMemo(() => {
         if (swipping) return '0';
         return '0.25s';
     }, [swipping]);
 
+    // Left property (CSS positioning) for the three panels
     const containerLeft = useMemo(() => {
         if (nav.length === 1) {
             // mind blown up. Hard coded here. whatever.
@@ -158,48 +217,36 @@ export default function PanelNavigation() {
         width="100%"
     >
 
-        <Box position="absolute"
-            top={0}
-            px={1}
-            width={widthProp}
-            aria-hidden={!nav.includes('input')}
+        <PanelBox
+            name='input'
             left={containerLeft.input}
+            disabled={!nav.includes('input')}
+            width={widthProp}
             sx={{
-                transition: 'all 0.25s',
                 transitionDuration,
                 filter: filterProp.input,
-                // transform: nav === 'input' ? 'scale(1)' : 'scale(0.95)',
             }}
         >
-            <fieldset disabled={!nav.includes('input')}>
-                <InputPanel />
-            </fieldset>
-        </Box>
+            <InputPanel />
+        </PanelBox>
 
-        <Box position="absolute"
-            top={0}
-            px={1}
-            width={widthProp}
-            aria-hidden={!nav.includes('config')}
+        <PanelBox
+            name='config'
             left={containerLeft.config}
+            disabled={!nav.includes('config')}
+            width={widthProp}
             sx={{
-                transition: 'all 0.25s',
                 transitionDuration,
                 filter: filterProp.config,
-                // transform: nav === 'config' ? 'scale(1)' : 'scale(0.95)',
-            }}
-        >
-            {/* ↓ disable the buttons when not being active. */}
-            <fieldset disabled={!nav.includes('config')}>
-                <Paper>
-                    <Box p={2}>
-                        <Typography variant="h5" fontWeight='bolder' gutterBottom>
-                            输出设置
-                        </Typography>
-                    </Box>
-                </Paper>
-            </fieldset>
-        </Box>
+            }}>
+            <Paper>
+                <Box p={2}>
+                    <Typography variant="h5" fontWeight='bolder' gutterBottom>
+                        输出设置
+                    </Typography>
+                </Box>
+            </Paper>
+        </PanelBox>
 
         <Box position="absolute"
             top={0}
@@ -211,6 +258,7 @@ export default function PanelNavigation() {
                 transition: 'all 0.25s',
                 transitionDuration,
                 filter: filterProp.output,
+                animation: '0.125s ease-in fade-in',
                 // transform: nav === 'output' ? 'scale(1)' : 'scale(0.95)',
             }}
         >
@@ -225,8 +273,9 @@ export default function PanelNavigation() {
             </fieldset>
         </Box>
 
-        <Button onClick={goPrev}>debug 1</Button>
-        <Button onClick={goNext}>debug 2</Button>
+        <Button onClick={navigateTo.bind(null, 'input')}>debug 1</Button>
+        <Button onClick={navigateTo.bind(null, 'config')}>debug 2</Button>
+        <Button onClick={navigateTo.bind(null, 'output')}>debug 3</Button>
 
     </Box>
 }

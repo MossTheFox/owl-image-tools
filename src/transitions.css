@@ -1,13 +1,11 @@
 /* Position should be absolute */
-@keyframes panel-transition-in {
+@keyframes fade-in {
     0% {
-        left: 100%;
-        top: 10%
+        opacity: 0;
     }
 
     100% {
-        left: 0%;
-        top: 0;
+        opacity: 1;
     }
 }
 

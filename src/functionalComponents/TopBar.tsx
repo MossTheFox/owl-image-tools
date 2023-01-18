@@ -1,9 +1,15 @@
 import { Box, Typography, Chip, Tooltip, ButtonBase, BoxProps } from "@mui/material";
 import { Settings } from "@mui/icons-material";
+import { useContext } from "react";
 import { t } from "i18next";
 import { FS_Mode, storageDisabled } from "../utils/browserCompability";
+import { loggerContext } from "../context/loggerContext";
 
 export default function TopBar(props: BoxProps) {
+
+    const { line, history } = useContext(loggerContext);
+
+    // TODO: view history modal
 
     return <Box width="100%"
         height="2rem"
@@ -48,7 +54,9 @@ export default function TopBar(props: BoxProps) {
 
             {/* Log Info Output Here */}
             <Box flexGrow={1} overflow='hidden' pr={1}>
-                <Typography variant="body2" whiteSpace='nowrap'>Image Optimization Tool</Typography>
+                <Typography variant="body2" whiteSpace='nowrap'>
+                    {line}
+                </Typography>
             </Box>
 
             {/* TODO: ↓ FS Mode Chip auto fade out */}
