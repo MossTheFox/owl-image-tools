@@ -6,6 +6,10 @@ import BrowserCompatibilityDetectionDialog from './functionalComponents/dialogs/
 import PanelNavigation from './functionalComponents/PanelNavigation';
 import TopBar from './functionalComponents/TopBar';
 
+export const TOP_BAR_HEIGHT = '2rem' as const;
+export const CONTROL_PANEL_CONTAINER_HEIGHT = `calc(100vh - ${TOP_BAR_HEIGHT})` as const;
+export const CONTROL_PANEL_HEIGHT = `calc(100vh - ${TOP_BAR_HEIGHT} - 16px)` as const;
+
 function App() {
 
     return <Box position="relative" height="100vh">
@@ -13,29 +17,42 @@ function App() {
 
         {/* Panels Navigarion Context */}
         <PanelNavigationContextProvider>
-            {/* (FS_MODE !== 'noFS') Context that records all the file handles */}
-            <FileListContext>
-                {/* For Dropped in folders (or files) and folder selector */}
-                <WebkitDirectoryFileListContext>
-                    {/* Context for the logs (display at the top bar) */}
-                    <LoggerContextProvider>
+            {/* Context for the logs (display at the top bar) */}
+            <LoggerContextProvider>
+                {/* (FS_MODE !== 'noFS') Context that records all the file handles */}
+                <FileListContext>
+                    {/* For Dropped in folders (or files) and folder selector */}
+                    <WebkitDirectoryFileListContext>
 
                         <TopBar />
                         <BrowserCompatibilityDetectionDialog />
                         <Box width="100%"
-                            height="calc(100vh - 2rem)"
-                            overflow="hidden"
+                            height={CONTROL_PANEL_CONTAINER_HEIGHT}
                             display="flex"
+                            alignItems="stretch"
+                            justifyContent="stretch"
                             flexDirection="column"
+                            py={1}
+                            // sx={{
+                            //     overflowX: 'hidden',
+                            //     overflowY: 'auto'
+                            // }}
+                            overflow="hidden"
+
                         >
-                            <Box py={1}>
-                                <PanelNavigation />
+                            <Box display="flex"
+                                flexGrow={1}
+                                flexDirection="column"
+                            >
+                                <PanelNavigation
+                                    maxHeight={CONTROL_PANEL_HEIGHT}
+                                />
                             </Box>
                         </Box>
 
-                    </LoggerContextProvider>
-                </WebkitDirectoryFileListContext>
-            </FileListContext>
+                    </WebkitDirectoryFileListContext>
+                </FileListContext>
+            </LoggerContextProvider>
         </PanelNavigationContextProvider>
     </Box>
 }

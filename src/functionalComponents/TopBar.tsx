@@ -4,6 +4,7 @@ import { useContext } from "react";
 import { t } from "i18next";
 import { FS_Mode, storageDisabled } from "../utils/browserCompability";
 import { loggerContext } from "../context/loggerContext";
+import { TOP_BAR_HEIGHT } from "../App";
 
 export default function TopBar(props: BoxProps) {
 
@@ -12,7 +13,7 @@ export default function TopBar(props: BoxProps) {
     // TODO: view history modal
 
     return <Box width="100%"
-        height="2rem"
+        height={TOP_BAR_HEIGHT}
         bgcolor={(theme) => theme.palette.primary.main}
         color={(theme) => theme.palette.primary.contrastText}
         boxShadow={(theme) => theme.shadows[1]}

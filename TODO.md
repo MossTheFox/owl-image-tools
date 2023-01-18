@@ -33,6 +33,7 @@ Source:
 |AVIF|
 |SVG|Canvas Draw Image|Canvas Draw Image then pngcrush|
 |TIFF|
+|ICO|
 
 Specially, GIF:
 

@@ -1,5 +1,6 @@
 import { Container, Grid, Typography, Paper, Box, Divider, Button, useMediaQuery, Theme, BoxProps, SxProps } from '@mui/material';
 import { useState, useMemo, useEffect, useCallback, useContext } from 'react';
+import { CONTROL_PANEL_HEIGHT } from '../App';
 import { panelNavigationContext } from '../context/panelNavigationContext';
 import InputPanel from './mainPanel/InputPanel';
 
@@ -34,24 +35,27 @@ function PanelBox({ left, width, sx, name, disabled, children }: {
         width={width}
         aria-hidden={disabled}
         left={left}
+        maxHeight={CONTROL_PANEL_HEIGHT}
         sx={{
             transition: 'all 0.25s',
             animation: '0.125s ease-in fade-in',
             // transform: nav === 'input' ? 'scale(1)' : 'scale(0.95)',
             ...sx
         }}
+        component={'fieldset'}
+        disabled={disabled}
     >
         {/* ↓ disable the buttons when not being active. */}
-        <fieldset disabled={disabled}>
+        {/* <fieldset disabled={disabled}> */}
             {children}
-        </fieldset>
+        {/* </fieldset> */}
     </Box>;
 }
 
 
 // TODO: trackpad, ctrl wheel, touch screen
 
-export default function PanelNavigation() {
+export default function PanelNavigation(props: BoxProps) {
 
     // Screen Size
     const screenSizePad = useMediaQuery((theme: Theme) => theme.breakpoints.between('sm', 'md'));
@@ -215,6 +219,8 @@ export default function PanelNavigation() {
     return <Box position="relative"
         overflow="visible"
         width="100%"
+        flexGrow={1}
+        {...props}
     >
 
         <PanelBox

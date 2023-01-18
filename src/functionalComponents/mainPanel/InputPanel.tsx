@@ -1,70 +1,49 @@
-import { Box, Button, Divider, Paper, Typography, Stack, PaperProps } from "@mui/material";
-import { useCallback, useRef } from "react";
-import { ContentPaste, FolderOpen } from '@mui/icons-material';
-import { FS_Mode } from "../../utils/browserCompability";
-import useAsync from "../../hooks/useAsync";
+import { Box, Button, Divider, Paper, Typography, Stack, PaperProps, Grid } from "@mui/material";
+import FileListPreview from "./fileListPreview/FileListPreview";
+import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../context/fileListContext";
+import { CONTROL_PANEL_HEIGHT } from "../../App";
+import ReadFromClipboardButton from "./inputPanelComponents/ReadFromClipboardButton";
+import SelectLocalFileButtonRow from "./inputPanelComponents/SelectLocalFileButtonRow";
 
 export default function InputPanel(props: PaperProps) {
 
-    // Case 1: window.showDirectoryPicker
-    const asyncRequestOpenFolder = useCallback(async () => {
-        return await window.showDirectoryPicker();
-    }, []);
+    return <Paper {...props} sx={{
+        overflowX: 'hidden',
+        overflowY: 'auto',
+        maxHeight: CONTROL_PANEL_HEIGHT,
+        transition: 'background-color 0.125s'
+    }}>
+        <Box px={2} pt={2} pb={1} position='sticky' top={0} left={0}
+            bgcolor={(theme) => theme.palette.background.paper}
+            zIndex={1}
+            borderBottom={1}
+            borderColor="divider"
+            sx={{
+                transition: 'background-color 0.125s'
+            }}
+        >
 
-    const requestOpenFolderOnSuccess = useCallback((result: FileSystemDirectoryHandle) => {
-
-    }, []);
-
-    const requestOpenFolderOnError = useCallback((err: Error) => {
-
-    }, []);
-
-    const fireRequestDir = useAsync(asyncRequestOpenFolder, requestOpenFolderOnSuccess, requestOpenFolderOnError);
-
-    // Case 2: Directory Picker
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
-
-    const handleFolderInput = useCallback(() => {
-        if (!fileInputRef.current || !fileInputRef.current.files) return;
-        const files = fileInputRef.current.files;
-        // clearContext
-
-
-    }, [fileInputRef])
-
-
-    return <Paper {...props}>
-        <Box p={2}>
             <Typography variant="h5" fontWeight='bolder' gutterBottom>
                 源文件
             </Typography>
             <Divider sx={{ mb: 2 }} />
-            <Stack spacing={1}>
+            <Stack spacing={1} pb={1}>
 
                 <Typography variant="body2" color="primary" gutterBottom>
                     将文件拖动至此处以快速导入图片。
                 </Typography>
 
                 {/* 2 Cases: Clipboard API or popup an input then let user paste */}
-                <Button startIcon={<ContentPaste />} variant="outlined">从剪贴板读取</Button>
+                <ReadFromClipboardButton fullWidth />
 
-                {FS_Mode === 'publicFS' ? <>
-                    <Button startIcon={<FolderOpen />} variant="outlined">打开文件夹</Button>
-                </> : <>
-                    <Button startIcon={<FolderOpen />} variant="outlined">选择文件夹</Button>
-                </>
-                }
-                {/* @ts-expect-error */}
-                <input ref={fileInputRef} type='file' webkitdirectory="1" multiple />
-
-                {/* ↓ TODO: One-time popup */}
-                <Typography variant="body2" color="textSecondary" gutterBottom>
-                    浏览器的对话框可能会将操作写作 "上传"。你的文件不会离开此设备。
-                </Typography>
-
-
+                <SelectLocalFileButtonRow />
             </Stack>
+        </Box>
+
+        <Box px={2} pt={1} pb={2} position='relative'>
+
+            <FileListPreview />
+
         </Box>
     </Paper>;
 }

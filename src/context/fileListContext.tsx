@@ -1,19 +1,23 @@
 import { createContext, useState, useCallback, useEffect } from "react";
+import { randomUUIDv4 } from "../utils/hasherAndUUID";
+import { ACCEPT_FILE_EXTs, checkIsFilenameAccepted } from "../utils/imageMIMEs";
 
-class TreeNode<T> {
+export class TreeNode<T> {
     data: T;
+    nodeId: string;
     children: TreeNode<T>[];
     constructor(data: T) {
         this.data = data;
         this.children = [];
+        this.nodeId = randomUUIDv4();
     };
 };
 
 /** For those support File System API */
-type FileNodeData = FileSystemDirectoryHandle | FileSystemFileHandle;
+export type FileNodeData = FileSystemDirectoryHandle | FileSystemFileHandle;
 
 /** For Firefox... (um) and Safari before 15.2 */
-type WebkitFileNodeData = {
+export type WebkitFileNodeData = {
     kind: 'file',
     file: File
 } | {
@@ -21,19 +25,10 @@ type WebkitFileNodeData = {
     name: string
 };
 
-const ACCEPT_FILE_EXTs = [
-    'jpg',
-    'jpeg',
-    'png',
-    'gif',
-    'svg',
-    'tiff',
-    'bmp',
-    'webp',
-    'avif',
-];
-
-/** it need to be abortable. */
+/** it need to be abortable. 
+ * 
+ * Also, non-image files will be ignored, as well as empty folders (with no images).
+*/
 async function iterateNode(node: TreeNode<FileNodeData>, abortSignal?: AbortSignal) {
     if (node.data.kind === 'file') return;
     if (abortSignal?.aborted) return;
@@ -45,19 +40,21 @@ async function iterateNode(node: TreeNode<FileNodeData>, abortSignal?: AbortSign
 
         // Skip non-image files
         if (handle.kind === 'file') {
-            const extIndex = handle.name.lastIndexOf('.');
-            if (extIndex < 0) continue;
-            if (!ACCEPT_FILE_EXTs.includes(handle.name.substring(extIndex + 1))) continue;
+            if (checkIsFilenameAccepted(handle.name)) {
+                node.children.push(new TreeNode(handle));
+            }
+            continue;
         }
 
-        const newNode = new TreeNode<FileNodeData>(handle);
-        node.children.push(newNode);
-    }
+        // ...filter empty folder
+        const folderNode = new TreeNode<FileNodeData>(handle);
+        await iterateNode(folderNode, abortSignal);
 
-    for (const child of node.children) {
         if (abortSignal?.aborted) return;
 
-        await iterateNode(child, abortSignal);
+        if (folderNode.children.length) {
+            node.children.push(folderNode);
+        }
     }
 }
 
@@ -99,10 +96,14 @@ export function FileListContext({ children }: { children: React.ReactNode }) {
         const controller = new AbortController();
 
         setReady(false);
-        const fileHandleTrees: typeof inputFileHandleTrees = [];
+        setError(null);
+        let fileHandleTrees: typeof inputFileHandleTrees = [];
 
         // NOTE: For duplicated folder names, KEEP it. Handle it when creating folder on outputing
         for (const handle of rootInputFSHandles) {
+            if (handle.kind === 'file' && !checkIsFilenameAccepted(handle.name)) {
+                continue;
+            }
             fileHandleTrees.push(new TreeNode(handle));
         }
         async function iterateAll() {
@@ -114,8 +115,10 @@ export function FileListContext({ children }: { children: React.ReactNode }) {
 
         iterateAll().then(() => {
             if (controller.signal.aborted) return;
+            fileHandleTrees = fileHandleTrees.filter((v) => v.data.kind === 'file' || v.children.length);
             setInputFileHandleTrees(fileHandleTrees);
             setReady(true);
+            setError(null);
         }).catch((err: Error) => {
             if (controller.signal.aborted) return;
             setError(err);
@@ -180,7 +183,10 @@ function iterateDirectoryEntry(entry: FileSystemDirectoryEntry, node: TreeNode<W
                         name: entry.name
                     });
                     await iterateDirectoryEntry(entry as FileSystemDirectoryEntry, dirNode, abortSignal);
-                    node.children.push(dirNode);
+                    // Ignore Empty dir
+                    if (dirNode.children.length) {
+                        node.children.push(dirNode);
+                    }
                     continue;
                 }
             }
@@ -195,7 +201,7 @@ interface WebkitFileListContext {
     inputFileTreeRoots: TreeNode<WebkitFileNodeData>[],
     setInputFileTreeRoots: React.Dispatch<React.SetStateAction<TreeNode<WebkitFileNodeData>[]>>,
 
-    appendFileList: (fileList: FileList) => void,
+    appendFileList: (fileList: FileList | File[]) => void,
 
     /** File iteration finished or exited with error (on both occations will be true, check `error` to specify whether it's all ok) */
     ready: boolean,
@@ -222,26 +228,36 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
 
     const [allowDrop, setAllowDrop] = useState(true);
 
-    // File List from input (webkitdirectory) element
-    const appendFileList = useCallback((fileList: FileList) => {
+    // File List from input (webkitdirectory) element or clipboard
+    const appendFileList = useCallback((fileList: FileList | File[]) => {
         if (fileList.length === 0) return;
-        const dirName = fileList[0].webkitRelativePath.split('/')[0];
+        // From <input>
+        if (fileList instanceof FileList) {
 
-        // NOTE: For duplicated folder names, KEEP it. Handle it when creating folder on outputing
-        let newRoot = new TreeNode<WebkitFileNodeData>({
-            kind: 'directory',
-            name: dirName
-        });
+            const dirName = fileList[0].webkitRelativePath.split('/')[0];
 
-        // construct the tree structure.
-        // webkitEntries is empty. Manually parse it.
-        // TODO:
+            // NOTE: For duplicated folder names, KEEP it. Handle it when creating folder on outputing
+            let newRoot = new TreeNode<WebkitFileNodeData>({
+                kind: 'directory',
+                name: dirName
+            });
 
+            // construct the tree structure.
+            // webkitEntries is empty. Manually parse it.
+            // TODO: PARSE...
+
+            return;
+        }
+        // From clipboard (file array...)
+        const newNodes: TreeNode<WebkitFileNodeData>[] = [];
+        for (const file of fileList) {
+            newNodes.push(new TreeNode({
+                kind: 'file',
+                file: file
+            }));
+        }
+        setInputFileTreeRoots((prev) => [...prev, ...newNodes]);
     }, []);
-
-    useEffect(() => {
-        console.log(inputFileTreeRoots);
-    }, [inputFileTreeRoots]);
 
     // Input from Drag and Drop APi
     const handleDrop = useCallback(async (e: DragEvent, signal: AbortSignal) => {
@@ -269,7 +285,6 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
                 // If it is able to get the FileEntry, then here we iterate the files...
                 const entry = item.webkitGetAsEntry() as FileSystemDirectoryEntry | null;
                 if (!entry || !entry.isDirectory) continue;
-
                 // parse this directory
                 const dirRoot = new TreeNode<WebkitFileNodeData>({
                     kind: 'directory',
@@ -277,13 +292,17 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
                 });
 
                 await iterateDirectoryEntry(entry, dirRoot, signal);
-
-                fileNodes.push(dirRoot);
+                // Ignore Empty dir
+                if (dirRoot.children.length) {
+                    fileNodes.push(dirRoot);
+                }
             }
         }
 
         if (!signal.aborted) {
             setInputFileTreeRoots((prev) => [...prev, ...fileNodes]);
+            setReady(true);
+            setError(null);
         }
 
     }, []);
@@ -291,12 +310,14 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
     useEffect(() => {
 
         const abortController = new AbortController();
-        setReady(false);
+        setReady(true);
         setError(null);
 
         /** Async handler. */
         const handleDropCall = async (e: DragEvent) => {
             try {
+                setReady(false);
+                setError(null);
                 await handleDrop(e, abortController.signal)
             } catch (err) {
                 if (!abortController.signal.aborted) {
