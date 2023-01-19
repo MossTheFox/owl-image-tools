@@ -1,6 +1,7 @@
 import { SwipeableDrawer, SwipeableDrawerProps, Box, Typography, List, ListItem, ListItemButton, ListItemText, ListItemIcon, ListSubheader, IconButton, Divider, Switch } from "@mui/material";
 import { Close, DarkMode, LightMode } from '@mui/icons-material';
 import { VERSION_TEXT, VERSION_TEXT_SECONDARY } from "../../constraints";
+import { FS_Mode } from "../../utils/browserCompability";
 
 export default function AppConfigDrawerMenu(props: SwipeableDrawerProps) {
 
@@ -66,6 +67,30 @@ export default function AppConfigDrawerMenu(props: SwipeableDrawerProps) {
                         </Typography>
                     </ListSubheader>}
                 >
+                    <ListItemButton >
+                        <ListItemText primary={"文件系统模式: " + (() => {
+                            switch (FS_Mode) {
+                                case 'noFS':
+                                    return '不支持文件系统访问';
+                                case 'privateFS':
+                                    return 'Private FS';
+                                case 'publicFS':
+                                    return '完整支持'
+                            }
+                        })()}
+                            secondary={(() => {
+                                switch (FS_Mode) {
+                                    case 'noFS':
+                                        return '批量转换的任务结果将存储在内存中，可能造成程序崩溃';
+                                    case 'privateFS':
+                                        return '批量转换的任务会在 Origin Private File System 中暂存';
+                                    case 'publicFS':
+                                        return '对于取得访问权限的目录有着完整的读写支持'
+                                }
+                            })()}
+                        />
+                    </ListItemButton>
+
                     <ListItemButton >
                         <ListItemText primary="清空站点数据"
                             secondary={`清除保存的配置信息与文件缓存`}

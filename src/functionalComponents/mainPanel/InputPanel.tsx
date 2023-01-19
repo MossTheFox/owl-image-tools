@@ -4,6 +4,7 @@ import { fileListContext as _fileListContext, webkitFileListContext as _webkitFi
 import { CONTROL_PANEL_HEIGHT } from "../../App";
 import ReadFromClipboardButton from "./inputPanelComponents/ReadFromClipboardButton";
 import SelectLocalFileButtonRow from "./inputPanelComponents/SelectLocalFileButtonRow";
+import { FileListDialogCallerContextProvider } from "../../context/fileListDialog/fileListDialogCallerContext";
 
 export default function InputPanel(props: PaperProps) {
 
@@ -42,7 +43,9 @@ export default function InputPanel(props: PaperProps) {
 
         <Box px={2} pt={1} pb={2} position='relative'>
 
-            <FileListPreview />
+            <FileListDialogCallerContextProvider>
+                <FileListPreview />
+            </FileListDialogCallerContextProvider>
 
         </Box>
     </Paper>;

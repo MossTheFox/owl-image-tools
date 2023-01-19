@@ -41,6 +41,7 @@ export default function ImageFilePreviewBox(props: BoxProps & { file: File }) {
         {!loading && !error && <Box width="100%" height="auto" display="flex" alignItems="center" justifyContent="center">
 
             <img alt={file.name} src={objectUrl} style={{ maxWidth: '100%', maxHeight: '100%' }}
+                loading="lazy"
                 onError={imageLoadError}
                 onLoad={imageOnLoad}
             />

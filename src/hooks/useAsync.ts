@@ -17,7 +17,7 @@ function useAsync<T>(
     onSuccess?: (result: T) => void,
     onError?: (error: Error) => void,
     fireOnMount = false,
-    abortSeconds = 12
+    abortSeconds = 30
 ) {
     const [fire, setFire] = useState(fireOnMount);
 

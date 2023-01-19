@@ -1,6 +1,6 @@
 import { createContext, useState, useCallback, useEffect, useContext } from "react";
 import { randomUUIDv4 } from "../utils/randomUtils";
-import { ACCEPT_FILE_EXTs, ACCEPT_MIMEs, checkIsFilenameAccepted } from "../utils/imageMIMEs";
+import { ACCEPT_MIMEs, checkIsFilenameAccepted } from "../utils/imageMIMEs";
 import useAsync from "../hooks/useAsync";
 import { loggerContext } from "./loggerContext";
 
@@ -32,7 +32,8 @@ export type WebkitFileNodeData = {
     file: File
 } | {
     kind: 'directory',
-    name: string
+    name: string,
+    childrenCount: number,
 };
 
 export type FileListStatistic = {
@@ -42,7 +43,7 @@ export type FileListStatistic = {
     }
 };
 
-const defaultFileListStatistic: FileListStatistic = {
+export const defaultFileListStatistic: FileListStatistic = {
     totalFiles: 0,
     perFormatCount: ACCEPT_MIMEs.reduce((prev, curr) => {
         return {
@@ -95,8 +96,6 @@ async function iterateNode(node: TreeNode<FileNodeData>, nodeMap?: Map<string, T
         // count in subfolder's children
         node.data.childrenCount += folderNode.data.childrenCount;
 
-        if (abortSignal?.aborted) return;
-
         if (folderNode.children.length) {
             node.children.push(folderNode);
             // Record node in map (only non-empty folder)
@@ -104,7 +103,9 @@ async function iterateNode(node: TreeNode<FileNodeData>, nodeMap?: Map<string, T
                 nodeMap.set(folderNode.nodeId, folderNode);
             }
         }
+
     }
+
 }
 
 
@@ -270,42 +271,71 @@ export function FileListContext({ children }: { children: React.ReactNode }) {
  * For files, will only record image/*
  * Abortable. 
 */
-function iterateDirectoryEntry(entry: FileSystemDirectoryEntry, node: TreeNode<WebkitFileNodeData>, abortSignal?: AbortSignal) {
+function iterateDirectoryEntry(
+    entry: FileSystemDirectoryEntry,
+    node: TreeNode<WebkitFileNodeData>,
+    nodeMap?: Map<string, TreeNode<WebkitFileNodeData>>,
+    abortSignal?: AbortSignal
+) {
     return new Promise<void>(async (resolve, reject) => {
         const reader = entry.createReader();
         reader.readEntries(async (entries) => {
+            if (node.data.kind === 'file') return;
             node.children = [];
+            node.data.childrenCount = 0;
             for (const entry of entries) {
                 if (abortSignal?.aborted) {
                     reject(new Error('Aborted'));
                     return;
                 }
                 if (entry.isFile) {
-                    const file = await new Promise<File>((resolveFile, rejectFile) => {
+                    const file = await new Promise<File | null>((resolveFile, rejectFile) => {
                         (entry as FileSystemFileEntry).file((file) => {
                             resolveFile(file)
                         }, (err) => {
                             // reject the main promise
                             reject(err);
+                            resolveFile(null);
                         })
                     });
+
+                    // Error occurred when getting File object. Stop the whole process
+                    if (!file) {
+                        return;
+                    }
+
                     // Count in image files only
                     if (file.type.startsWith('image/')) {
-                        node.children.push(new TreeNode({
+                        const newNode = new TreeNode<WebkitFileNodeData>({
                             kind: 'file',
                             file
-                        }));
+                        })
+
+                        // Record here
+                        if (nodeMap) {
+                            nodeMap.set(newNode.nodeId, newNode);
+                        }
+
+                        node.children.push(newNode);
+                        node.data.childrenCount++;
                     }
                     continue;
                 }
                 if (entry.isDirectory) {
                     const dirNode = new TreeNode<WebkitFileNodeData>({
                         kind: 'directory',
-                        name: entry.name
+                        name: entry.name,
+                        childrenCount: 0
                     });
-                    await iterateDirectoryEntry(entry as FileSystemDirectoryEntry, dirNode, abortSignal);
-                    // Ignore Empty dir
-                    if (dirNode.children.length) {
+                    await iterateDirectoryEntry(entry as FileSystemDirectoryEntry, dirNode, nodeMap, abortSignal);
+                    // Ignore Empty dir             ↓ TypeScript... Should have define it more properly but whatever
+                    if (dirNode.children.length && dirNode.data.kind === 'directory') {
+                        node.data.childrenCount += dirNode.data.childrenCount;
+
+                        if (nodeMap) {
+                            nodeMap.set(dirNode.nodeId, dirNode);
+                        }
+
                         node.children.push(dirNode);
                     }
                     continue;
@@ -369,7 +399,8 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
             // NOTE: For duplicated folder names, KEEP it. Handle it when creating folder on outputing
             let newRoot = new TreeNode<WebkitFileNodeData>({
                 kind: 'directory',
-                name: dirName
+                name: dirName,
+                childrenCount: 0
             });
 
             // construct the tree structure.
@@ -378,19 +409,28 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
 
             return;
         }
-        
+
         // From clipboard (file array...)
         const newNodes: TreeNode<WebkitFileNodeData>[] = [];
         for (const file of fileList) {
-            newNodes.push(new TreeNode({
+            const newNode = new TreeNode<WebkitFileNodeData>({
                 kind: 'file',
                 file: file
-            }));
+            });
+            newNodes.push(newNode);
+
+            // Record in nodeMap
+            setNodeMap((prev) => {
+                const newMap = new Map(prev);
+                newMap.set(newNode.nodeId, newNode);
+                return newMap;
+            });
+
         }
         setInputFileTreeRoots((prev) => [...prev, ...newNodes]);
     }, []);
 
-    // Input from Drag and Drop APi
+    // Input from Drag and Drop API
     const handleDrop = useCallback(async (e: DragEvent, signal: AbortSignal) => {
         e.preventDefault();
         document.body.style.filter = 'unset';
@@ -400,6 +440,7 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
         // Handle Files
 
         const fileNodes: typeof inputFileTreeRoots = [];
+        const additionalMap: typeof nodeMap = new Map();
 
         for (const item of e.dataTransfer.items) {
             if (item.kind !== 'file') continue;
@@ -407,37 +448,67 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
             if (item.type.startsWith('image/')) {
                 const file = item.getAsFile();
                 if (!file) continue;
-                fileNodes.push(new TreeNode({
+
+                const newNode = new TreeNode<WebkitFileNodeData>({
                     file: file,
                     kind: 'file'
-                }));
+                });
+
+                fileNodes.push(newNode);
+
+                additionalMap.set(newNode.nodeId, newNode);
+
             } else if (item.type === '') {
                 // directory type is `''`, as is those unknown file types
                 // If it is able to get the FileEntry, then here we iterate the files...
                 const entry = item.webkitGetAsEntry() as FileSystemDirectoryEntry | null;
                 if (!entry || !entry.isDirectory) continue;
+
                 // parse this directory
                 const dirRoot = new TreeNode<WebkitFileNodeData>({
                     kind: 'directory',
-                    name: entry.name
+                    name: entry.name,
+                    childrenCount: 0
                 });
 
-                await iterateDirectoryEntry(entry, dirRoot, signal);
+                await iterateDirectoryEntry(entry, dirRoot, additionalMap, signal);
+
                 // Ignore Empty dir
                 if (dirRoot.children.length) {
                     fileNodes.push(dirRoot);
+                    additionalMap.set(dirRoot.nodeId, dirRoot);
                 }
             }
         }
 
         if (!signal.aborted) {
             setInputFileTreeRoots((prev) => [...prev, ...fileNodes]);
+            setNodeMap((prev) => new Map([...prev, ...additionalMap]));
             setReady(true);
             setError(null);
         }
 
     }, []);
 
+    // Update Statistics Here
+    useEffect(() => {
+        const newStatistic = {
+            ...defaultFileListStatistic,
+            perFormatCount: {
+                ...defaultFileListStatistic.perFormatCount
+            }
+        };
+
+        for (const [_, node] of nodeMap.entries()) {
+            if (node.data.kind === 'directory') continue;
+            newStatistic.totalFiles++;
+            newStatistic.perFormatCount[node.data.file.type as typeof ACCEPT_MIMEs[number]]++;
+        }
+
+        setStatistic(newStatistic);
+    }, [nodeMap]);
+
+    // Add Drop Event Listener Here
     useEffect(() => {
 
         const abortController = new AbortController();

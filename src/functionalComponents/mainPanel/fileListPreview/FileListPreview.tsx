@@ -2,40 +2,72 @@ import { TreeView, TreeItem } from "@mui/lab";
 import { Typography, Box, ButtonGroup, Button, Link, Tooltip } from "@mui/material";
 import { ExpandMore, ChevronRight, FolderOpen, List as ListIcon, ViewList } from "@mui/icons-material";
 import { useContext, useMemo, useCallback, useState } from "react";
-import { fileListContext as _fileListContext, FileNodeData, TreeNode, webkitFileListContext as _webkitFileListContext, WebkitFileNodeData } from "../../../context/fileListContext";
+import { fileListContext, fileListContext as _fileListContext, FileNodeData, TreeNode, webkitFileListContext, webkitFileListContext as _webkitFileListContext, WebkitFileNodeData } from "../../../context/fileListContext";
 import { FS_Mode } from "../../../utils/browserCompability";
 import { parseFileSizeString } from "../../../utils/randomUtils";
 import ImageFilePreviewBox from "../../../components/ImageFilePreviewBox";
+import { fileListDialogCallerContext } from "../../../context/fileListDialog/fileListDialogCallerContext";
 
 
 function FileTreeItem({
     nodeId,
     file,
     previewMode,
+    type,
 }: {
     nodeId: string;
-    file: File,
-    previewMode: boolean
+    file: File;
+    previewMode: boolean;
+    type: 'FS' | 'no_FS'
 }) {
-    return <TreeItem nodeId={nodeId} label={
 
-        <Box display={'flex'} justifyContent={'space-between'} alignItems="center">
-            {previewMode && <ImageFilePreviewBox file={file} 
-                height="3rem"
-                width="3rem"
-                minWidth="3rem"
-                m={'1px'}
-                mr={1}
-            />}
-            <Typography variant="body1" color='textSecondary' whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
-                {file.name}
-            </Typography>
-            <Typography variant="body1" color="textSecondary" whiteSpace='nowrap'>
-                {parseFileSizeString(file.size)}
-            </Typography>
-        </Box>
+    const caller = useContext(fileListDialogCallerContext);
 
-    } />
+    const webkitFile = useContext(webkitFileListContext);
+    const fsFile = useContext(fileListContext);
+
+    const callPreviewDialog = useCallback(() => {
+
+        const node = type === 'FS' ? fsFile.nodeMap.get(nodeId) : webkitFile.nodeMap.get(nodeId);
+        if (!node) return;
+        caller.callFilePreviewDialog(file, type, node)
+
+    }, [webkitFile, fsFile, caller.callFilePreviewDialog, file]);
+
+    return <TreeItem nodeId={nodeId}
+        onClick={callPreviewDialog}
+        label={
+            <Box display={'flex'} justifyContent={'space-between'} alignItems="center">
+                {previewMode && <ImageFilePreviewBox file={file}
+                    height="3rem"
+                    width="3rem"
+                    minWidth="3rem"
+                    m={'1px'}
+                    mr={1}
+                />}
+                {previewMode ? <Box flexGrow={1}
+                    display="flex"
+                    flexDirection="column"
+                    justifyContent="space-between"
+                    overflow="hidden"
+                >
+                    <Typography variant="body1" color='textSecondary' whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
+                        {file.name}
+                    </Typography>
+                    <Typography variant="body1" color="textSecondary" whiteSpace='nowrap' textAlign="end">
+                        {parseFileSizeString(file.size)}
+                    </Typography>
+                </Box> : <>
+                    <Typography variant="body1" color='textSecondary' whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
+                        {file.name}
+                    </Typography>
+                    <Typography variant="body1" color="textSecondary" whiteSpace='nowrap'>
+                        {parseFileSizeString(file.size)}
+                    </Typography>
+                </>}
+            </Box>
+
+        } />
 }
 
 function FolderTreeItem({
@@ -81,19 +113,12 @@ function RenderTreeItem({
     return <>
         {type === 'no_FS' && <>
             {rootNode.data.kind === 'file' ? (
-                <FileTreeItem file={rootNode.data.file} nodeId={rootNode.nodeId} previewMode={previewMode} />
+                <FileTreeItem file={rootNode.data.file} nodeId={rootNode.nodeId} previewMode={previewMode} type={type} />
             ) : (
-                <TreeItem nodeId={rootNode.nodeId} label={
-                    <Box display={'flex'} justifyContent={'space-between'}>
-                        <Box component={FolderOpen} color='inherit' mr={1} />
-                        <Typography variant="body1" fontWeight='bolder' whiteSpace='nowrap' flexGrow={1}>
-                            {rootNode.data.name}
-                        </Typography>
-                        <Typography variant="body1" color="textSecondary" whiteSpace='nowrap'>
-                            {rootNode.children.length}
-                        </Typography>
-                    </Box>
-                }>
+                <FolderTreeItem childrenCount={rootNode.data.childrenCount}
+                    name={rootNode.data.name}
+                    nodeId={rootNode.nodeId}>
+
                     {rootNode.children.sort((a, b) => {
                         if (a.data.kind === 'directory' && b.data.kind === 'file') return -1;
                         if (a.data.kind === 'file' && b.data.kind === 'directory') return 1;
@@ -101,13 +126,13 @@ function RenderTreeItem({
                     }).map((v, i) => (
                         <RenderTreeItem key={i} rootNode={v} type='no_FS' previewMode={previewMode} />
                     ))}
-                </TreeItem>
+                </FolderTreeItem>
             )}
         </>}
 
         {type === 'FS' && <>
             {rootNode.data.kind === 'file' ? (
-                <FileTreeItem file={rootNode.data.file} nodeId={rootNode.nodeId} previewMode={previewMode} />
+                <FileTreeItem file={rootNode.data.file} nodeId={rootNode.nodeId} previewMode={previewMode} type={type} />
             ) : (
                 <FolderTreeItem childrenCount={rootNode.data.childrenCount} name={rootNode.data.handle.name}
                     nodeId={rootNode.nodeId}>
@@ -137,7 +162,14 @@ export default function FileListPreview() {
     const enablePreview = useCallback(() => setPreviewMode(true), []);
     const disablePreview = useCallback(() => setPreviewMode(false), []);
 
+    const dialogCaller = useContext(fileListDialogCallerContext);
 
+    const callFullStatisticDialog = useCallback(() => {
+        dialogCaller.callFileListStatisticDialog([
+            webkitFileListContext.statistic,
+            fileListContext.statistic
+        ]);
+    }, [dialogCaller.callFileListStatisticDialog, webkitFileListContext.statistic, fileListContext.statistic]);
 
 
     return <Box>
@@ -151,9 +183,16 @@ export default function FileListPreview() {
                     <Typography variant="body2" color='textSecondary' display="inline-block" whiteSpace="nowrap">
                         {`${totalFiles} 个文件`}
                     </Typography>
-                    <Link component="button" variant="body2" underline="hover" whiteSpace="nowrap">
+
+                    <Link component="button"
+                        variant="body2"
+                        underline="hover"
+                        whiteSpace="nowrap"
+                        onClick={callFullStatisticDialog}
+                    >
                         查看详细信息
                     </Link>
+
                 </Box>
             ) : (
                 <Typography variant="body2" color='textSecondary' display="inline-block">
@@ -178,7 +217,7 @@ export default function FileListPreview() {
             </ButtonGroup>
         </Box>
 
-        {FS_Mode === 'publicFS' && fileListContext.inputFileHandleTrees.length > 0 && <>
+        {FS_Mode === 'publicFS' && fileListContext.inputFileHandleTrees.length > 0 && <Box mb={1}>
             <Box display='flex' justifyContent='space-between' alignItems='center' pb={1}>
                 <Typography variant="body1" fontWeight="bolder">
                     打开的文件夹
@@ -196,8 +235,8 @@ export default function FileListPreview() {
                     <RenderTreeItem type="FS" rootNode={v} key={v.nodeId} previewMode={previewMode} />
                 ))}
             </TreeView>
-        </>}
-        {webkitFileListContext.inputFileTreeRoots.length > 0 && <>
+        </Box>}
+        {webkitFileListContext.inputFileTreeRoots.length > 0 && <Box mb={1}>
             <Box display='flex' justifyContent='space-between' alignItems='center' pb={1}>
                 <Typography variant="body1" fontWeight="bolder">
                     文件列表 (只读)
@@ -215,6 +254,6 @@ export default function FileListPreview() {
                     <RenderTreeItem type="no_FS" rootNode={v} key={v.nodeId} previewMode={previewMode} />
                 ))}
             </TreeView>
-        </>}
+        </Box>}
     </Box>
 }

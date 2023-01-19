@@ -88,13 +88,14 @@ let lightTheme = createTheme({
         MuiDialog: {
             styleOverrides: {
                 paperFullWidth: {
-                    width: "calc(100% - 32px)",
-                    maxHeight: "calc(100% - 32px)",
-                    margin: "0"
+                    margin: "16px"
                 },
                 paper: {
                     marginLeft: '16px',
                     marginRight: '16px',
+                },
+                paperFullScreen: {
+                    margin: 0
                 }
             }
         }

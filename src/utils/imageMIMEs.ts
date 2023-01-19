@@ -15,7 +15,7 @@ export const ACCEPT_FILE_EXTs = [
 export function checkIsFilenameAccepted(filename: string) {
     const extIndex = filename.lastIndexOf('.');
     if (extIndex < 0) return false;
-    if (ACCEPT_FILE_EXTs.includes(filename.substring(extIndex + 1))) return true;
+    if (ACCEPT_FILE_EXTs.includes(filename.substring(extIndex + 1).toLowerCase())) return true;
     return false;
 }
 
