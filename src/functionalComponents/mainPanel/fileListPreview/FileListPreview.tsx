@@ -5,6 +5,64 @@ import { useContext, useMemo, useCallback, useState } from "react";
 import { fileListContext as _fileListContext, FileNodeData, TreeNode, webkitFileListContext as _webkitFileListContext, WebkitFileNodeData } from "../../../context/fileListContext";
 import { FS_Mode } from "../../../utils/browserCompability";
 import { parseFileSizeString } from "../../../utils/randomUtils";
+import ImageFilePreviewBox from "../../../components/ImageFilePreviewBox";
+
+
+function FileTreeItem({
+    nodeId,
+    file,
+    previewMode,
+}: {
+    nodeId: string;
+    file: File,
+    previewMode: boolean
+}) {
+    return <TreeItem nodeId={nodeId} label={
+
+        <Box display={'flex'} justifyContent={'space-between'} alignItems="center">
+            {previewMode && <ImageFilePreviewBox file={file} 
+                height="3rem"
+                width="3rem"
+                minWidth="3rem"
+                m={'1px'}
+                mr={1}
+            />}
+            <Typography variant="body1" color='textSecondary' whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
+                {file.name}
+            </Typography>
+            <Typography variant="body1" color="textSecondary" whiteSpace='nowrap'>
+                {parseFileSizeString(file.size)}
+            </Typography>
+        </Box>
+
+    } />
+}
+
+function FolderTreeItem({
+    nodeId,
+    name,
+    childrenCount,
+    children
+}: {
+    nodeId: string;
+    name: string;
+    childrenCount: number;
+    children: React.ReactNode
+}) {
+    return <TreeItem nodeId={nodeId} label={
+        <Box display={'flex'} justifyContent={'space-between'}>
+            <Box component={FolderOpen} color='inherit' mr={1} />
+            <Typography variant="body1" fontWeight='bolder' whiteSpace='nowrap' flexGrow={1}>
+                {name}
+            </Typography>
+            <Typography variant="body1" color="textSecondary" whiteSpace='nowrap'>
+                {childrenCount}
+            </Typography>
+        </Box>
+    }>
+        {children}
+    </TreeItem>
+}
 
 function RenderTreeItem({
     rootNode,
@@ -23,18 +81,7 @@ function RenderTreeItem({
     return <>
         {type === 'no_FS' && <>
             {rootNode.data.kind === 'file' ? (
-                <TreeItem nodeId={rootNode.nodeId} label={
-
-                    <Box display={'flex'} justifyContent={'center'}>
-                        <Typography variant="body1" color='textSecondary' whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
-                            {rootNode.data.file.name}
-                        </Typography>
-                        <Typography variant="body1" color="textSecondary" whiteSpace='nowrap'>
-                            {parseFileSizeString(rootNode.data.file.size)}
-                        </Typography>
-                    </Box>
-
-                } />
+                <FileTreeItem file={rootNode.data.file} nodeId={rootNode.nodeId} previewMode={previewMode} />
             ) : (
                 <TreeItem nodeId={rootNode.nodeId} label={
                     <Box display={'flex'} justifyContent={'space-between'}>
@@ -60,29 +107,11 @@ function RenderTreeItem({
 
         {type === 'FS' && <>
             {rootNode.data.kind === 'file' ? (
-                <TreeItem nodeId={rootNode.nodeId} label={
-                    <Box display={'flex'} justifyContent={'center'}>
-                        <Typography variant="body1" color='textSecondary' whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
-                            {rootNode.data.file.name}
-                        </Typography>
-                        <Typography variant="body1" color="textSecondary" whiteSpace='nowrap'>
-                            {parseFileSizeString(rootNode.data.file.size)}
-                        </Typography>
-                    </Box>
-                } />
+                <FileTreeItem file={rootNode.data.file} nodeId={rootNode.nodeId} previewMode={previewMode} />
             ) : (
-                <TreeItem nodeId={rootNode.nodeId} label={
-                    <Box display={'flex'} justifyContent={'space-between'}>
-                        <Box component={FolderOpen} mr={1} />
-                        <Typography variant="body1" fontWeight='bolder' whiteSpace='nowrap' flexGrow={1}>
-                            {rootNode.data.handle.name}
-                        </Typography>
-                        <Typography variant="body1" color="textSecondary" whiteSpace='nowrap'>
-                            {rootNode.data.childrenCount}
-                        </Typography>
+                <FolderTreeItem childrenCount={rootNode.data.childrenCount} name={rootNode.data.handle.name}
+                    nodeId={rootNode.nodeId}>
 
-                    </Box>
-                }>
                     {rootNode.children.sort((a, b) => {
                         if (a.data.kind === 'directory' && b.data.kind === 'file') return -1;
                         if (a.data.kind === 'file' && b.data.kind === 'directory') return 1;
@@ -90,7 +119,7 @@ function RenderTreeItem({
                     }).map((v, i) => (
                         <RenderTreeItem key={i} rootNode={v} type='FS' previewMode={previewMode} />
                     ))}
-                </TreeItem>
+                </FolderTreeItem>
             )}
         </>}
     </>

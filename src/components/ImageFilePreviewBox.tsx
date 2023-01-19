@@ -24,14 +24,31 @@ export default function ImageFilePreviewBox(props: BoxProps & { file: File }) {
         setError(true);
     }, []);
 
+    const imageOnLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+        setError(false);
+    }, []);
 
-    return <Box {...boxProps}>
-        {loading && <Skeleton variant="rectangular" width="100%" />}
-        {!loading && !error &&
+
+    return <Box
+        display="flex"
+        alignItems="stretch"
+        justifyContent="stretch"
+        border={1}
+        borderColor="divider"
+        // bgcolor={(theme) => theme.palette.action.selected}
+        {...boxProps}>
+        {loading && <Skeleton variant="rectangular" width="100%" height="auto" />}
+        {!loading && !error && <Box width="100%" height="auto" display="flex" alignItems="center" justifyContent="center">
+
             <img alt={file.name} src={objectUrl} style={{ maxWidth: '100%', maxHeight: '100%' }}
                 onError={imageLoadError}
-            />}
-        {!loading && error && <BrokenImage />}
+                onLoad={imageOnLoad}
+            />
+        </Box>
+        }
+        {!loading && error && <Box width="100%" height="auto" display="flex" alignItems="center" justifyContent="center">
+            <BrokenImage color="action" />
+        </Box>}
     </Box>
 
 }
