@@ -25,7 +25,9 @@ export default function ReadFromClipboardButton(props: ButtonProps) {
             const imageType = item.types.find((v) => checkIsMimeSupported(v));
             if (!imageType || !mimeToExt(imageType)) continue;
             const file = await item.getType(imageType);
-            picArray.push(new File([file], 'clipboard_image.' + mimeToExt(imageType)));
+            picArray.push(new File([file], 'clipboard_image.' + mimeToExt(imageType), {
+                type: imageType
+            }));
         }
         if (picArray.length === 0) throw new Error('剪切板中没有有效的图片数据');
         return picArray;

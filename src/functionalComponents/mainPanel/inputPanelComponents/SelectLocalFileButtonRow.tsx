@@ -1,6 +1,6 @@
 import { Box, Button, Typography, Grid, GridProps } from "@mui/material";
 import { useCallback, useRef, useContext, useMemo } from "react";
-import { FolderOpen } from '@mui/icons-material';
+import { FolderOpen, Image as ImageIcon } from '@mui/icons-material';
 import { FS_Mode } from "../../../utils/browserCompability";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../../context/fileListContext";
 import useAsync from "../../../hooks/useAsync";
@@ -35,18 +35,28 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
     const openFilePicker = useCallback(() => fileInputRef.current?.click(), [fileInputRef]);
     const openWebkitDirectoryPicker = useCallback(() => directoryInputRef.current?.click(), [directoryInputRef]);
 
-    const handleFolderInput = useCallback(() => {
-        if (!fileInputRef.current || !fileInputRef.current.files) return;
-        const files = fileInputRef.current.files;
-        // clearContext
-    }, [fileInputRef])
+    const handleMultipleImageInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.currentTarget.files;
+        if (!files || !files.length) return;
+        webkitFileListContext.appendFileList(files);
+    }, [webkitFileListContext.appendFileList]);
+
+    const handleWebkitDirectoryInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.currentTarget.files;
+        if (!files || !files.length) return;
+        webkitFileListContext.appendFileList(files, true);
+    }, [webkitFileListContext.appendFileList])
 
     return <Grid container {...props}>
         <Grid item xs={6} pr={0.5}>
-            <Button fullWidth startIcon={<FolderOpen />} onClick={openFilePicker} variant="outlined"
+            <Button fullWidth startIcon={<ImageIcon />} onClick={openFilePicker} variant="outlined"
                 disabled={processing}
                 sx={{ whiteSpace: 'nowrap' }}
             >选择文件</Button>
+            <input ref={fileInputRef} type='file' accept="image/*" multiple hidden
+                name="image-selection-multiple"
+                onChange={handleMultipleImageInput}
+            />
         </Grid>
         <Grid item xs={6} pl={0.5}>
             {FS_Mode === 'publicFS' ?
@@ -57,14 +67,17 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
                 :
                 <>
                     {/* @ts-expect-error */}
-                    <input ref={directoryInputRef} type='file' webkitdirectory="1" multiple hidden />
+                    <input ref={directoryInputRef} type='file' webkitdirectory="1" multiple hidden
+                        name="image-dir-selection"
+                        onChange={handleWebkitDirectoryInput}
+                    />
 
                     <Button fullWidth startIcon={<FolderOpen />} variant="outlined"
                         disabled={processing}
                         onClick={openWebkitDirectoryPicker}
                         sx={{ whiteSpace: 'nowrap' }}
                     >
-                        选择文件夹
+                        导入文件夹
                     </Button>
                     {/* ↓ TODO: One-time popup */}
                     <Typography variant="body2" color="textSecondary" gutterBottom>

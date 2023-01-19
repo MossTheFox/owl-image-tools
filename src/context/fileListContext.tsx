@@ -1,6 +1,6 @@
 import { createContext, useState, useCallback, useEffect, useContext } from "react";
 import { randomUUIDv4 } from "../utils/randomUtils";
-import { ACCEPT_MIMEs, checkIsFilenameAccepted } from "../utils/imageMIMEs";
+import { ACCEPT_MIMEs, checkIsFilenameAccepted, checkIsMimeSupported } from "../utils/imageMIMEs";
 import useAsync from "../hooks/useAsync";
 import { loggerContext } from "./loggerContext";
 
@@ -352,7 +352,7 @@ interface WebkitFileListContext {
     inputFileTreeRoots: TreeNode<WebkitFileNodeData>[],
     setInputFileTreeRoots: React.Dispatch<React.SetStateAction<TreeNode<WebkitFileNodeData>[]>>,
 
-    appendFileList: (fileList: FileList | File[]) => void,
+    appendFileList: (fileList: FileList | File[], webkitDirectory?: boolean) => void,
 
     /** Count pictures */
     statistic: FileListStatistic,
@@ -390,43 +390,99 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
     const [allowDrop, setAllowDrop] = useState(true);
 
     // File List from input (webkitdirectory) element or clipboard
-    const appendFileList = useCallback((fileList: FileList | File[]) => {
+    const appendFileList = useCallback((fileList: FileList | File[], webkitDirectory = false) => {
         if (fileList.length === 0) return;
-        // From <input>
-        if (fileList instanceof FileList) {
-            const dirName = fileList[0].webkitRelativePath.split('/')[0];
 
+        // From <input webkitdirectory>
+        if (fileList instanceof FileList && webkitDirectory) {
             // NOTE: For duplicated folder names, KEEP it. Handle it when creating folder on outputing
-            let newRoot = new TreeNode<WebkitFileNodeData>({
+
+            // This root node will be discarded later since it's at `/`
+            // (the files' `webkitRelativePath` string starts without '/')
+            const newRoot = new TreeNode<WebkitFileNodeData>({
                 kind: 'directory',
-                name: dirName,
+                name: 'root',
                 childrenCount: 0
             });
 
             // construct the tree structure.
-            // webkitEntries is empty. Manually parse it.
-            // TODO: PARSE...
+            // webkitEntries is empty. Manually parse it via `webkitRelativePath`.
+
+            const theNodes: TreeNode<WebkitFileNodeData>[] = [];
+            // theNodes.push(newRoot);
+
+            for (const file of fileList) {
+                // Ignore unsupported file
+                if (!checkIsMimeSupported(file.type)) continue;
+
+                // Directory...
+                const dirPath = file.webkitRelativePath.split('/');
+                dirPath.pop();  // remove the filename itself
+
+                // Now put it in the dir
+                let currentDir = newRoot;
+                for (const [i, dir] of dirPath.entries()) {
+                    let found = currentDir.children.find((v) => v.data.kind === 'directory' && v.data.name === dir) as ((TreeNode<WebkitFileNodeData & { kind: 'directory' }>) | undefined);;
+                    // Create if not exist
+                    if (!found) {
+                        found = new TreeNode<WebkitFileNodeData & { kind: 'directory' }>({
+                            kind: 'directory',
+                            name: dir,
+                            childrenCount: 0
+                        });
+                        // Record in node list
+                        theNodes.push(found);
+                        // Record in currentDir
+                        currentDir.children.push(found);
+                    }
+                    found.data.childrenCount++;
+                    currentDir = found;
+                    // Last
+                    if (i === dirPath.length - 1) {
+                        const fileNode = new TreeNode<WebkitFileNodeData>({
+                            kind: 'file',
+                            file
+                        });
+                        currentDir.children.push(fileNode);
+                        theNodes.push(fileNode);
+                    }
+                }
+            }
+
+            // If not empty, then update the list
+            if (newRoot.children.length) {
+                // The root will be skipped, record the children
+                setInputFileTreeRoots((prev) => [...prev, ...newRoot.children]);
+                setNodeMap((prev) => {
+                    const newMap = new Map(prev);
+                    for (const node of theNodes) {
+                        newMap.set(node.nodeId, node);
+                    }
+                    return newMap;
+                });
+            }
 
             return;
-        }
+        }   // End of handle webkitdirectory input
 
-        // From clipboard (file array...)
+        // From clipboard or multiple select input (file array...)
         const newNodes: TreeNode<WebkitFileNodeData>[] = [];
         for (const file of fileList) {
+            if (!checkIsMimeSupported(file.type)) continue;
             const newNode = new TreeNode<WebkitFileNodeData>({
                 kind: 'file',
                 file: file
             });
             newNodes.push(newNode);
-
-            // Record in nodeMap
-            setNodeMap((prev) => {
-                const newMap = new Map(prev);
-                newMap.set(newNode.nodeId, newNode);
-                return newMap;
-            });
-
         }
+        // Record in nodeMap
+        setNodeMap((prev) => {
+            const newMap = new Map(prev);
+            for (const newNode of newNodes) {
+                newMap.set(newNode.nodeId, newNode);
+            }
+            return newMap;
+        });
         setInputFileTreeRoots((prev) => [...prev, ...newNodes]);
     }, []);
 

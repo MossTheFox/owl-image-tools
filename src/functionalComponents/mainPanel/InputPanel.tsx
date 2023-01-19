@@ -1,12 +1,20 @@
 import { Box, Button, Divider, Paper, Typography, Stack, PaperProps, Grid } from "@mui/material";
+import { useContext, useMemo } from "react";
 import FileListPreview from "./fileListPreview/FileListPreview";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../context/fileListContext";
 import { CONTROL_PANEL_HEIGHT } from "../../App";
 import ReadFromClipboardButton from "./inputPanelComponents/ReadFromClipboardButton";
 import SelectLocalFileButtonRow from "./inputPanelComponents/SelectLocalFileButtonRow";
 import { FileListDialogCallerContextProvider } from "../../context/fileListDialog/fileListDialogCallerContext";
+import DialogLoadingIndicator from "../../ui/smallComponents/DialogLoadingIndicator";
 
 export default function InputPanel(props: PaperProps) {
+
+    const fileListContext = useContext(_fileListContext);
+    const webkitFileListContext = useContext(_webkitFileListContext);
+
+    const processing = useMemo(() => !fileListContext.ready || !webkitFileListContext.ready, [fileListContext.ready, webkitFileListContext.ready]);
+
 
     return <Paper {...props} sx={{
         overflowX: 'hidden',
@@ -14,6 +22,9 @@ export default function InputPanel(props: PaperProps) {
         maxHeight: CONTROL_PANEL_HEIGHT,
         transition: 'background-color 0.125s'
     }}>
+        {/* Loading Indicator with ZIndex higher than content box */}
+        <DialogLoadingIndicator loading={processing} zIndex={2} position="relative" />
+
         <Box px={2} pt={2} pb={1} position='sticky' top={0} left={0}
             bgcolor={(theme) => theme.palette.background.paper}
             zIndex={1}

@@ -1,9 +1,14 @@
-import { Box, LinearProgress } from "@mui/material";
+import { Box, LinearProgress, BoxProps } from "@mui/material";
 
-function DialogLoadingIndicator({
-    loading = false
-}) {
-    return <Box height={0} overflow="visible">
+function DialogLoadingIndicator(
+    {
+        loading = false,
+        ...props
+    }: {
+        loading: boolean
+    } & BoxProps
+) {
+    return <Box height={0} overflow="visible" {...props}>
         {loading && <LinearProgress />}
     </Box>
 }
