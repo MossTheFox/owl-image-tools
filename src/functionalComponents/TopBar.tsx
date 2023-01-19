@@ -1,16 +1,32 @@
 import { Box, Typography, Chip, Tooltip, ButtonBase, BoxProps } from "@mui/material";
 import { Settings } from "@mui/icons-material";
-import { useContext } from "react";
+import { useContext, useCallback, useState } from "react";
 import { t } from "i18next";
 import { FS_Mode, storageDisabled } from "../utils/browserCompability";
 import { loggerContext } from "../context/loggerContext";
 import { TOP_BAR_HEIGHT } from "../App";
+import LogHistoryDrawer from "./menus/LogHistoryDrawer";
+import AppConfigDrawerMenu from "./menus/AppConfigDrawerMenu";
 
 export default function TopBar(props: BoxProps) {
 
-    const { line, history } = useContext(loggerContext);
+    const { line } = useContext(loggerContext);
+
+    const [settingsDrawerOpen, setSettingsDrawerOpen] = useState(false);
+    const openSettingsDrawer = useCallback(() => setSettingsDrawerOpen(true), []);
+    const closeSettingsDrawer = useCallback(() => setSettingsDrawerOpen(false), []);
+
+
+    const [loggerDrawerOpen, setLoggerDrawerOpen] = useState(false);
+
+    const openLoggerDrawer = useCallback(() => setLoggerDrawerOpen(true), []);
+    const closeLoggerDrawer = useCallback(() => setLoggerDrawerOpen(false), []);
 
     // TODO: view history modal
+
+    const animationEnd = useCallback((e: React.AnimationEvent<HTMLDivElement>) => {
+        e.currentTarget.style.display = 'none';
+    }, []);
 
     return <Box width="100%"
         height={TOP_BAR_HEIGHT}
@@ -27,55 +43,77 @@ export default function TopBar(props: BoxProps) {
         zIndex={10}
         {...props}
     >
+
+        {/* Menu and Drawers */}
+        <LogHistoryDrawer onClose={closeLoggerDrawer} onOpen={openLoggerDrawer} open={loggerDrawerOpen} />
+        <AppConfigDrawerMenu onClose={closeSettingsDrawer} onOpen={openSettingsDrawer} open={settingsDrawerOpen} />
+
         <Box bgcolor={(theme) => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.5)' : theme.palette.primary.light}
             color={(theme) => theme.palette.primary.contrastText}
             display='flex'
             alignItems='stretch'
         >
-            <ButtonBase>
+            <ButtonBase aria-label="Open settings menu" onClick={openSettingsDrawer} >
                 <Box px={1}
                     display='flex'
-                    gap={'2px'}
                     alignItems='center'
                     justifyContent='center'
                 >
-                    <Settings fontSize="inherit" />
+                    <Settings sx={{
+                        fontSize: (theme) => theme.typography.body2.fontSize,
+                        mr: '4px'
+                    }} />
                     <Typography variant="body2" whiteSpace='nowrap'>
-                        设置</Typography>
+                        设置
+                    </Typography>
                 </Box>
             </ButtonBase>
         </Box>
-        <Box px='4px'
-            py='2px'
-            display='flex' flexWrap='nowrap'
-            alignItems='center'
-            justifyContent='space-between'
-            flexGrow={1}
+        <ButtonBase sx={{
+            flexGrow: 1,
+            width: '100%',
+            overflow: 'hidden',
+            justifyContent: 'left'
+        }} aria-label="Open Logger Drawer" onClick={openLoggerDrawer}>
+            <Box px='4px'
+                py='2px'
+                display='flex' flexWrap='nowrap'
+                alignItems='stretch'
+                justifyContent='left'
+                flexGrow={1}
+            >
+                {/* Log Info Output Here */}
+                <Box flexGrow={1} overflow='hidden' pr={1}>
+                    <Typography variant="body2" whiteSpace='nowrap' textAlign='left'>
+                        {line}
+                    </Typography>
+                </Box>
+            </Box>
+        </ButtonBase>
+
+
+        {/* TODO: ↓ FS Mode Chip auto fade out */}
+
+
+        <Box display='flex' gap={1} justifyContent="center" alignItems="center" px={1}
+            {...FS_Mode !== 'noFS' ? ({
+                sx: {
+                    animation: '0.25s ease-in 6s forwards fade-out-and-remove',
+                },
+                onAnimationEnd: animationEnd
+            }) : ({})}
         >
-
-            {/* Log Info Output Here */}
-            <Box flexGrow={1} overflow='hidden' pr={1}>
-                <Typography variant="body2" whiteSpace='nowrap'>
-                    {line}
-                </Typography>
-            </Box>
-
-            {/* TODO: ↓ FS Mode Chip auto fade out */}
-
-            <Box display='flex' gap={1} justifyContent="center" alignItems="center">
-                {storageDisabled ? <>
-                    <Chip color="error" label={"访问 Storage API 被拒绝"} size="small" />
-                </> : <>
-                    <Typography variant="body2" whiteSpace='nowrap'>FS Mode: </Typography>
-                    {FS_Mode === 'noFS' && <Tooltip title={"批量文件转换受限"} arrow enterDelay={0} enterTouchDelay={0}>
-                        <Chip color="warning" label={"不支持文件系统访问"} size="small" />
-                    </Tooltip>}
-                    {FS_Mode === 'privateFS' && <Chip color="info" label={"Private FS"} size="small" />}
-                    {FS_Mode === 'publicFS' && <Chip color="success" label={"Full Support"} size="small" />}
-                </>}
-            </Box>
-
-
+            {storageDisabled ? <>
+                <Chip color="error" label={"访问 Storage API 被拒绝"} size="small" />
+            </> : <>
+                <Typography variant="body2" whiteSpace='nowrap'>FS Mode: </Typography>
+                {FS_Mode === 'noFS' && <Tooltip title={"批量文件转换受限"} arrow enterDelay={0} enterTouchDelay={0}>
+                    <Chip color="warning" label={"不支持文件系统访问"} size="small" />
+                </Tooltip>}
+                {FS_Mode === 'privateFS' && <Chip color="info" label={"Private FS"} size="small" />}
+                {FS_Mode === 'publicFS' && <Chip color="success" label={"Full Support"} size="small" />}
+            </>}
         </Box>
+
     </Box>
 }

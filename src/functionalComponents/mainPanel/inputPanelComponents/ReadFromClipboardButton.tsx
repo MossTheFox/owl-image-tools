@@ -108,6 +108,7 @@ export default function ReadFromClipboardButton(props: ButtonProps) {
         <Button ref={anchorEl} startIcon={<ContentPaste />} variant="outlined"
             onClick={readClipboardButton}
             disabled={processing}
+            sx={{ whiteSpace: 'nowrap' }}
             {...props}
         >
             从剪贴板读取

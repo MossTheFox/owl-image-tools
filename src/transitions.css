@@ -9,14 +9,14 @@
     }
 }
 
-@keyframes panel-transition-left {
+@keyframes fade-out-and-remove {
     0% {
-        left: 100%;
-        top: 10%
+        transform: translateX(0);
+        opacity: 1;
     }
 
     100% {
-        left: 0%;
-        top: 0;
+        transform: translateX(100%);
+        opacity: 0;
     }
 }

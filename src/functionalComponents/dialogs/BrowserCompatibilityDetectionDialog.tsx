@@ -75,7 +75,7 @@ export default function BrowserCompatibilityDetectionDialog() {
                 {/* noFS */}
                 {FS_Mode === 'noFS' && <Box p={1} mb={1} bgcolor={(theme) => theme.palette.action.hover} borderRadius={1}>
                     <DialogContentText variant="h6" fontWeight='bolder' gutterBottom>不支持 File System API</DialogContentText>
-                    <DialogContentText gutterBottom><strong>这会影响图片的批量转换功能。</strong>单次的文件转换操作不会受到影响。</DialogContentText>
+                    <DialogContentText gutterBottom><strong>这会影响图片的批量转换功能。</strong>单次或少量的文件转换操作不会受到影响。</DialogContentText>
                     {userOSAndBrowser.isIOS ? <>
                         <DialogContentText gutterBottom>对于 iOS 设备，请尝试使用 Safari 浏览器，且<strong>不要使用无痕浏览</strong>模式 (此模式下，无法使用必要的 Storage API 来暂存批量转换的任务)</DialogContentText>
                         <DialogContentText gutterBottom>此应用程序不会追踪你的数据，所有图片转换均在你的设备上完成，不会被上传到云端。请放心。</DialogContentText>
@@ -87,7 +87,7 @@ export default function BrowserCompatibilityDetectionDialog() {
                 </Box>}
                 {!clipboardSupport && <Box p={1} mb={1} bgcolor={(theme) => theme.palette.action.hover} borderRadius={1}>
                     <DialogContentText variant="h6" fontWeight='bolder' gutterBottom>不支持剪切板文件访问 API (Clipboard API)</DialogContentText>
-                    <DialogContentText gutterBottom><strong>快速读取和写入剪切板文件的操作将不可用。</strong>你会需要在导入和存储图片时手动进行操作。</DialogContentText>
+                    <DialogContentText gutterBottom><strong>快速读取和写入剪切板文件的操作将不可用。</strong>你会需要在粘贴和存储图片时进行一些额外的操作。</DialogContentText>
                 </Box>}
                 <DialogContentText gutterBottom>这些问题不会影响部分核心功能的使用。</DialogContentText>
 

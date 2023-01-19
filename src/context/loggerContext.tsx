@@ -1,10 +1,15 @@
 import { createContext, useState, useCallback, useMemo } from "react";
 import { Snackbar, Alert, AlertTitle } from "@mui/material";
 
+type LogHistory = {
+    time: Date;
+    data: string;
+}[];
+
 type LoggerContext = {
     writeLine: (str: string) => void,
     line: string,
-    history: string[],
+    history: LogHistory,
     fireAlertSnackbar: (data: MuiAlertState, autoHideDuration?: number) => void
 };
 
@@ -19,11 +24,14 @@ export const loggerContext = createContext<LoggerContext>({
 export function LoggerContextProvider({ children }: { children: React.ReactNode }) {
 
     const [line, setLine] = useState('');
-    const [history, setHistory] = useState<string[]>([]);
+    const [history, setHistory] = useState<LogHistory>([]);
 
     const writeLine = useCallback((line: string) => {
         setLine(line);
-        setHistory((prev) => [...prev, line]);
+        setHistory((prev) => [...prev, {
+            time: new Date(),
+            data: line
+        }]);
     }, []);
 
     // Snackbar

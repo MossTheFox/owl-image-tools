@@ -1,6 +1,8 @@
-import { createContext, useState, useCallback, useEffect } from "react";
-import { randomUUIDv4 } from "../utils/hasherAndUUID";
-import { ACCEPT_FILE_EXTs, checkIsFilenameAccepted } from "../utils/imageMIMEs";
+import { createContext, useState, useCallback, useEffect, useContext } from "react";
+import { randomUUIDv4 } from "../utils/randomUtils";
+import { ACCEPT_FILE_EXTs, ACCEPT_MIMEs, checkIsFilenameAccepted } from "../utils/imageMIMEs";
+import useAsync from "../hooks/useAsync";
+import { loggerContext } from "./loggerContext";
 
 export class TreeNode<T> {
     data: T;
@@ -14,9 +16,17 @@ export class TreeNode<T> {
 };
 
 /** For those support File System API */
-export type FileNodeData = FileSystemDirectoryHandle | FileSystemFileHandle;
+export type FileNodeData = {
+    kind: 'file',   // ← To let typescript distinguish the two types...
+    handle: FileSystemFileHandle,
+    file: File,
+} | {
+    kind: 'directory',
+    handle: FileSystemDirectoryHandle,
+    childrenCount: number,
+};
 
-/** For Firefox... (um) and Safari before 15.2 */
+/** For files that dropped in, or folder selection for ...Firefox (um) and Safari before 15.2 */
 export type WebkitFileNodeData = {
     kind: 'file',
     file: File
@@ -25,37 +35,108 @@ export type WebkitFileNodeData = {
     name: string
 };
 
+export type FileListStatistic = {
+    totalFiles: number;
+    perFormatCount: {
+        [key in typeof ACCEPT_MIMEs[number]]: number
+    }
+};
+
+const defaultFileListStatistic: FileListStatistic = {
+    totalFiles: 0,
+    perFormatCount: ACCEPT_MIMEs.reduce((prev, curr) => {
+        return {
+            ...prev,
+            [curr]: 0
+        }
+    }, {} as Partial<FileListStatistic['perFormatCount']>) as FileListStatistic['perFormatCount']
+} as const;
+
 /** it need to be abortable. 
  * 
  * Also, non-image files will be ignored, as well as empty folders (with no images).
 */
-async function iterateNode(node: TreeNode<FileNodeData>, abortSignal?: AbortSignal) {
+async function iterateNode(node: TreeNode<FileNodeData>, nodeMap?: Map<string, TreeNode<FileNodeData>>, abortSignal?: AbortSignal) {
     if (node.data.kind === 'file') return;
     if (abortSignal?.aborted) return;
     // directory:
     node.children = [];
-    for await (const [fileName, handle] of node.data.entries()) {
+    node.data.childrenCount = 0;
+    for await (const [fileName, handle] of node.data.handle.entries()) {
 
         if (abortSignal?.aborted) return;
 
         // Skip non-image files
         if (handle.kind === 'file') {
             if (checkIsFilenameAccepted(handle.name)) {
-                node.children.push(new TreeNode(handle));
+                const newNode = new TreeNode<FileNodeData>({
+                    handle,
+                    kind: 'file',
+                    file: await handle.getFile()
+                });
+                // Record node in map
+                if (nodeMap) {
+                    nodeMap.set(newNode.nodeId, newNode);
+                }
+                node.children.push(newNode);
+                node.data.childrenCount++;
             }
             continue;
         }
 
         // ...filter empty folder
-        const folderNode = new TreeNode<FileNodeData>(handle);
-        await iterateNode(folderNode, abortSignal);
+        const folderNode = new TreeNode<FileNodeData & { kind: 'directory' }>({
+            handle,
+            kind: 'directory',
+            childrenCount: 0
+        });
+        await iterateNode(folderNode, nodeMap, abortSignal);
+
+        // count in subfolder's children
+        node.data.childrenCount += folderNode.data.childrenCount;
 
         if (abortSignal?.aborted) return;
 
         if (folderNode.children.length) {
             node.children.push(folderNode);
+            // Record node in map (only non-empty folder)
+            if (nodeMap) {
+                nodeMap.set(folderNode.nodeId, folderNode);
+            }
         }
     }
+}
+
+
+async function iterateAll(rootInputFSHandles: (FileSystemDirectoryHandle | FileSystemFileHandle)[], nodeMap?: Map<string, TreeNode<FileNodeData>>, signal?: AbortSignal) {
+    const fileHandleTrees: TreeNode<FileNodeData>[] = [];
+    // NOTE: For duplicated folder or file names, KEEP it. Handle it when creating folder on outputing
+    for (const handle of rootInputFSHandles) {
+        if (handle.kind === 'file' && !checkIsFilenameAccepted(handle.name)) {
+            continue;
+        }
+        const newNode = new TreeNode<FileNodeData>(handle.kind === 'file' ? {
+            kind: 'file',
+            file: await handle.getFile(),
+            handle: handle
+        } : {
+            kind: 'directory',
+            handle: handle,
+            childrenCount: 0
+        });
+        fileHandleTrees.push(newNode);
+        if (nodeMap) {
+            nodeMap.set(newNode.nodeId, newNode);
+        }
+    }
+    for (const node of fileHandleTrees) {
+        if (signal?.aborted) throw new Error('Aborted');
+        await iterateNode(node, nodeMap, signal);
+    }
+    return {
+        fileHandleTrees,
+        nodeMap
+    };
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -63,11 +144,22 @@ async function iterateNode(node: TreeNode<FileNodeData>, abortSignal?: AbortSign
 interface FileListContext {
     /** Root, one or many files or directories. Treated as children of path `/` */
     rootInputFSHandles: (FileSystemDirectoryHandle | FileSystemFileHandle)[],
+
+    /** Override or append. will trigger full iteration of all recorded folder handles */
     setRootInputFsHandles: React.Dispatch<React.SetStateAction<(FileSystemDirectoryHandle | FileSystemFileHandle)[]>>,
+
+    /** Append new handle. Previous handles will not be re-iterated in case there's some big deep folders. */
+    appendInputFsHandles: (handles: (FileSystemDirectoryHandle | FileSystemFileHandle)[]) => void,
 
     /** Match the length of `rootFSHandles`, but will iterate and record all valid file handles  */
     inputFileHandleTrees: TreeNode<FileNodeData>[],
     setInputFileHandleTrees: React.Dispatch<React.SetStateAction<TreeNode<FileNodeData>[]>>,
+
+    /** Count pictures */
+    statistic: FileListStatistic,
+
+    /** Node Map (uuid -> tree node) */
+    nodeMap: Map<string, TreeNode<FileNodeData>>,
 
     /** File iteration finished or exited with error (on both occations will be true, check `error` to specify whether it's all ok) */
     ready: boolean,
@@ -81,61 +173,90 @@ export const fileListContext = createContext<FileListContext>({
     rootInputFSHandles: [],
     setInputFileHandleTrees: () => { throw new Error('Not initialized.') },
     setRootInputFsHandles: () => { throw new Error('Not initialized.') },
+    appendInputFsHandles(handles) { throw new Error('Not initialized.') },
+    statistic: defaultFileListStatistic,
+    nodeMap: new Map(),
     ready: true,
     error: null,
 });
 
 export function FileListContext({ children }: { children: React.ReactNode }) {
 
+    const logger = useContext(loggerContext);
+
     const [rootInputFSHandles, setRootInputFsHandles] = useState<(FileSystemDirectoryHandle | FileSystemFileHandle)[]>([]);
     const [inputFileHandleTrees, setInputFileHandleTrees] = useState<TreeNode<FileNodeData>[]>([]);
+    const [statistic, setStatistic] = useState<FileListStatistic>(defaultFileListStatistic);
+    const [nodeMap, setNodeMap] = useState<Map<string, TreeNode<FileNodeData>>>(new Map());
     const [ready, setReady] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
-    useEffect(() => {
-        const controller = new AbortController();
+    const asyncDoFullIteration = useCallback(async (signal?: AbortSignal) => {
+        const map = new Map();
+        return await iterateAll(rootInputFSHandles, map, signal);
+    }, [rootInputFSHandles]);
 
+    const doFullIterationOnSuccess = useCallback(({ fileHandleTrees, nodeMap }: Awaited<ReturnType<typeof asyncDoFullIteration>>) => {
+        // remove empty folders on top level
+        fileHandleTrees = fileHandleTrees.filter((v) => v.data.kind === 'file' || v.children.length);
+
+        if (nodeMap) {
+            // count files and log statistic data
+            const newStatistic: FileListStatistic = {
+                ...defaultFileListStatistic,
+                perFormatCount: {
+                    ...defaultFileListStatistic.perFormatCount
+                }
+            };
+
+            for (const [_, node] of nodeMap.entries()) {
+                if (node.data.kind === 'directory') continue;
+                newStatistic.totalFiles++;
+                newStatistic.perFormatCount[node.data.file.type as typeof ACCEPT_MIMEs[number]]++;
+            }
+
+            setNodeMap(nodeMap);
+            setStatistic(newStatistic);
+        }
+
+        setInputFileHandleTrees(fileHandleTrees);
+        setReady(true);
+        setError(null);
+    }, []);
+
+    const doFullIterationOnError = useCallback((err: Error) => {
+        setError(err);
+        setReady(true);
+        logger.writeLine(`读取文件时发生错误。错误信息: ` + err.message);
+        logger.fireAlertSnackbar({
+            severity: 'error',
+            title: '添加文件夹失败',
+            message: `读取文件时发生错误。错误信息: ` + err.message
+        });
+    }, [logger.fireAlertSnackbar, logger.writeLine]);
+
+    const fireDoFullIteration = useAsync(asyncDoFullIteration, doFullIterationOnSuccess, doFullIterationOnError);
+
+    const setRootHandlesAndDoFullIteration = useCallback<typeof setRootInputFsHandles>((arg) => {
         setReady(false);
         setError(null);
-        let fileHandleTrees: typeof inputFileHandleTrees = [];
+        setRootInputFsHandles(arg);
+        fireDoFullIteration();
+    }, [fireDoFullIteration]);
 
-        // NOTE: For duplicated folder names, KEEP it. Handle it when creating folder on outputing
-        for (const handle of rootInputFSHandles) {
-            if (handle.kind === 'file' && !checkIsFilenameAccepted(handle.name)) {
-                continue;
-            }
-            fileHandleTrees.push(new TreeNode(handle));
-        }
-        async function iterateAll() {
-            for (const node of fileHandleTrees) {
-                if (controller.signal.aborted) return;
-                await iterateNode(node);
-            }
-        }
+    const appendInputFsHandles = useCallback(() => {
 
-        iterateAll().then(() => {
-            if (controller.signal.aborted) return;
-            fileHandleTrees = fileHandleTrees.filter((v) => v.data.kind === 'file' || v.children.length);
-            setInputFileHandleTrees(fileHandleTrees);
-            setReady(true);
-            setError(null);
-        }).catch((err: Error) => {
-            if (controller.signal.aborted) return;
-            setError(err);
-            setReady(true);
-        });
-
-        return () => {
-            controller.abort();
-        }
-    }, [rootInputFSHandles]);
+    }, []);
 
 
     return <fileListContext.Provider value={{
         inputFileHandleTrees,
         rootInputFSHandles,
         setInputFileHandleTrees,
-        setRootInputFsHandles,
+        setRootInputFsHandles: setRootHandlesAndDoFullIteration,
+        appendInputFsHandles,
+        statistic,
+        nodeMap,
         ready,
         error
     }}>
@@ -203,6 +324,12 @@ interface WebkitFileListContext {
 
     appendFileList: (fileList: FileList | File[]) => void,
 
+    /** Count pictures */
+    statistic: FileListStatistic,
+
+    /** Node Map (uuid -> tree node) */
+    nodeMap: Map<string, TreeNode<WebkitFileNodeData>>,
+
     /** File iteration finished or exited with error (on both occations will be true, check `error` to specify whether it's all ok) */
     ready: boolean,
     /** File iteration Error (if `error` is `null` and `ready` is `true`, then it's all ok) */
@@ -213,6 +340,8 @@ export const webkitFileListContext = createContext<WebkitFileListContext>({
     inputFileTreeRoots: [],
     setInputFileTreeRoots: () => { throw new Error('Not Initialized'); },
     appendFileList: () => { throw new Error('Not initialized.') },
+    statistic: defaultFileListStatistic,
+    nodeMap: new Map(),
     ready: true,
     error: null
 });
@@ -223,6 +352,8 @@ export const webkitFileListContext = createContext<WebkitFileListContext>({
 export function WebkitDirectoryFileListContext({ children }: { children: React.ReactNode }) {
 
     const [inputFileTreeRoots, setInputFileTreeRoots] = useState<WebkitFileListContext['inputFileTreeRoots']>([]);
+    const [statistic, setStatistic] = useState<FileListStatistic>(defaultFileListStatistic);
+    const [nodeMap, setNodeMap] = useState<Map<string, TreeNode<WebkitFileNodeData>>>(new Map());
     const [ready, setReady] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
@@ -233,7 +364,6 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
         if (fileList.length === 0) return;
         // From <input>
         if (fileList instanceof FileList) {
-
             const dirName = fileList[0].webkitRelativePath.split('/')[0];
 
             // NOTE: For duplicated folder names, KEEP it. Handle it when creating folder on outputing
@@ -248,6 +378,7 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
 
             return;
         }
+        
         // From clipboard (file array...)
         const newNodes: TreeNode<WebkitFileNodeData>[] = [];
         for (const file of fileList) {
@@ -358,6 +489,8 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
         inputFileTreeRoots,
         setInputFileTreeRoots,
         appendFileList,
+        nodeMap,
+        statistic,
         error,
         ready,
     }}>

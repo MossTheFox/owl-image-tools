@@ -37,7 +37,7 @@ function PanelBox({ left, width, sx, name, disabled, children }: {
         left={left}
         maxHeight={CONTROL_PANEL_HEIGHT}
         sx={{
-            transition: 'all 0.25s',
+            transition: 'filter 0.25s, left 0.125s, width 0.25s',
             animation: '0.125s ease-in fade-in',
             // transform: nav === 'input' ? 'scale(1)' : 'scale(0.95)',
             ...sx

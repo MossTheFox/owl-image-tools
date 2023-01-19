@@ -45,28 +45,31 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
         <Grid item xs={6} pr={0.5}>
             <Button fullWidth startIcon={<FolderOpen />} onClick={openFilePicker} variant="outlined"
                 disabled={processing}
+                sx={{ whiteSpace: 'nowrap' }}
             >选择文件</Button>
         </Grid>
         <Grid item xs={6} pl={0.5}>
             {FS_Mode === 'publicFS' ?
                 <Button fullWidth startIcon={<FolderOpen />} onClick={fireRequestDir} variant="outlined"
                     disabled={processing}
+                    sx={{ whiteSpace: 'nowrap' }}
                 >打开文件夹</Button>
                 :
                 <>
                     {/* @ts-expect-error */}
                     <input ref={directoryInputRef} type='file' webkitdirectory="1" multiple hidden />
 
+                    <Button fullWidth startIcon={<FolderOpen />} variant="outlined"
+                        disabled={processing}
+                        onClick={openWebkitDirectoryPicker}
+                        sx={{ whiteSpace: 'nowrap' }}
+                    >
+                        选择文件夹
+                    </Button>
                     {/* ↓ TODO: One-time popup */}
                     <Typography variant="body2" color="textSecondary" gutterBottom>
                         浏览器的对话框可能会将操作写作 "上传"。你的文件不会离开此设备。
                     </Typography>
-                    <Button fullWidth startIcon={<FolderOpen />} variant="outlined"
-                        disabled={processing}
-                        onClick={openWebkitDirectoryPicker}
-                    >
-                        选择文件夹
-                    </Button>
                 </>
             }
         </Grid>
