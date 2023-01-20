@@ -19,8 +19,8 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
     }, []);
 
     const requestOpenFolderOnSuccess = useCallback((result: FileSystemDirectoryHandle) => {
-        fileListContext.setRootInputFsHandles((prev) => [...prev, result])
-    }, [fileListContext.setRootInputFsHandles]);
+        fileListContext.appendInputFsHandles([result])
+    }, [fileListContext.appendInputFsHandles]);
 
     const requestOpenFolderOnError = useCallback((err: Error) => {
         // ignore?

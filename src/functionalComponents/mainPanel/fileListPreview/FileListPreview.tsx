@@ -1,144 +1,12 @@
-import { TreeView, TreeItem } from "@mui/lab";
+import { TreeView } from "@mui/lab";
 import { Typography, Box, ButtonGroup, Button, Link, Tooltip } from "@mui/material";
-import { ExpandMore, ChevronRight, FolderOpen, List as ListIcon, ViewList } from "@mui/icons-material";
+import { ExpandMore, ChevronRight, List as ListIcon, ViewList } from "@mui/icons-material";
 import { useContext, useMemo, useCallback, useState } from "react";
-import { fileListContext, fileListContext as _fileListContext, FileNodeData, TreeNode, webkitFileListContext, webkitFileListContext as _webkitFileListContext, WebkitFileNodeData } from "../../../context/fileListContext";
+import { fileListContext as _fileListContext, FileNodeData, TreeNode, webkitFileListContext as _webkitFileListContext, WebkitFileNodeData } from "../../../context/fileListContext";
 import { FS_Mode } from "../../../utils/browserCompability";
-import { parseFileSizeString } from "../../../utils/randomUtils";
-import ImageFilePreviewBox from "../../../components/ImageFilePreviewBox";
 import { fileListDialogCallerContext } from "../../../context/fileListDialog/fileListDialogCallerContext";
-
-
-function FileTreeItem({
-    nodeId,
-    file,
-    previewMode,
-    type,
-}: {
-    nodeId: string;
-    file: File;
-    previewMode: boolean;
-    type: 'FS' | 'no_FS'
-}) {
-
-    const caller = useContext(fileListDialogCallerContext);
-
-    const webkitFile = useContext(webkitFileListContext);
-    const fsFile = useContext(fileListContext);
-
-    const callPreviewDialog = useCallback(() => {
-
-        const node = type === 'FS' ? fsFile.nodeMap.get(nodeId) : webkitFile.nodeMap.get(nodeId);
-        if (!node) return;
-        caller.callFilePreviewDialog(file, type, node)
-
-    }, [type, webkitFile.nodeMap, fsFile.nodeMap, caller.callFilePreviewDialog, file]);
-
-    const callContextMenu = useCallback((e: React.MouseEvent) => {
-        e.preventDefault();
-        const anchorPositon = {
-            top: e.clientY,
-            left: e.clientX
-        };
-        const node = type === 'FS' ? fsFile.nodeMap.get(nodeId) : webkitFile.nodeMap.get(nodeId);
-        if (!node) return;
-
-        caller.callFileListItemContextMenu(anchorPositon, node, type)
-    }, [type, webkitFile.nodeMap, fsFile.nodeMap, caller.callFileListItemContextMenu])
-
-    return <TreeItem nodeId={nodeId}
-        // Click: Preview Dialog
-        onClick={callPreviewDialog}
-
-        ContentProps={{
-            // Right Click (or touch hold): Context Menu
-            onContextMenu: callContextMenu
-        }}
-
-        label={
-            <Box display={'flex'} justifyContent={'space-between'} alignItems="center">
-                {previewMode && <ImageFilePreviewBox file={file}
-                    height="3rem"
-                    width="3rem"
-                    minWidth="3rem"
-                    m={'1px'}
-                    mr={1}
-                />}
-                {previewMode ? <Box flexGrow={1}
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="space-between"
-                    overflow="hidden"
-                >
-                    <Typography variant="body1" color='textSecondary' whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
-                        {file.name}
-                    </Typography>
-                    <Typography variant="body1" color="textSecondary" whiteSpace='nowrap' textAlign="end">
-                        {parseFileSizeString(file.size)}
-                    </Typography>
-                </Box> : <>
-                    <Typography variant="body1" color='textSecondary' whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
-                        {file.name}
-                    </Typography>
-                    <Typography variant="body1" color="textSecondary" whiteSpace='nowrap'>
-                        {parseFileSizeString(file.size)}
-                    </Typography>
-                </>}
-            </Box>
-
-        } />
-}
-
-function FolderTreeItem({
-    nodeId,
-    name,
-    childrenCount,
-    children,
-    type
-}: {
-    nodeId: string;
-    name: string;
-    childrenCount: number;
-    children: React.ReactNode;
-    type: 'FS' | 'no_FS'
-}) {
-    const caller = useContext(fileListDialogCallerContext);
-
-    const webkitFile = useContext(webkitFileListContext);
-    const fsFile = useContext(fileListContext);
-
-    const callContextMenu = useCallback((e: React.MouseEvent) => {
-        e.preventDefault();
-        const anchorPositon = {
-            top: e.clientY,
-            left: e.clientX
-        };
-        const node = type === 'FS' ? fsFile.nodeMap.get(nodeId) : webkitFile.nodeMap.get(nodeId);
-        if (!node) return;
-
-        caller.callFileListItemContextMenu(anchorPositon, node, type)
-    }, [type, webkitFile.nodeMap, fsFile.nodeMap, caller.callFileListItemContextMenu]);
-
-    return <TreeItem nodeId={nodeId}
-        ContentProps={{
-            // Right Click (or touch hold): Context Menu
-            onContextMenu: callContextMenu
-        }}
-
-        label={
-            <Box display={'flex'} justifyContent={'space-between'}>
-                <Box component={FolderOpen} color='inherit' mr={1} />
-                <Typography variant="body1" fontWeight='bolder' whiteSpace='nowrap' flexGrow={1}>
-                    {name}
-                </Typography>
-                <Typography variant="body1" color="textSecondary" whiteSpace='nowrap'>
-                    {childrenCount}
-                </Typography>
-            </Box>
-        }>
-        {children}
-    </TreeItem>
-}
+import FileTreeItem from "./treeItems/FileTreeItem";
+import FolderTreeItem from "./treeItems/FolderTreeItem";
 
 /**
  * Tree Renderer.
@@ -204,6 +72,7 @@ export default function FileListPreview() {
 
     const fileListContext = useContext(_fileListContext);
     const webkitFileListContext = useContext(_webkitFileListContext);
+    const { contextMenuActiveItem } = useContext(fileListDialogCallerContext);
 
     const totalFiles = useMemo(() => fileListContext.statistic.totalFiles + webkitFileListContext.statistic.totalFiles,
         [fileListContext, webkitFileListContext]);
@@ -233,6 +102,15 @@ export default function FileListPreview() {
             bgcolor={(theme) => theme.palette.background.paper}
             zIndex={1}
             pb={0.5}
+
+            // Mobile (especially Safari) Selection disabled
+            // Not sure if it helps.
+            sx={{
+                '& > *': {
+                    WebkitUserSelect: 'none',
+                    userSelect: 'none'
+                }
+            }}
         >
             {totalFiles > 0 ? (
 
@@ -284,7 +162,7 @@ export default function FileListPreview() {
                 </Typography>
             </Box>
             <TreeView defaultCollapseIcon={<ExpandMore />} defaultExpandIcon={<ChevronRight />}
-                selected={""}   // No selection
+                selected={contextMenuActiveItem}
             >
                 {fileListContext.inputFileHandleTrees.sort((a, b) => {
                     if (a.data.kind === 'directory' && b.data.kind === 'file') return -1;
@@ -305,7 +183,7 @@ export default function FileListPreview() {
                 </Typography>
             </Box>
             <TreeView defaultCollapseIcon={<ExpandMore />} defaultExpandIcon={<ChevronRight />}
-                selected={""}   // No selection
+                selected={contextMenuActiveItem}
             >
                 {webkitFileListContext.inputFileTreeRoots.sort((a, b) => {
                     if (a.data.kind === 'directory' && b.data.kind === 'file') return -1;

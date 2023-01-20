@@ -248,9 +248,61 @@ export function FileListContext({ children }: { children: React.ReactNode }) {
         fireDoFullIteration();
     }, [fireDoFullIteration]);
 
-    const appendInputFsHandles = useCallback(() => {
+    // Append, won't do iterations for previews handles
+    const [deltaHandles, setDeltaHandles] = useState<(FileSystemDirectoryHandle | FileSystemFileHandle)[]>([]);
 
+    const asyncDoAppendedIteration = useCallback(async (signal?: AbortSignal) => {
+        const map = new Map();
+        return await iterateAll(deltaHandles, map, signal);
+    }, [deltaHandles]);
+
+    const doAppendedIterationOnSuccess = useCallback(({ fileHandleTrees, nodeMap }: Awaited<ReturnType<typeof asyncDoFullIteration>>) => {
+        // remove empty folders on top level
+        fileHandleTrees = fileHandleTrees.filter((v) => v.data.kind === 'file' || v.children.length);
+
+        if (nodeMap) {
+            // count files and log statistic data
+            const deltaStatistic: FileListStatistic = {
+                ...defaultFileListStatistic,
+                perFormatCount: {
+                    ...defaultFileListStatistic.perFormatCount
+                }
+            };
+
+            for (const [_, node] of nodeMap.entries()) {
+                if (node.data.kind === 'directory') continue;
+                deltaStatistic.totalFiles++;
+                deltaStatistic.perFormatCount[node.data.file.type as typeof ACCEPT_MIMEs[number]]++;
+            }
+
+            setNodeMap((prev) => {
+                const fullMap = new Map([...prev, ...nodeMap]);
+                return fullMap;
+            });
+            setStatistic((prev) => {
+                // add together...
+                deltaStatistic.totalFiles += prev.totalFiles;
+                for (const _key in deltaStatistic.perFormatCount) {
+                    const key = _key as typeof ACCEPT_MIMEs[number];
+                    deltaStatistic.perFormatCount[key] += prev.perFormatCount[key];
+                }
+                return deltaStatistic;
+            });
+        }
+        setInputFileHandleTrees((prev) => [...prev, ...fileHandleTrees]);
+        setReady(true);
+        setError(null);
     }, []);
+
+    const fireDoAppendIteration = useAsync(asyncDoAppendedIteration, doAppendedIterationOnSuccess, doFullIterationOnError);
+
+
+    const appendInputFsHandles = useCallback((delta: (FileSystemDirectoryHandle | FileSystemFileHandle)[]) => {
+        setReady(false);
+        setError(null);
+        setDeltaHandles(delta);
+        fireDoAppendIteration();
+    }, [fireDoAppendIteration]);
 
 
     return <fileListContext.Provider value={{
