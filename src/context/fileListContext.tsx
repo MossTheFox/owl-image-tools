@@ -23,6 +23,7 @@ export type FileNodeData = {
 } | {
     kind: 'directory',
     handle: FileSystemDirectoryHandle,
+    name: string,
     childrenCount: number,
 };
 
@@ -89,6 +90,7 @@ async function iterateNode(node: TreeNode<FileNodeData>, nodeMap?: Map<string, T
         const folderNode = new TreeNode<FileNodeData & { kind: 'directory' }>({
             handle,
             kind: 'directory',
+            name: handle.name,
             childrenCount: 0
         });
         await iterateNode(folderNode, nodeMap, abortSignal);
@@ -123,7 +125,8 @@ async function iterateAll(rootInputFSHandles: (FileSystemDirectoryHandle | FileS
         } : {
             kind: 'directory',
             handle: handle,
-            childrenCount: 0
+            childrenCount: 0,
+            name: handle.name,
         });
         fileHandleTrees.push(newNode);
         if (nodeMap) {

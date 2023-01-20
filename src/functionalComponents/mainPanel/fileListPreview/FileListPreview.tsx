@@ -32,10 +32,29 @@ function FileTreeItem({
         if (!node) return;
         caller.callFilePreviewDialog(file, type, node)
 
-    }, [webkitFile, fsFile, caller.callFilePreviewDialog, file]);
+    }, [type, webkitFile.nodeMap, fsFile.nodeMap, caller.callFilePreviewDialog, file]);
+
+    const callContextMenu = useCallback((e: React.MouseEvent) => {
+        e.preventDefault();
+        const anchorPositon = {
+            top: e.clientY,
+            left: e.clientX
+        };
+        const node = type === 'FS' ? fsFile.nodeMap.get(nodeId) : webkitFile.nodeMap.get(nodeId);
+        if (!node) return;
+
+        caller.callFileListItemContextMenu(anchorPositon, node, type)
+    }, [type, webkitFile.nodeMap, fsFile.nodeMap, caller.callFileListItemContextMenu])
 
     return <TreeItem nodeId={nodeId}
+        // Click: Preview Dialog
         onClick={callPreviewDialog}
+
+        ContentProps={{
+            // Right Click (or touch hold): Context Menu
+            onContextMenu: callContextMenu
+        }}
+
         label={
             <Box display={'flex'} justifyContent={'space-between'} alignItems="center">
                 {previewMode && <ImageFilePreviewBox file={file}
@@ -74,28 +93,56 @@ function FolderTreeItem({
     nodeId,
     name,
     childrenCount,
-    children
+    children,
+    type
 }: {
     nodeId: string;
     name: string;
     childrenCount: number;
-    children: React.ReactNode
+    children: React.ReactNode;
+    type: 'FS' | 'no_FS'
 }) {
-    return <TreeItem nodeId={nodeId} label={
-        <Box display={'flex'} justifyContent={'space-between'}>
-            <Box component={FolderOpen} color='inherit' mr={1} />
-            <Typography variant="body1" fontWeight='bolder' whiteSpace='nowrap' flexGrow={1}>
-                {name}
-            </Typography>
-            <Typography variant="body1" color="textSecondary" whiteSpace='nowrap'>
-                {childrenCount}
-            </Typography>
-        </Box>
-    }>
+    const caller = useContext(fileListDialogCallerContext);
+
+    const webkitFile = useContext(webkitFileListContext);
+    const fsFile = useContext(fileListContext);
+
+    const callContextMenu = useCallback((e: React.MouseEvent) => {
+        e.preventDefault();
+        const anchorPositon = {
+            top: e.clientY,
+            left: e.clientX
+        };
+        const node = type === 'FS' ? fsFile.nodeMap.get(nodeId) : webkitFile.nodeMap.get(nodeId);
+        if (!node) return;
+
+        caller.callFileListItemContextMenu(anchorPositon, node, type)
+    }, [type, webkitFile.nodeMap, fsFile.nodeMap, caller.callFileListItemContextMenu]);
+
+    return <TreeItem nodeId={nodeId}
+        ContentProps={{
+            // Right Click (or touch hold): Context Menu
+            onContextMenu: callContextMenu
+        }}
+
+        label={
+            <Box display={'flex'} justifyContent={'space-between'}>
+                <Box component={FolderOpen} color='inherit' mr={1} />
+                <Typography variant="body1" fontWeight='bolder' whiteSpace='nowrap' flexGrow={1}>
+                    {name}
+                </Typography>
+                <Typography variant="body1" color="textSecondary" whiteSpace='nowrap'>
+                    {childrenCount}
+                </Typography>
+            </Box>
+        }>
         {children}
     </TreeItem>
 }
 
+/**
+ * Tree Renderer.
+ */
 function RenderTreeItem({
     rootNode,
     type,
@@ -116,6 +163,7 @@ function RenderTreeItem({
                 <FileTreeItem file={rootNode.data.file} nodeId={rootNode.nodeId} previewMode={previewMode} type={type} />
             ) : (
                 <FolderTreeItem childrenCount={rootNode.data.childrenCount}
+                    type="no_FS"
                     name={rootNode.data.name}
                     nodeId={rootNode.nodeId}>
 
@@ -134,7 +182,9 @@ function RenderTreeItem({
             {rootNode.data.kind === 'file' ? (
                 <FileTreeItem file={rootNode.data.file} nodeId={rootNode.nodeId} previewMode={previewMode} type={type} />
             ) : (
-                <FolderTreeItem childrenCount={rootNode.data.childrenCount} name={rootNode.data.handle.name}
+                <FolderTreeItem childrenCount={rootNode.data.childrenCount}
+                    name={rootNode.data.name}
+                    type="FS"
                     nodeId={rootNode.nodeId}>
 
                     {rootNode.children.sort((a, b) => {
@@ -182,6 +232,7 @@ export default function FileListPreview() {
             top={0}
             bgcolor={(theme) => theme.palette.background.paper}
             zIndex={1}
+            pb={0.5}
         >
             {totalFiles > 0 ? (
 
@@ -232,7 +283,9 @@ export default function FileListPreview() {
                     {`共 ${fileListContext.statistic.totalFiles} 个文件`}
                 </Typography>
             </Box>
-            <TreeView defaultCollapseIcon={<ExpandMore />} defaultExpandIcon={<ChevronRight />}>
+            <TreeView defaultCollapseIcon={<ExpandMore />} defaultExpandIcon={<ChevronRight />}
+                selected={""}   // No selection
+            >
                 {fileListContext.inputFileHandleTrees.sort((a, b) => {
                     if (a.data.kind === 'directory' && b.data.kind === 'file') return -1;
                     if (a.data.kind === 'file' && b.data.kind === 'directory') return 1;
@@ -251,7 +304,9 @@ export default function FileListPreview() {
                     {`共 ${webkitFileListContext.statistic.totalFiles} 个文件`}
                 </Typography>
             </Box>
-            <TreeView defaultCollapseIcon={<ExpandMore />} defaultExpandIcon={<ChevronRight />}>
+            <TreeView defaultCollapseIcon={<ExpandMore />} defaultExpandIcon={<ChevronRight />}
+                selected={""}   // No selection
+            >
                 {webkitFileListContext.inputFileTreeRoots.sort((a, b) => {
                     if (a.data.kind === 'directory' && b.data.kind === 'file') return -1;
                     if (a.data.kind === 'file' && b.data.kind === 'directory') return 1;

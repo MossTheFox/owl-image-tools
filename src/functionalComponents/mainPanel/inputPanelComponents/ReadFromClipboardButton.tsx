@@ -35,8 +35,12 @@ export default function ReadFromClipboardButton(props: ButtonProps) {
 
     const readClipboardOnSuccess = useCallback((files: File[]) => {
         webkitFileListContext.appendFileList(files);
-        logger.writeLine(`从剪切板读取了 ${files.length} 张图片。`)
-    }, [webkitFileListContext.appendFileList, logger.writeLine]);
+        logger.writeLine(`从剪切板读取了 ${files.length} 张图片。`);
+        logger.fireAlertSnackbar({
+            severity: 'success',
+            message: `从剪切板读取了 ${files.length} 张图片。`
+        }, 3000);
+    }, [webkitFileListContext.appendFileList, logger.writeLine, logger.fireAlertSnackbar]);
 
     const readClipboardOnError = useCallback((err: Error) => {
         console.log(err);

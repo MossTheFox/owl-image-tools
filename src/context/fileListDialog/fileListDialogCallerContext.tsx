@@ -1,5 +1,5 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText, Box, Button, DialogProps, TableContainer, Table, TableHead, TableBody, TableCell, TableRow, useMediaQuery, Theme, Typography, IconButton } from "@mui/material";
-import { Close, Download } from "@mui/icons-material";
+import { Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText, Box, Button, DialogProps, TableContainer, Table, TableHead, TableBody, TableCell, TableRow, useMediaQuery, Theme, Typography, IconButton, Menu, MenuItem, ListItem, ListItemButton, ListItemIcon, ListItemText, PopoverPosition } from "@mui/material";
+import { Close, Download, Info, Delete } from "@mui/icons-material";
 import { createContext, useCallback, useState, useEffect } from "react";
 import ImageFilePreviewBox from "../../components/ImageFilePreviewBox";
 import { ACCEPT_MIMEs } from "../../utils/imageMIMEs";
@@ -94,7 +94,7 @@ function SingleFileDetailDialog(props: DialogProps &
                     </Box>
 
                     {/* Detail */}
-                    <Box sx={{ overflowY: 'auto' }}>
+                    <Box flexShrink={0} sx={{ overflowX: 'auto' }}>
                         {!pending && !canDownload &&
                             <DialogContentText gutterBottom fontWeight="bolder">
                                 无法读取文件。原始文件可能已被修改、移动或删除。
@@ -198,12 +198,15 @@ function FileListStatisticDialog(props: DialogProps & { detail: FileListStatisti
 
 type FileListDialogCallerContext = {
     callFileListStatisticDialog: (detail: FileListStatistic | FileListStatistic[]) => void,
-    callFilePreviewDialog: (file: File, type: 'FS' | 'no_FS', node: FileNode) => void
+    callFilePreviewDialog: (file: File, type: 'FS' | 'no_FS', node: FileNode) => void,
+
+    callFileListItemContextMenu: (anchorPosition: { top: number, left: number }, node: FileNode, type: 'FS' | 'no_FS') => void
 }
 
 export const fileListDialogCallerContext = createContext<FileListDialogCallerContext>({
     callFileListStatisticDialog(detail) { throw new Error('Not init') },
     callFilePreviewDialog(file, type, node) { throw new Error('Not init') },
+    callFileListItemContextMenu(anchorPosition, node, type) { },
 });
 
 
@@ -248,10 +251,29 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
 
     }, []);
 
+    const [contextMenuNodeHold, setContextMenuNodeHold] = useState<FileNode>();
+    const [contextMenuOpen, setContextMenuOpen] = useState(false);
+    const closeMenu = useCallback(() => setContextMenuOpen(false), []);
+    const [menuAnchor, setMenuAnchor] = useState<PopoverPosition>();
+    const callFileListItemContextMenu = useCallback((anchorPosition: { top: number, left: number }, node: FileNode, type: 'FS' | 'no_FS') => {
+        setMenuAnchor(anchorPosition);
+        setContextMenuOpen(true);
+        setMode(type);
+        setContextMenuNodeHold(node);
+    }, []);
+
+    const contextMenuSeeFileDetail = useCallback(() => {
+        setContextMenuOpen(false);
+        if (!contextMenuNodeHold || contextMenuNodeHold?.data.kind !== 'file') return;
+        callPreviewDialog(contextMenuNodeHold.data.file, mode, contextMenuNodeHold);
+
+    }, [contextMenuNodeHold, mode, callPreviewDialog]);
+
 
     return <fileListDialogCallerContext.Provider value={{
         callFilePreviewDialog: callPreviewDialog,
-        callFileListStatisticDialog
+        callFileListStatisticDialog,
+        callFileListItemContextMenu
     }}>
         {previewFile && (
             <SingleFileDetailDialog
@@ -267,6 +289,73 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
             open={fullStatisticDialogOpen}
             onClose={closeFullStatisticDialog}
         />
+
+        {contextMenuNodeHold &&
+            <Menu open={contextMenuOpen} onClose={closeMenu}
+                anchorReference="anchorPosition"
+                anchorPosition={menuAnchor}
+                transitionDuration={1}  // 1 ms since it may flash at (0, 0) if set to 0 (due to anchorPosition)
+            >
+                {/* For Direcrtory Node */}
+                {contextMenuNodeHold.data.kind === 'directory' && [
+                    <ListItem key={1}>
+                        <Typography variant="body2" fontWeight="bolder" color="textSecondary"
+                            sx={{ lineBreak: 'anywhere' }}
+                        >
+                            {`文件夹: ${contextMenuNodeHold.data.name}`}
+                        </Typography>
+                    </ListItem>,
+                    <MenuItem key={2} >
+                        <ListItemIcon><Delete color="error" /></ListItemIcon>
+                        <ListItemText>
+                            <Typography color="error">
+                                {`移除目录 (${contextMenuNodeHold.data.childrenCount} 个子项)`}
+                            </Typography>
+                        </ListItemText>
+                    </MenuItem>
+                ]}
+                {/* For File Node */}
+                {contextMenuNodeHold.data.kind === 'file' && [
+                    <ListItemButton key={1}
+                        onClick={contextMenuSeeFileDetail}
+                    >
+                        <Box display="flex" flexDirection="column" alignItems="center"
+                            maxWidth="12rem"
+                        >
+
+                            <ImageFilePreviewBox
+                                file={contextMenuNodeHold.data.file}
+                                height="6rem"
+                                width="9rem"
+                                flexGrow={1}
+                                mb={0.5}
+                            />
+
+                            <Typography variant="body2" fontWeight="bolder" color="textSecondary"
+                                sx={{ lineBreak: 'anywhere' }}
+                            >
+                                {contextMenuNodeHold.data.file.name}
+                            </Typography>
+                        </Box>
+                    </ListItemButton>,
+                    <MenuItem key={2}
+                        onClick={contextMenuSeeFileDetail}
+                    >
+                        <ListItemIcon><Info /></ListItemIcon>
+                        <ListItemText>详情</ListItemText>
+                    </MenuItem>,
+                    <MenuItem key={3} >
+                        <ListItemIcon><Delete color="error" /></ListItemIcon>
+                        <ListItemText>
+                            <Typography color="error">
+                                移除
+                            </Typography>
+                        </ListItemText>
+                    </MenuItem>
+                ]}
+            </Menu>
+        }
+
 
 
         {children}

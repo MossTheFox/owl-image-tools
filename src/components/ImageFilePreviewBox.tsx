@@ -2,9 +2,9 @@ import { Box, BoxProps, Skeleton } from "@mui/material";
 import { useState, useEffect, useCallback } from "react";
 import { BrokenImage } from "@mui/icons-material"
 
-export default function ImageFilePreviewBox(props: BoxProps & { file: File }) {
+export default function ImageFilePreviewBox(props: BoxProps & { file: File, draggable?: boolean }) {
 
-    const { file, ...boxProps } = props;
+    const { file, draggable, ...boxProps } = props;
 
     const [objectUrl, setObjectUrl] = useState('');
     const [loading, setLoading] = useState(true);
@@ -44,6 +44,7 @@ export default function ImageFilePreviewBox(props: BoxProps & { file: File }) {
                 loading="lazy"
                 onError={imageLoadError}
                 onLoad={imageOnLoad}
+                draggable={!!draggable}
             />
         </Box>
         }
