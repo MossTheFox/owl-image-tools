@@ -45,10 +45,12 @@ export default function FolderTreeItem({
         label={
             <Box display={'flex'} justifyContent={'space-between'}>
                 <Box component={FolderOpen} color='inherit' mr={1} />
-                <Typography variant="body1" fontWeight='bolder' whiteSpace='nowrap' flexGrow={1}>
+                <Typography variant="body1" fontWeight='bolder' whiteSpace='nowrap' flexGrow={1}
+                    overflow='hidden'
+                >
                     {name}
                 </Typography>
-                <Typography variant="body1" color="textSecondary" whiteSpace='nowrap'>
+                <Typography variant="body1" color="textSecondary" whiteSpace='nowrap' ml='1px'>
                     {childrenCount}
                 </Typography>
             </Box>

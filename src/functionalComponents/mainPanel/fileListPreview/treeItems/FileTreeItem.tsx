@@ -82,7 +82,7 @@ export default function FileTreeItem({
                     <Typography variant="body1" color='textSecondary' whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
                         {file.name}
                     </Typography>
-                    <Typography variant="body1" color="textSecondary" whiteSpace='nowrap'>
+                    <Typography variant="body1" color="textSecondary" whiteSpace='nowrap' ml="1px">
                         {parseFileSizeString(file.size)}
                     </Typography>
                 </>}

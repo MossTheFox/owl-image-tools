@@ -43,7 +43,7 @@ export default function ReadFromClipboardButton(props: ButtonProps) {
     }, [webkitFileListContext.appendFileList, logger.writeLine, logger.fireAlertSnackbar]);
 
     const readClipboardOnError = useCallback((err: Error) => {
-        console.log(err);
+        import.meta.env.DEV && console.log(err);
         // DOMExcention: Read permission denied.
         if (err instanceof DOMException) {
             logger.fireAlertSnackbar({

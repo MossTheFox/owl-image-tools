@@ -108,7 +108,7 @@ export default function TopBar(props: BoxProps) {
             </> : <>
                 <Typography variant="body2" whiteSpace='nowrap'>FS Mode: </Typography>
                 {FS_Mode === 'noFS' && <Tooltip title={"批量文件转换受限"} arrow enterDelay={0} enterTouchDelay={0}>
-                    <Chip color="warning" label={"不支持文件系统访问"} size="small" />
+                    <Chip color="warning" label={"受限模式"} size="small" />
                 </Tooltip>}
                 {FS_Mode === 'privateFS' && <Chip color="info" label={"Private FS"} size="small" />}
                 {FS_Mode === 'publicFS' && <Chip color="success" label={"Full Support"} size="small" />}

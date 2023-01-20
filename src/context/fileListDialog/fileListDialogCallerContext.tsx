@@ -1,11 +1,12 @@
 import { Dialog, DialogTitle, DialogContent, DialogActions, Box, Button, DialogProps, TableContainer, Table, TableHead, TableBody, TableCell, TableRow, Typography, Menu, MenuItem, ListItem, ListItemButton, ListItemIcon, ListItemText, PopoverPosition } from "@mui/material";
 import { Info, Delete } from "@mui/icons-material";
-import { createContext, useCallback, useState, useMemo, useEffect } from "react";
+import { createContext, useCallback, useState, useMemo, useEffect, useContext } from "react";
 import ImageFilePreviewBox from "../../components/ImageFilePreviewBox";
 import { ACCEPT_MIMEs } from "../../utils/imageMIMEs";
 import { FileListStatistic, FileNodeData, WebkitFileNodeData, TreeNode, defaultFileListStatistic } from "../fileListContext";
 import SingleFileDetailDialog from "./fileListDialogsAndMenus/SingleFileDetailDialog";
 import FileListStatisticDialog from "./fileListDialogsAndMenus/FileListStatisticDialog";
+import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../context/fileListContext";
 
 type FileNode = TreeNode<FileNodeData> | TreeNode<WebkitFileNodeData>;
 
@@ -29,7 +30,6 @@ export const fileListDialogCallerContext = createContext<FileListDialogCallerCon
 export function FileListDialogCallerContextProvider({ children }: { children: React.ReactNode }) {
 
     // File Preview Dialog //
-
     const [previewFile, setPreviewFile] = useState<File | null>(null);
     const [mode, setMode] = useState<'FS' | 'no_FS'>('FS');
 
@@ -71,6 +71,8 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
     }, []);
 
     // Context Menu //
+    const fileListContext = useContext(_fileListContext);
+    const webkitFileListContext = useContext(_webkitFileListContext);
 
     const [contextMenuNodeHold, setContextMenuNodeHold] = useState<FileNode>();
     const [contextMenuOpen, setContextMenuOpen] = useState(false);
@@ -90,6 +92,20 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
 
     }, [contextMenuNodeHold, mode, callPreviewDialog]);
 
+    const deleteNode = useCallback(() => {
+        console.log("WARRR")
+        if (!contextMenuNodeHold) return;
+        switch (mode) {
+            case 'FS':
+                fileListContext.deleteNode(contextMenuNodeHold as TreeNode<FileNodeData>);
+                break;
+            case 'no_FS':
+                webkitFileListContext.deleteNode(contextMenuNodeHold as TreeNode<WebkitFileNodeData>);
+                break;
+        }
+        setContextMenuOpen(false);
+    }, [contextMenuNodeHold, mode, fileListContext.deleteNode, webkitFileListContext.deleteNode]);
+
     // When context menu is open, right click outside will close it
     useEffect(() => {
         if (!contextMenuOpen) return;
@@ -106,6 +122,13 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
         document.body.addEventListener('contextmenu', listener);
         return () => {
             document.body.removeEventListener('contextmenu', listener);
+        }
+    }, [contextMenuOpen]);
+
+    // When context menu is closed, clear all refs here
+    useEffect(() => {
+        if (!contextMenuOpen) {
+            setContextMenuNodeHold(undefined);
         }
     }, [contextMenuOpen]);
 
@@ -128,6 +151,7 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
                 mode={mode}
                 open={previewDialogOpen}
                 onClose={closePreviewDialog}
+
             />
         )}
 
@@ -137,75 +161,73 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
             onClose={closeFullStatisticDialog}
         />
 
-        {contextMenuNodeHold &&
-            <Menu open={contextMenuOpen} onClose={closeMenu}
-                anchorReference="anchorPosition"
-                anchorPosition={menuAnchor}
-                transitionDuration={1}  // 1 ms since it may flash at (0, 0) if set to 0 (due to anchorPosition)
+        <Menu open={contextMenuOpen} onClose={closeMenu}
+            anchorReference="anchorPosition"
+            anchorPosition={menuAnchor}
+            transitionDuration={0}
+        >
+            {/* For Direcrtory Node */}
+            {contextMenuNodeHold && contextMenuNodeHold.data.kind === 'directory' && [
+                <ListItem key={1}>
+                    <Typography variant="body2" fontWeight="bolder" color="textSecondary"
+                        sx={{ lineBreak: 'anywhere' }}
+                    >
+                        {`文件夹: ${contextMenuNodeHold.data.name}`}
+                    </Typography>
+                </ListItem>,
+                <MenuItem key={2} onClick={deleteNode} >
+                    <ListItemIcon><Delete color="error" /></ListItemIcon>
+                    <ListItemText>
+                        <Typography color="error">
+                            {`移除目录 (${contextMenuNodeHold.data.childrenCount} 个子项)`}
+                        </Typography>
+                    </ListItemText>
+                </MenuItem>
+            ]}
+            {/* For File Node */}
+            {contextMenuNodeHold && contextMenuNodeHold.data.kind === 'file' && [
+                <ListItemButton key={1}
+                    onClick={contextMenuSeeFileDetail}
+                >
+                    <Box display="flex" flexDirection="column" alignItems="center"
+                        maxWidth="12rem"
+                    >
 
-            >
-                {/* For Direcrtory Node */}
-                {contextMenuNodeHold.data.kind === 'directory' && [
-                    <ListItem key={1}>
+                        <ImageFilePreviewBox
+                            file={contextMenuNodeHold.data.file}
+                            height="6rem"
+                            width="9rem"
+                            flexGrow={1}
+                            mb={0.5}
+                        />
+
                         <Typography variant="body2" fontWeight="bolder" color="textSecondary"
                             sx={{ lineBreak: 'anywhere' }}
                         >
-                            {`文件夹: ${contextMenuNodeHold.data.name}`}
+                            {contextMenuNodeHold.data.file.name}
                         </Typography>
-                    </ListItem>,
-                    <MenuItem key={2} >
-                        <ListItemIcon><Delete color="error" /></ListItemIcon>
-                        <ListItemText>
-                            <Typography color="error">
-                                {`移除目录 (${contextMenuNodeHold.data.childrenCount} 个子项)`}
-                            </Typography>
-                        </ListItemText>
-                    </MenuItem>
-                ]}
-                {/* For File Node */}
-                {contextMenuNodeHold.data.kind === 'file' && [
-                    <ListItemButton key={1}
-                        onClick={contextMenuSeeFileDetail}
-                    >
-                        <Box display="flex" flexDirection="column" alignItems="center"
-                            maxWidth="12rem"
-                        >
+                    </Box>
+                </ListItemButton>,
+                <MenuItem key={2}
+                    onClick={contextMenuSeeFileDetail}
+                >
+                    <ListItemIcon><Info /></ListItemIcon>
+                    <ListItemText>详情</ListItemText>
+                </MenuItem>,
+                <MenuItem key={3} onClick={deleteNode} >
+                    <ListItemIcon><Delete color="error" /></ListItemIcon>
+                    <ListItemText>
+                        <Typography color="error">
+                            移除
+                        </Typography>
+                    </ListItemText>
+                </MenuItem>
+            ]}
+        </Menu>
 
-                            <ImageFilePreviewBox
-                                file={contextMenuNodeHold.data.file}
-                                height="6rem"
-                                width="9rem"
-                                flexGrow={1}
-                                mb={0.5}
-                            />
-
-                            <Typography variant="body2" fontWeight="bolder" color="textSecondary"
-                                sx={{ lineBreak: 'anywhere' }}
-                            >
-                                {contextMenuNodeHold.data.file.name}
-                            </Typography>
-                        </Box>
-                    </ListItemButton>,
-                    <MenuItem key={2}
-                        onClick={contextMenuSeeFileDetail}
-                    >
-                        <ListItemIcon><Info /></ListItemIcon>
-                        <ListItemText>详情</ListItemText>
-                    </MenuItem>,
-                    <MenuItem key={3} >
-                        <ListItemIcon><Delete color="error" /></ListItemIcon>
-                        <ListItemText>
-                            <Typography color="error">
-                                移除
-                            </Typography>
-                        </ListItemText>
-                    </MenuItem>
-                ]}
-            </Menu>
-        }
 
 
 
         {children}
-    </fileListDialogCallerContext.Provider>
+    </fileListDialogCallerContext.Provider >
 }

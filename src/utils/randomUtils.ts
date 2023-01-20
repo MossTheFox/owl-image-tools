@@ -23,6 +23,5 @@ export function fireFileDownload(blob: Blob, fileName = randomUUIDv4()) {
     a.href = URL.createObjectURL(blob);
     a.download = fileName;
     a.click();
-    console.log(a);
     URL.revokeObjectURL(a.href);
 }

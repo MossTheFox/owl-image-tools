@@ -54,7 +54,7 @@ export default function SingleFileDetailDialog(props: DialogProps &
                     setCanDownload(true);
                 }
             } catch (err) {
-                console.log(err);
+                import.meta.env.DEV && console.log(err);
                 if (!unmounted) {
                     setCanDownload(false);
                 }

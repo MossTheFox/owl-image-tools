@@ -45,6 +45,7 @@ export const isWebkit = typeof navigator.standalone === 'boolean';
 export const isMacOriOS = /iPad|iPhone|iPod|Mac/.test(navigator.userAgent);
 
 // File Formats Test
+// TODO: For all async detections, make them into a Context.
 
 export const browserImageFormatSupport = {
     /** Use canvas to output webp file (Safari ×) */
@@ -60,14 +61,12 @@ export const browserImageFormatSupport = {
         if (canvas && 'toBlob' in canvas) {
             // Canvas Output Test
             canvas.toBlob((blob) => {
-                console.log(blob);
                 if (blob && blob.type === 'image/webp') {
                     browserImageFormatSupport.canvasOutputWebp = true;
                 }
             }, 'image/webp');
 
             canvas.toBlob((blob) => {
-                console.log(blob);
                 if (blob && blob.type === 'image/vnd.microsoft.icon') {
                     browserImageFormatSupport.canvasOutputIco = true;
                 }

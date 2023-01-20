@@ -230,22 +230,7 @@ export function FileListContext({ children }: { children: React.ReactNode }) {
         fileHandleTrees = fileHandleTrees.filter((v) => v.data.kind === 'file' || v.children.length);
 
         if (nodeMap) {
-            // count files and log statistic data
-            const newStatistic: FileListStatistic = {
-                ...defaultFileListStatistic,
-                perFormatCount: {
-                    ...defaultFileListStatistic.perFormatCount
-                }
-            };
-
-            for (const [_, node] of nodeMap.entries()) {
-                if (node.data.kind === 'directory') continue;
-                newStatistic.totalFiles++;
-                newStatistic.perFormatCount[node.data.file.type as typeof ACCEPT_MIMEs[number]]++;
-            }
-
             setNodeMap(nodeMap);
-            setStatistic(newStatistic);
         }
 
         setInputFileHandleTrees(fileHandleTrees);
@@ -286,33 +271,11 @@ export function FileListContext({ children }: { children: React.ReactNode }) {
         fileHandleTrees = fileHandleTrees.filter((v) => v.data.kind === 'file' || v.children.length);
 
         if (nodeMap) {
-            // count files and log statistic data
-            const deltaStatistic: FileListStatistic = {
-                ...defaultFileListStatistic,
-                perFormatCount: {
-                    ...defaultFileListStatistic.perFormatCount
-                }
-            };
-
-            for (const [_, node] of nodeMap.entries()) {
-                if (node.data.kind === 'directory') continue;
-                deltaStatistic.totalFiles++;
-                deltaStatistic.perFormatCount[node.data.file.type as typeof ACCEPT_MIMEs[number]]++;
-            }
-
             setNodeMap((prev) => {
                 const fullMap = new Map([...prev, ...nodeMap]);
                 return fullMap;
             });
-            setStatistic((prev) => {
-                // add together...
-                deltaStatistic.totalFiles += prev.totalFiles;
-                for (const _key in deltaStatistic.perFormatCount) {
-                    const key = _key as typeof ACCEPT_MIMEs[number];
-                    deltaStatistic.perFormatCount[key] += prev.perFormatCount[key];
-                }
-                return deltaStatistic;
-            });
+            // Statistic will be handled when nodemap us updated correctly.
         }
         setInputFileHandleTrees((prev) => [...prev, ...fileHandleTrees]);
         setReady(true);
@@ -334,12 +297,56 @@ export function FileListContext({ children }: { children: React.ReactNode }) {
         // if it's of the root handles... remove it.
         setRootInputFsHandles((prev) => prev.filter((v) => v !== node.data.handle));
 
-        // then, handle the tree.
-        // TODO:
-        // const allNodesToDelete = getAllNodeInTree(node);
-        // setInputFileHandleTrees((prev) => [...prev])
-        
-    }, [])
+        // then, handle the node map.
+        const allNodesToDelete = getAllNodeInTree(node);
+        const deleteCount = allNodesToDelete.filter((v) => v.data.kind === 'file').length;
+
+        setNodeMap((prev) => {
+            const newMap = new Map(prev);
+            for (const node of allNodesToDelete) {
+                newMap.delete(node.nodeId);
+            }
+            return newMap;
+        });
+
+        if (node.parent) {
+            // remove this node.
+            node.parent.children = node.parent.children.filter((v) => v !== node);
+            // go all the way to the top folder and set the childCount
+            let curr: null | typeof node.parent = node.parent;
+            while (curr && curr.data.kind === 'directory') {
+                curr.data.childrenCount -= deleteCount;
+                // kick empty folder off it's parent
+                if (curr.parent && curr.data.childrenCount <= 0) {
+                    curr.parent.children = curr.parent.children.filter((v) => v !== curr);
+                }
+                curr = curr.parent;
+            }
+        }
+
+        // Now cut the tree.
+        setInputFileHandleTrees((prev) => {
+            return prev.filter((v) => v !== node);
+        });
+
+    }, []);
+
+    // Every time the node map is updated, iterate it and update the state.
+    useEffect(() => {
+        const statistic: FileListStatistic = {
+            totalFiles: 0,
+            perFormatCount: {
+                ...defaultFileListStatistic.perFormatCount
+            }
+        };
+
+        for (const [_, node] of nodeMap) {
+            if (node.data.kind !== 'file') continue;
+            statistic.totalFiles++;
+            statistic.perFormatCount[node.data.file.type as typeof ACCEPT_MIMEs[number]]++;
+        }
+        setStatistic(statistic);
+    }, [nodeMap]);
 
     return <fileListContext.Provider value={{
         inputFileHandleTrees,
@@ -390,14 +397,14 @@ function iterateDirectoryEntry(
                             resolveFile(null);
                         })
                     });
-
                     // Error occurred when getting File object. Stop the whole process
                     if (!file) {
                         return;
                     }
 
                     // Count in image files only
-                    if (file.type.startsWith('image/')) {
+                    // IMPORTANT: Firefox don't parst file MIME here. CHECK extentions
+                    if (file.type.startsWith('image/') || checkIsFilenameAccepted(file.name)) {
                         const newNode = new TreeNode<WebkitFileNodeData>({
                             kind: 'file',
                             file
@@ -452,6 +459,9 @@ interface WebkitFileListContext {
     /** Node Map (uuid -> tree node) */
     nodeMap: Map<string, TreeNode<WebkitFileNodeData>>,
 
+    /** Call to delete a node. Either a file or a directory. */
+    deleteNode: (targetNode: TreeNode<WebkitFileNodeData>) => void,
+
     /** File iteration finished or exited with error (on both occations will be true, check `error` to specify whether it's all ok) */
     ready: boolean,
     /** File iteration Error (if `error` is `null` and `ready` is `true`, then it's all ok) */
@@ -467,6 +477,7 @@ export const webkitFileListContext = createContext<WebkitFileListContext>({
     appendFileList: () => { throw new Error('Not initialized.') },
     statistic: defaultFileListStatistic,
     nodeMap: new Map(),
+    deleteNode() { },
     ready: true,
     error: null,
     // allowDrop: false,
@@ -643,7 +654,7 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
 
     }, []);
 
-    // Update Statistics Here
+    // Update Statistics Here when nodemap is changed
     useEffect(() => {
         const newStatistic = {
             ...defaultFileListStatistic,
@@ -709,11 +720,63 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
         }
     }, [handleDrop]);
 
+    // delete node...
+    const deleteNode = useCallback((node: TreeNode<WebkitFileNodeData>) => {
+
+        // then, handle the node map.
+        const allNodesToDelete = getAllNodeInTree(node);
+        const deleteCount = allNodesToDelete.filter((v) => v.data.kind === 'file').length;
+
+        console.log(allNodesToDelete, deleteCount);
+
+        // ok check this:
+        // "It is expected that setState updaters will run twice in strict mode in development."
+        // @see https://github.com/facebook/react/issues/12856
+
+        // so ya'll get messed up if use the two constants inside setstate. 
+        // Not sure how the rest of the app don't blow up, but whateve. let's fix it here.
+
+        // ↓ this one is ok
+        setNodeMap((prev) => {
+            const newMap = new Map(prev);
+            for (const node of allNodesToDelete) {
+                newMap.delete(node.nodeId);
+            }
+            return newMap;
+        });
+
+        // Now cut the tree.
+        // ↓ actually all I've done is move this if block outside of set state function.
+        // I gurss it make sense why react had done the twice call. Quite wise person(s) who designed it.
+        if (node.parent) {
+            // remove this node.
+            node.parent.children = node.parent.children.filter((v) => v !== node);
+            // go all the way to the top folder and set the childCount
+            let curr: null | typeof node.parent = node.parent;
+            while (curr && curr.data.kind === 'directory') {
+                curr.data.childrenCount -= deleteCount;
+                // kick empty folder off it's parent
+                if (curr.parent && curr.data.childrenCount <= 0) {
+                    curr.parent.children = curr.parent.children.filter((v) => v !== curr);
+                }
+                curr = curr.parent;
+            }
+        }
+        setInputFileTreeRoots((prev) => {
+            return prev.filter((v) => v !== node
+                && (
+                    (v.data.kind === 'directory' && v.data.childrenCount > 0) || v.data.kind === 'file'
+                )
+            );
+        });
+    }, []);
+
     return <webkitFileListContext.Provider value={{
         inputFileTreeRoots,
         setInputFileTreeRoots,
         appendFileList,
         nodeMap,
+        deleteNode,
         statistic,
         error,
         ready,
