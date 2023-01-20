@@ -17,10 +17,13 @@ export default function InputPanel(props: PaperProps) {
 
 
     return <Paper {...props} sx={{
-        overflowX: 'hidden',
-        overflowY: 'auto',
+        // overflowX: 'hidden',
+        // overflowY: 'auto',
         maxHeight: CONTROL_PANEL_HEIGHT,
-        transition: 'background-color 0.125s'
+        transition: 'background-color 0.125s',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'stretch'
     }}>
         {/* Loading Indicator with ZIndex higher than content box */}
         <DialogLoadingIndicator loading={processing} zIndex={2} position="relative" />
@@ -52,7 +55,9 @@ export default function InputPanel(props: PaperProps) {
             </Stack>
         </Box>
 
-        <Box px={2} pt={1} pb={2} position='relative'>
+        <Box px={2} mt={1} pb={2} position='relative' flexGrow={1}
+            overflow="auto"
+        >
 
             <FileListDialogCallerContextProvider>
                 <FileListPreview />

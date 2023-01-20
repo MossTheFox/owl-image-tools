@@ -48,3 +48,5 @@ Specially, GIF:
     - e.g. pngcrush in webworker
 
 - **Fix file format** (real file ext)
+
+- Canvas control: ☆ **PNG to JPG BACKGROUND COLOR on OPAQUE PLACES**

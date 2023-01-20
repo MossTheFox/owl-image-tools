@@ -94,7 +94,7 @@ function SingleFileDetailDialog(props: DialogProps &
                     </Box>
 
                     {/* Detail */}
-                    <Box>
+                    <Box sx={{ overflowY: 'auto' }}>
                         {!pending && !canDownload &&
                             <DialogContentText gutterBottom fontWeight="bolder">
                                 无法读取文件。原始文件可能已被修改、移动或删除。
@@ -104,7 +104,7 @@ function SingleFileDetailDialog(props: DialogProps &
                         <DialogContentText gutterBottom>
                             {file.name}
                         </DialogContentText>
-                        <DialogContentText component={"ul"} whiteSpace="nowrap">
+                        <DialogContentText gutterBottom component={"ul"} whiteSpace="nowrap">
                             <DialogContentText component={"li"} whiteSpace="nowrap">
                                 {`类型: ${file.type}`}
                             </DialogContentText>

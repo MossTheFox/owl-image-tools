@@ -36,13 +36,15 @@ let darkTheme = createTheme({
         MuiDialog: {
             styleOverrides: {
                 paperFullWidth: {
-                    width: "calc(100% - 32px)",
-                    maxHeight: "calc(100% - 32px)",
-                    margin: "0"
+                    margin: "16px"
                 },
                 paper: {
                     marginLeft: '16px',
                     marginRight: '16px',
+                    width: '100%'
+                },
+                paperFullScreen: {
+                    margin: 0
                 }
             }
         }
@@ -93,6 +95,7 @@ let lightTheme = createTheme({
                 paper: {
                     marginLeft: '16px',
                     marginRight: '16px',
+                    width: '100%',
                 },
                 paperFullScreen: {
                     margin: 0

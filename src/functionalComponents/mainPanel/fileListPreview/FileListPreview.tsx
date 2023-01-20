@@ -172,11 +172,17 @@ export default function FileListPreview() {
     }, [dialogCaller.callFileListStatisticDialog, webkitFileListContext.statistic, fileListContext.statistic]);
 
 
-    return <Box>
+    return <>
         {/* Note: The root layer of file array CAN have duplicated filenames or directory names.
             Use tree nodeId as key
         */}
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}
+            // Sticky
+            position="sticky"
+            top={0}
+            bgcolor={(theme) => theme.palette.background.paper}
+            zIndex={1}
+        >
             {totalFiles > 0 ? (
 
                 <Box display="flex" justifyContent="left" alignItems="center" gap={1}>
@@ -255,5 +261,5 @@ export default function FileListPreview() {
                 ))}
             </TreeView>
         </Box>}
-    </Box>
+    </>
 }
