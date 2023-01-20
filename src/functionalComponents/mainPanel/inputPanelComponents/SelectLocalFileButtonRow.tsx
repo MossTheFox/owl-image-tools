@@ -1,5 +1,5 @@
-import { Box, Button, Typography, Grid, GridProps } from "@mui/material";
-import { useCallback, useRef, useContext, useMemo } from "react";
+import { Box, Button, Typography, Grid, GridProps, Popover } from "@mui/material";
+import { useCallback, useRef, useContext, useMemo, useState } from "react";
 import { FolderOpen, Image as ImageIcon } from '@mui/icons-material';
 import { FS_Mode } from "../../../utils/browserCompability";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../../context/fileListContext";
@@ -31,9 +31,24 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
     // Case 2: Directory Picker
     const fileInputRef = useRef<HTMLInputElement>(null);
     const directoryInputRef = useRef<HTMLInputElement>(null);
+    const webkitDirectoryPickerButton = useRef<HTMLButtonElement>(null);
+
+    // TODO: store in global site config
+    const [notifyPopperOpen, setNotifyPopperOpen] = useState(false);
+    const closeNotify = useCallback(() => setNotifyPopperOpen(false), []);
 
     const openFilePicker = useCallback(() => fileInputRef.current?.click(), [fileInputRef]);
-    const openWebkitDirectoryPicker = useCallback(() => directoryInputRef.current?.click(), [directoryInputRef]);
+    const openWebkitDirectoryPicker = useCallback(() => {
+        setNotifyPopperOpen(false);
+        directoryInputRef.current?.click();
+    }, [directoryInputRef]);
+    const openWebkitDirectoryPickerButton = useCallback(() => {
+        // if (...) skip open tip popup, directly open picker
+        // openWebkitDirectoryPicker();
+        setNotifyPopperOpen(true);
+    }, [openWebkitDirectoryPicker]);
+
+
 
     const handleMultipleImageInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.currentTarget.files;
@@ -74,15 +89,31 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
 
                     <Button fullWidth startIcon={<FolderOpen />} variant="outlined"
                         disabled={processing}
-                        onClick={openWebkitDirectoryPicker}
+                        onClick={openWebkitDirectoryPickerButton}
                         sx={{ whiteSpace: 'nowrap' }}
+                        ref={webkitDirectoryPickerButton}
                     >
                         导入文件夹
                     </Button>
-                    {/* ↓ TODO: One-time popup */}
-                    <Typography variant="body2" color="textSecondary" gutterBottom>
-                        浏览器的对话框可能会将操作写作 "上传"。你的文件不会离开此设备。
-                    </Typography>
+                    <Popover open={notifyPopperOpen} onClose={closeNotify}
+                        anchorEl={webkitDirectoryPickerButton.current}
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'left'
+                        }}
+                    >
+                        <Box p={2} display="flex" flexDirection="column" alignItems="end">
+                            <Box>
+                                <Typography variant="body2" color="textSecondary" gutterBottom>
+                                    选择文件夹时，浏览器的对话框可能会将此操作写作 "上传"。
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary" gutterBottom>
+                                    请放心，你的文件不会离开此设备。
+                                </Typography>
+                            </Box>
+                            <Button onClick={openWebkitDirectoryPicker}>明白了，不再提示</Button>
+                        </Box>
+                    </Popover>
                 </>
             }
         </Grid>

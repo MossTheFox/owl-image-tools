@@ -2,9 +2,18 @@ import { Box, BoxProps, Skeleton } from "@mui/material";
 import { useState, useEffect, useCallback } from "react";
 import { BrokenImage } from "@mui/icons-material"
 
-export default function ImageFilePreviewBox(props: BoxProps & { file: File, draggable?: boolean }) {
+export default function ImageFilePreviewBox(props: BoxProps & {
+    file: File,
+    draggable?: boolean,
+    imageOnLoad?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void,
+    imageOnError?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void
+}) {
 
-    const { file, draggable, ...boxProps } = props;
+    const { file, draggable,
+        imageOnLoad: imageOnLoadCallback,
+        imageOnError: imageOnErrorCallback,
+        ...boxProps
+    } = props;
 
     const [objectUrl, setObjectUrl] = useState('');
     const [loading, setLoading] = useState(true);
@@ -22,11 +31,13 @@ export default function ImageFilePreviewBox(props: BoxProps & { file: File, drag
 
     const imageLoadError = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
         setError(true);
-    }, []);
+        imageOnErrorCallback && imageOnErrorCallback(e);
+    }, [imageOnErrorCallback]);
 
     const imageOnLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
         setError(false);
-    }, []);
+        imageOnLoadCallback && imageOnLoadCallback(e);
+    }, [imageOnLoadCallback]);
 
 
     return <Box
@@ -45,6 +56,7 @@ export default function ImageFilePreviewBox(props: BoxProps & { file: File, drag
                 onError={imageLoadError}
                 onLoad={imageOnLoad}
                 draggable={!!draggable}
+                decoding="async"
             />
         </Box>
         }

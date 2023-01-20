@@ -8,10 +8,14 @@ export class TreeNode<T> {
     data: T;
     nodeId: string;
     children: TreeNode<T>[];
-    constructor(data: T) {
+    parent: TreeNode<T> | null = null;
+    constructor(data: T, parent?: TreeNode<T> | null) {
         this.data = data;
         this.children = [];
         this.nodeId = randomUUIDv4();
+        if (parent) {
+            this.parent = parent;
+        }
     };
 };
 
@@ -54,6 +58,23 @@ export const defaultFileListStatistic: FileListStatistic = {
     }, {} as Partial<FileListStatistic['perFormatCount']>) as FileListStatistic['perFormatCount']
 } as const;
 
+/**
+ * get All nodes inside a tree. Will look for all children of root.
+ * 
+ * @returns an array contains all the nodes in the tree of root. Root node included.
+ */
+function getAllNodeInTree<T>(root: TreeNode<T>) {
+    if (root.children.length === 0) {
+        return [root];
+    }
+    const result: TreeNode<T>[] = [root];
+    for (const child of root.children) {
+        let iterated = getAllNodeInTree(child);
+        result.push(...iterated);
+    }
+    return result;
+}
+
 /** it need to be abortable. 
  * 
  * Also, non-image files will be ignored, as well as empty folders (with no images).
@@ -75,7 +96,7 @@ async function iterateNode(node: TreeNode<FileNodeData>, nodeMap?: Map<string, T
                     handle,
                     kind: 'file',
                     file: await handle.getFile()
-                });
+                }, node);
                 // Record node in map
                 if (nodeMap) {
                     nodeMap.set(newNode.nodeId, newNode);
@@ -92,7 +113,7 @@ async function iterateNode(node: TreeNode<FileNodeData>, nodeMap?: Map<string, T
             kind: 'directory',
             name: handle.name,
             childrenCount: 0
-        });
+        }, node as TreeNode<FileNodeData & { kind: 'directory' }>);
         await iterateNode(folderNode, nodeMap, abortSignal);
 
         // count in subfolder's children
@@ -127,7 +148,7 @@ async function iterateAll(rootInputFSHandles: (FileSystemDirectoryHandle | FileS
             handle: handle,
             childrenCount: 0,
             name: handle.name,
-        });
+        }, null);   // ROOT nodes
         fileHandleTrees.push(newNode);
         if (nodeMap) {
             nodeMap.set(newNode.nodeId, newNode);
@@ -165,6 +186,9 @@ interface FileListContext {
     /** Node Map (uuid -> tree node) */
     nodeMap: Map<string, TreeNode<FileNodeData>>,
 
+    /** Call to delete a node. Either a file or a directory. */
+    deleteNode: (targetNode: TreeNode<FileNodeData>) => void,
+
     /** File iteration finished or exited with error (on both occations will be true, check `error` to specify whether it's all ok) */
     ready: boolean,
     /** File iteration Error (if `error` is `null` and `ready` is `true`, then it's all ok) */
@@ -180,6 +204,7 @@ export const fileListContext = createContext<FileListContext>({
     appendInputFsHandles(handles) { throw new Error('Not initialized.') },
     statistic: defaultFileListStatistic,
     nodeMap: new Map(),
+    deleteNode() { throw new Error('Not initialized.') },
     ready: true,
     error: null,
 });
@@ -304,6 +329,17 @@ export function FileListContext({ children }: { children: React.ReactNode }) {
         fireDoAppendIteration();
     }, [fireDoAppendIteration]);
 
+    // Delete Node. Check the root first, then do... whatever.
+    const deleteNode = useCallback((node: TreeNode<FileNodeData>) => {
+        // if it's of the root handles... remove it.
+        setRootInputFsHandles((prev) => prev.filter((v) => v !== node.data.handle));
+
+        // then, handle the tree.
+        // TODO:
+        // const allNodesToDelete = getAllNodeInTree(node);
+        // setInputFileHandleTrees((prev) => [...prev])
+        
+    }, [])
 
     return <fileListContext.Provider value={{
         inputFileHandleTrees,
@@ -313,6 +349,7 @@ export function FileListContext({ children }: { children: React.ReactNode }) {
         appendInputFsHandles,
         statistic,
         nodeMap,
+        deleteNode,
         ready,
         error
     }}>
@@ -364,7 +401,7 @@ function iterateDirectoryEntry(
                         const newNode = new TreeNode<WebkitFileNodeData>({
                             kind: 'file',
                             file
-                        })
+                        }, node);
 
                         // Record here
                         if (nodeMap) {
@@ -381,7 +418,7 @@ function iterateDirectoryEntry(
                         kind: 'directory',
                         name: entry.name,
                         childrenCount: 0
-                    });
+                    }, node);
                     await iterateDirectoryEntry(entry as FileSystemDirectoryEntry, dirNode, nodeMap, abortSignal);
                     // Ignore Empty dir             ↓ TypeScript... Should have define it more properly but whatever
                     if (dirNode.children.length && dirNode.data.kind === 'directory') {
@@ -419,6 +456,9 @@ interface WebkitFileListContext {
     ready: boolean,
     /** File iteration Error (if `error` is `null` and `ready` is `true`, then it's all ok) */
     error: Error | null,
+
+    // allowDrop: boolean;
+    // setAllowDrop: React.Dispatch<React.SetStateAction<boolean>>
 };
 
 export const webkitFileListContext = createContext<WebkitFileListContext>({
@@ -428,7 +468,9 @@ export const webkitFileListContext = createContext<WebkitFileListContext>({
     statistic: defaultFileListStatistic,
     nodeMap: new Map(),
     ready: true,
-    error: null
+    error: null,
+    // allowDrop: false,
+    // setAllowDrop: () => { }
 });
 
 /**
@@ -442,7 +484,7 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
     const [ready, setReady] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
-    const [allowDrop, setAllowDrop] = useState(true);
+    // const [allowDrop, setAllowDrop] = useState(true);
 
     // File List from input (webkitdirectory) element or clipboard
     const appendFileList = useCallback((fileList: FileList | File[], webkitDirectory = false) => {
@@ -458,7 +500,7 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
                 kind: 'directory',
                 name: 'root',
                 childrenCount: 0
-            });
+            }, null);
 
             // construct the tree structure.
             // webkitEntries is empty. Manually parse it via `webkitRelativePath`.
@@ -484,7 +526,7 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
                             kind: 'directory',
                             name: dir,
                             childrenCount: 0
-                        });
+                        }, currentDir === newRoot ? null : (currentDir as TreeNode<WebkitFileNodeData & { kind: 'directory' }>));
                         // Record in node list
                         theNodes.push(found);
                         // Record in currentDir
@@ -497,7 +539,7 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
                         const fileNode = new TreeNode<WebkitFileNodeData>({
                             kind: 'file',
                             file
-                        });
+                        }, currentDir === newRoot ? null : currentDir);
                         currentDir.children.push(fileNode);
                         theNodes.push(fileNode);
                     }
@@ -520,14 +562,14 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
             return;
         }   // End of handle webkitdirectory input
 
-        // From clipboard or multiple select input (file array...)
+        // From clipboard or multiple select input (file array... No folders)
         const newNodes: TreeNode<WebkitFileNodeData>[] = [];
         for (const file of fileList) {
             if (!checkIsMimeSupported(file.type)) continue;
             const newNode = new TreeNode<WebkitFileNodeData>({
                 kind: 'file',
                 file: file
-            });
+            }, null);
             newNodes.push(newNode);
         }
         // Record in nodeMap
@@ -563,7 +605,7 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
                 const newNode = new TreeNode<WebkitFileNodeData>({
                     file: file,
                     kind: 'file'
-                });
+                }, null);
 
                 fileNodes.push(newNode);
 
@@ -580,7 +622,7 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
                     kind: 'directory',
                     name: entry.name,
                     childrenCount: 0
-                });
+                }, null);
 
                 await iterateDirectoryEntry(entry, dirRoot, additionalMap, signal);
 
@@ -675,6 +717,8 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
         statistic,
         error,
         ready,
+        // allowDrop,
+        // setAllowDrop
     }}>
         {children}
     </webkitFileListContext.Provider>

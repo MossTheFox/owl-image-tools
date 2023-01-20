@@ -43,3 +43,37 @@ export const clipboardSupport = (!!navigator.clipboard?.read && typeof Clipboard
 export const isWebkit = typeof navigator.standalone === 'boolean';
 
 export const isMacOriOS = /iPad|iPhone|iPod|Mac/.test(navigator.userAgent);
+
+// File Formats Test
+
+export const browserImageFormatSupport = {
+    /** Use canvas to output webp file (Safari ×) */
+    canvasOutputWebp: false,
+
+    /** Use canvas to output ico file (Mozilla only? Fail to test.) */
+    canvasOutputIco: false,
+};
+
+(async function testBrowserImageFormatSupport() {
+    try {
+        const canvas = document.createElement('canvas');
+        if (canvas && 'toBlob' in canvas) {
+            // Canvas Output Test
+            canvas.toBlob((blob) => {
+                console.log(blob);
+                if (blob && blob.type === 'image/webp') {
+                    browserImageFormatSupport.canvasOutputWebp = true;
+                }
+            }, 'image/webp');
+
+            canvas.toBlob((blob) => {
+                console.log(blob);
+                if (blob && blob.type === 'image/vnd.microsoft.icon') {
+                    browserImageFormatSupport.canvasOutputIco = true;
+                }
+            }, 'image/vnd.microsoft.icon', '-moz-parse-options:format=bmp;bpp=32')
+        }
+    } catch (err) {
+        import.meta.env.DEV && console.log(err);
+    }
+})();

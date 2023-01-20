@@ -1,6 +1,6 @@
 import { Dialog, DialogTitle, DialogContent, DialogActions, Box, Button, DialogProps, TableContainer, Table, TableHead, TableBody, TableCell, TableRow, Typography, Menu, MenuItem, ListItem, ListItemButton, ListItemIcon, ListItemText, PopoverPosition } from "@mui/material";
 import { Info, Delete } from "@mui/icons-material";
-import { createContext, useCallback, useState, useMemo } from "react";
+import { createContext, useCallback, useState, useMemo, useEffect } from "react";
 import ImageFilePreviewBox from "../../components/ImageFilePreviewBox";
 import { ACCEPT_MIMEs } from "../../utils/imageMIMEs";
 import { FileListStatistic, FileNodeData, WebkitFileNodeData, TreeNode, defaultFileListStatistic } from "../fileListContext";
@@ -90,6 +90,25 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
 
     }, [contextMenuNodeHold, mode, callPreviewDialog]);
 
+    // When context menu is open, right click outside will close it
+    useEffect(() => {
+        if (!contextMenuOpen) return;
+
+        const listener = function (e: MouseEvent) {
+            // Click target is hidden then it means it's the backdrop.
+            // Allow fire context menu on the image.
+            if (e.target && !(e.target instanceof HTMLImageElement)) {
+                e.preventDefault();
+                setContextMenuOpen(false);
+            }
+        };
+
+        document.body.addEventListener('contextmenu', listener);
+        return () => {
+            document.body.removeEventListener('contextmenu', listener);
+        }
+    }, [contextMenuOpen]);
+
     // This is for TreeView active object
     const contextMenuActiveItem = useMemo(() => {
         if (contextMenuOpen && contextMenuNodeHold) return contextMenuNodeHold.nodeId;
@@ -123,6 +142,7 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
                 anchorReference="anchorPosition"
                 anchorPosition={menuAnchor}
                 transitionDuration={1}  // 1 ms since it may flash at (0, 0) if set to 0 (due to anchorPosition)
+
             >
                 {/* For Direcrtory Node */}
                 {contextMenuNodeHold.data.kind === 'directory' && [

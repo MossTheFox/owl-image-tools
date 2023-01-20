@@ -35,37 +35,67 @@ export default function SingleFileDetailDialog(props: DialogProps &
         fireFileDownload(file, file.name);
     }, [file]);
 
-    // Validate file object
+    // Validate file object itself
     const [canDownload, setCanDownload] = useState(false);
     const [pending, setPending] = useState(true);
     useEffect(() => {
+        if (!dialogProps.open || !file) {
+            return;
+        }
+
         let unmounted = false;
         setPending(true);
         setCanDownload(false);
 
-        if (dialogProps.open && file) {
-            (async () => {
-                try {
-                    const whatever = await file.stream().getReader().read();
-                    if (!unmounted) {
-                        setCanDownload(true);
-                    }
-                } catch (err) {
-                    console.log(err);
-                    if (!unmounted) {
-                        setCanDownload(false);
-                    }
-                }
+        (async () => {
+            try {
+                const whatever = await file.stream().getReader().read();
                 if (!unmounted) {
-                    setPending(false);
+                    setCanDownload(true);
                 }
+            } catch (err) {
+                console.log(err);
+                if (!unmounted) {
+                    setCanDownload(false);
+                }
+            }
+            if (!unmounted) {
+                setPending(false);
+            }
 
-            })();
-        }
+        })();
         return () => {
             unmounted = true;
         }
     }, [dialogProps.open, file]);
+
+    // Check if the file can be read by the browser
+    const [isImageDecodable, setIsImageDecodable] = useState(false);
+    const [imageLoading, setImageLoading] = useState(true);
+    const [imageSize, setImageSize] = useState('');
+
+    useEffect(() => {
+        if (dialogProps.open) {
+            setImageSize('');
+            setImageLoading(true);
+        }
+    }, [dialogProps.open]);
+
+    const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+        if ('naturalWidth' in e.target && 'naturalHeight' in e.target) {
+            setImageSize(`${e.target.naturalWidth} x ${e.target.naturalHeight}`);
+        } else {
+            setImageSize('获取失败');
+        }
+        setIsImageDecodable(true);
+        setImageLoading(false);
+    }, []);
+
+    const onImageError = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+        setImageSize('');
+        setIsImageDecodable(false);
+        setImageLoading(false);
+    }, []);
 
     return <>
         {!!file &&
@@ -85,8 +115,11 @@ export default function SingleFileDetailDialog(props: DialogProps &
                 <DialogContent sx={{ position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'stretch' }}>
 
                     {/* Preview */}
-                    <Box flexGrow={1} p={1} overflow="auto" display="flex" justifyContent="center">
-                        <ImageFilePreviewBox file={file} overflow="auto" width="100%" minHeight="3rem" />
+                    <Box flexGrow={1} pb={1} overflow="auto" display="flex" justifyContent="center">
+                        <ImageFilePreviewBox file={file} overflow="auto" width="100%" minHeight="3rem"
+                            onLoad={onImageLoad}
+                            onError={onImageError}
+                        />
                     </Box>
 
                     {/* Detail */}
@@ -97,10 +130,21 @@ export default function SingleFileDetailDialog(props: DialogProps &
                             </DialogContentText>
                         }
 
+                        {!pending && canDownload && !imageLoading && !isImageDecodable &&
+                            <DialogContentText gutterBottom fontWeight="bolder">
+                                当前浏览器无法解码此图片。可能是格式不支持或文件损坏。
+                            </DialogContentText>
+                        }
+
                         <DialogContentText gutterBottom>
                             {file.name}
                         </DialogContentText>
                         <DialogContentText gutterBottom component={"ul"} whiteSpace="nowrap">
+                            {!!imageSize && (
+                                <DialogContentText component={"li"} whiteSpace="nowrap">
+                                    {`尺寸: ${imageSize}`}
+                                </DialogContentText>
+                            )}
                             <DialogContentText component={"li"} whiteSpace="nowrap">
                                 {`类型: ${file.type}`}
                             </DialogContentText>

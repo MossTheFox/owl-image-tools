@@ -28,7 +28,9 @@ export const mimeExtMatch = {
     'image/svg+xml': 'svg',
     'image/tiff': 'tiff',
     'image/webp': 'webp',
+    // ico files... uses multiple mime.
     'image/vnd.microsoft.icon': 'ico',
+    'image/x-icon': 'ico'
 } as const;
 
 export const ACCEPT_MIMEs = Object.keys(mimeExtMatch) as (keyof typeof mimeExtMatch)[];
