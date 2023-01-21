@@ -1,6 +1,6 @@
 import { TreeItem } from "@mui/lab";
 import { Typography, Box, PopoverPosition } from "@mui/material";
-import { useContext, useCallback } from "react";
+import React, { useContext, useCallback, useState, useEffect } from "react";
 import { fileListContext, fileListContext as _fileListContext, webkitFileListContext, webkitFileListContext as _webkitFileListContext } from "../../../../context/fileListContext";
 import { parseFileSizeString } from "../../../../utils/randomUtils";
 import ImageFilePreviewBox from "../../../../components/ImageFilePreviewBox";
@@ -47,6 +47,25 @@ export default function FileTreeItem({
         callContextMenu(anchorPosition);
     }, [callContextMenu]);
 
+    // Image Detail in Preview Mode
+    const [imageSizeText, setImageSizeText] = useState('');
+
+    useEffect(() => {
+        if (previewMode) {
+            setImageSizeText('');
+        }
+    }, [previewMode]);
+
+    const onImageLoad = useCallback((e: React.SyntheticEvent<HTMLDivElement, Event>) => {
+        if ('naturalHeight' in e.target && 'naturalWidth' in e.target) {
+            setImageSizeText(`${e.target.naturalWidth} x ${e.target.naturalHeight}`);
+        }
+    }, []);
+
+    const onImageError = useCallback((e: React.SyntheticEvent<HTMLDivElement, Event>) => {
+        setImageSizeText('无法载入图片');
+    }, []);
+
 
     return <TreeItem nodeId={nodeId}
         // Click: Preview Dialog
@@ -65,6 +84,8 @@ export default function FileTreeItem({
                     minWidth="3rem"
                     m={'1px'}
                     mr={1}
+                    onLoad={onImageLoad}
+                    onError={onImageError}
                 />}
                 {previewMode ? <Box flexGrow={1}
                     display="flex"
@@ -72,12 +93,17 @@ export default function FileTreeItem({
                     justifyContent="space-between"
                     overflow="hidden"
                 >
-                    <Typography variant="body1" color='textSecondary' whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
+                    <Typography variant="body1" whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
                         {file.name}
                     </Typography>
-                    <Typography variant="body1" color="textSecondary" whiteSpace='nowrap' textAlign="end">
-                        {parseFileSizeString(file.size)}
-                    </Typography>
+                    <Box display='flex' alignItems="baseline" justifyContent="space-between">
+                        <Typography variant="body2" color="textSecondary" whiteSpace='nowrap' textAlign="end" overflow='hidden'>
+                            {imageSizeText}
+                        </Typography>
+                        <Typography flexGrow={1} variant="body1" color="textSecondary" whiteSpace='nowrap' textAlign="end" ml='1px'>
+                            {parseFileSizeString(file.size)}
+                        </Typography>
+                    </Box>
                 </Box> : <>
                     <Typography variant="body1" color='textSecondary' whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
                         {file.name}
