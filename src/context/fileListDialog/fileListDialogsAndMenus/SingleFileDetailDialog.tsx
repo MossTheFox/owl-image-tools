@@ -2,7 +2,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, DialogContentText, B
 import { Close, Download } from "@mui/icons-material";
 import { useCallback, useState, useEffect } from "react";
 import ImageFilePreviewBox from "../../../components/ImageFilePreviewBox";
-import { fireFileDownload, parseFileSizeString } from "../../../utils/randomUtils";
+import { fireFileDownload, parseFileSizeString, tryReadABlob } from "../../../utils/randomUtils";
 
 export default function SingleFileDetailDialog(props: DialogProps &
     ({
@@ -49,7 +49,7 @@ export default function SingleFileDetailDialog(props: DialogProps &
 
         (async () => {
             try {
-                const whatever = await file.stream().getReader().read();
+                await tryReadABlob(file);
                 if (!unmounted) {
                     setCanDownload(true);
                 }
@@ -76,7 +76,7 @@ export default function SingleFileDetailDialog(props: DialogProps &
 
     useEffect(() => {
         if (dialogProps.open) {
-            setImageSize('');
+            setImageSize('...');
             setImageLoading(true);
         }
     }, [dialogProps.open]);

@@ -26,7 +26,6 @@ export default function ImageFilePreviewBox(props: BoxProps & {
         return () => {
             URL.revokeObjectURL(url);
         }
-
     }, []);
 
     const imageLoadError = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {

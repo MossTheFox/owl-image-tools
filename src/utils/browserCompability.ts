@@ -40,16 +40,25 @@ export const storageDisabled = (() => {
 
 export const clipboardSupport = (!!navigator.clipboard?.read && typeof ClipboardItem !== 'undefined') as boolean;
 
+/**
+ * (Safari) Can use this to detect some feature limitations of Safari:
+ * - Canvass JPEG output quality param is not supported
+ * - Canvas cannot output WEBP file
+ * 
+ * Or, use `browserImageFormatSupport` exported. 
+ */
 export const isWebkit = typeof navigator.standalone === 'boolean';
 
 export const isMacOriOS = /iPad|iPhone|iPod|Mac/.test(navigator.userAgent);
 
-// File Formats Test
-// TODO: For all async detections, make them into a Context.
+// File Formats Test (ok whatever)
 
 export const browserImageFormatSupport = {
+
+    canvasOutputQualityParam: !isWebkit,
+
     /** Use canvas to output webp file (Safari ×) */
-    canvasOutputWebp: false,
+    canvasOutputWebp: !isWebkit,
 
     /** Use canvas to output ico file (Mozilla only? Fail to test.) */
     canvasOutputIco: false,

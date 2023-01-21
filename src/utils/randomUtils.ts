@@ -25,3 +25,17 @@ export function fireFileDownload(blob: Blob, fileName = randomUUIDv4()) {
     a.click();
     URL.revokeObjectURL(a.href);
 }
+
+/**
+ * Try to read a blob. Can be used to check whether it's readable.
+ * 
+ * @throws If error is thrown, the blob should be unreadable.
+ */
+export async function tryReadABlob(blob: Blob) {
+    const whatever = blob.stream()
+    const reader = whatever.getReader();
+    await reader.read();
+    reader.cancel('Aborted');
+    reader.releaseLock();
+    await whatever.cancel('Aborted');
+}
