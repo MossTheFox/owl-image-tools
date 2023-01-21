@@ -19,8 +19,10 @@ export default function InputPanel(props: PaperProps) {
     return <Paper {...props} sx={{
         // overflowX: 'hidden',
         // overflowY: 'auto',
+        ...props.sx,
+        flexGrow: 1,
         maxHeight: CONTROL_PANEL_HEIGHT,
-        transition: 'background-color 0.125s',
+        transition: 'background-color 0.25s',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'stretch'
@@ -28,20 +30,19 @@ export default function InputPanel(props: PaperProps) {
         {/* Loading Indicator with ZIndex higher than content box */}
         <DialogLoadingIndicator loading={processing} zIndex={2} position="relative" />
 
-        <Box px={2} pt={2} pb={1} position='sticky' top={0} left={0}
-            bgcolor={(theme) => theme.palette.background.paper}
-            zIndex={1}
+        <Box px={2} pt={2} pb={1}
             borderBottom={1}
             borderColor="divider"
-            sx={{
-                transition: 'background-color 0.125s'
-            }}
         >
 
-            <Typography variant="h5" fontWeight='bolder' gutterBottom>
+            <Typography variant="h5" fontWeight='bolder'>
                 源文件
             </Typography>
-            <Divider sx={{ mb: 2 }} />
+        </Box>
+        <Box px={2} py={1}
+            borderBottom={1}
+            borderColor="divider"
+        >
             <Stack spacing={1} pb={1}>
 
                 <Typography variant="body2" color="primary" gutterBottom>

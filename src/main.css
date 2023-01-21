@@ -1,3 +1,7 @@
+:root {
+    --font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
 fieldset {
     display: unset;
     margin-inline: unset;

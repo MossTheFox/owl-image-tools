@@ -2,6 +2,7 @@ import { Container, Grid, Typography, Paper, Box, Divider, Button, useMediaQuery
 import { useState, useMemo, useEffect, useCallback, useContext } from 'react';
 import { CONTROL_PANEL_HEIGHT } from '../App';
 import { panelNavigationContext } from '../context/panelNavigationContext';
+import ConfigPanel from './mainPanel/ConfigPanel';
 import InputPanel from './mainPanel/InputPanel';
 
 export type Panels = 'input' | 'config' | 'output';
@@ -35,19 +36,24 @@ function PanelBox({ left, width, sx, name, disabled, children }: {
         width={width}
         aria-hidden={disabled}
         left={left}
-        maxHeight={CONTROL_PANEL_HEIGHT}
+        // maxHeight={CONTROL_PANEL_HEIGHT}
+        height={CONTROL_PANEL_HEIGHT}
         sx={{
             transition: 'filter 0.25s, left 0.125s, width 0.25s',
             animation: '0.125s ease-in fade-in',
             // transform: nav === 'input' ? 'scale(1)' : 'scale(0.95)',
             ...sx
         }}
+        display='flex'
+        flexDirection='column'
+        justifyContent='stretch'
+
         component={'fieldset'}
         disabled={disabled}
     >
         {/* ↓ disable the buttons when not being active. */}
         {/* <fieldset disabled={disabled}> */}
-            {children}
+        {children}
         {/* </fieldset> */}
     </Box>;
 }
@@ -162,6 +168,7 @@ export default function PanelNavigation(props: BoxProps) {
 
 
     // Touch screen swipping action
+    // TODO: (?) do or skip?
     const [swipping, setSwipping] = useState(false);
 
     // When swipping, duratio should be 0
@@ -244,14 +251,9 @@ export default function PanelNavigation(props: BoxProps) {
             sx={{
                 transitionDuration,
                 filter: filterProp.config,
-            }}>
-            <Paper>
-                <Box p={2}>
-                    <Typography variant="h5" fontWeight='bolder' gutterBottom>
-                        输出设置
-                    </Typography>
-                </Box>
-            </Paper>
+            }}
+        >
+            <ConfigPanel />
         </PanelBox>
 
         <Box position="absolute"
