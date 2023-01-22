@@ -14,7 +14,10 @@ export const CONTROL_PANEL_HEIGHT = `calc(100vh - ${TOP_BAR_HEIGHT} - 16px)` as 
 function App() {
 
     return <Box position="relative" height="100vh">
-        {/* Context Here */}
+        {/* Small Context Here */}
+        {/* Node: output config and site settings are on the higher level.
+                  See main.tsx
+        */}
 
         {/* Panels Navigarion Context */}
         <PanelNavigationContextProvider>

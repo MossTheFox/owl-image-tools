@@ -15,13 +15,13 @@ export default function ImageFilePreviewBox(props: BoxProps & {
         ...boxProps
     } = props;
 
-    const [objectUrl, setObjectUrl] = useState('');
+    const [objectURL, setObjectURL] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);  // May not catch the error object. Just record if it happened.
 
     useEffect(() => {
         const url = URL.createObjectURL(file);
-        setObjectUrl(url);
+        setObjectURL(url);
         setLoading(false);
         return () => {
             URL.revokeObjectURL(url);
@@ -50,7 +50,7 @@ export default function ImageFilePreviewBox(props: BoxProps & {
         {loading && <Skeleton variant="rectangular" width="100%" height="auto" />}
         {!loading && !error && <Box width="100%" height="auto" display="flex" alignItems="center" justifyContent="center">
 
-            <img alt={file.name} src={objectUrl} style={{ maxWidth: '100%', maxHeight: '100%' }}
+            <img alt={file.name} src={objectURL} style={{ maxWidth: '100%', maxHeight: '100%' }}
                 loading="lazy"
                 onError={imageLoadError}
                 onLoad={imageOnLoad}

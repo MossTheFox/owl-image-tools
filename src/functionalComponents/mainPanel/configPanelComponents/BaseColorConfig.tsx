@@ -1,18 +1,18 @@
 import { Box, BoxProps, ButtonBase, Link, Paper, Typography, FormHelperText, InputBase } from "@mui/material";
 import { TinyColor } from '@ctrl/tinycolor';
 import { useCallback, useRef, useState } from "react";
+import { ColorFormatConfig } from "../../../context/appConfigContext";
 
-type ColorFormat = 'hex' | 'rgb' | 'hsl' | 'hsv';
 
-const formats: ColorFormat[] = ['hex', 'rgb', 'hsl', 'hsv'];
-const defaultColors: { [key in ColorFormat]: string } = {
+const formats: ColorFormatConfig[] = ['hex', 'rgb', 'hsl', 'hsv'];
+const defaultColors: { [key in ColorFormatConfig]: string } = {
     hex: '#ffffff',
     hsl: 'hsl(0, 0%, 100%)',
     hsv: 'hsv(0, 0%, 100%)',
     rgb: 'rgb(255, 255, 255)'
 };
 
-const convertTo = (color: string, target: ColorFormat) => {
+const convertTo = (color: string, target: ColorFormatConfig) => {
     let result = color;
     switch (target) {
         case 'hex':
@@ -35,7 +35,7 @@ export default function BaseColorConfig(props: BoxProps) {
 
     // TODO: store with global config
 
-    const [format, setFormat] = useState<ColorFormat>('hex'); // <- TODO: global
+    const [format, setFormat] = useState<ColorFormatConfig>('hex'); // <- TODO: global
     // 👇 Store Hex. Display format up to the user.
     const [color, setColor] = useState('#ffffff');          // <-       config
 
@@ -75,7 +75,7 @@ export default function BaseColorConfig(props: BoxProps) {
         setColorInput(result);
     }, [format]);
 
-    const handleFormatChange = useCallback((format: ColorFormat) => {
+    const handleFormatChange = useCallback((format: ColorFormatConfig) => {
         setFormat(format);
         setColorInput(convertTo(color, format));
     }, [color]);

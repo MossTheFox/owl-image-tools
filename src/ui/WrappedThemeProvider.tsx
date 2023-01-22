@@ -1,18 +1,21 @@
 import { useMediaQuery, ThemeProvider, CssBaseline } from '@mui/material'
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
+import { appConfigContext } from '../context/appConfigContext';
 import { themeObject } from './theme';
 
 /**
  * CssBaseline is already ready here as the first child.
  */
 function WrappedThemeProvider({ children }: { children: React.ReactNode }) {
-    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+    const appConfig = useContext(appConfigContext);
+    const sysPrefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+
     const theme = useMemo(() => {
-        if (prefersDarkMode) {
-            return themeObject.dark;
+        if (appConfig.siteConfig.colorModeFollowSystem) {
+            return sysPrefersDarkMode ? themeObject.dark : themeObject.light;
         }
-        return themeObject.light;
-    }, [prefersDarkMode]);
+        return appConfig.siteConfig.colorMode === 'dark' ? themeObject.dark : themeObject.light
+    }, [sysPrefersDarkMode, appConfig.siteConfig.colorMode, appConfig.siteConfig.colorModeFollowSystem]);
 
     return <ThemeProvider theme={theme}>
         <CssBaseline />

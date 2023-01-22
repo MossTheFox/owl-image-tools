@@ -7,13 +7,16 @@ import MainContainer from './ui/MainContainer';
 import WrappedThemeProvider from './ui/WrappedThemeProvider';
 import './transitions.css';
 import './main.css';
+import { AppConfigContextProvider } from './context/appConfigContext';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>
-        <WrappedThemeProvider>
-            <MainContainer>
-                <App />
-            </MainContainer>
-        </WrappedThemeProvider>
+        <AppConfigContextProvider>
+            <WrappedThemeProvider>
+                <MainContainer>
+                    <App />
+                </MainContainer>
+            </WrappedThemeProvider>
+        </AppConfigContextProvider>
     </React.StrictMode>,
 )
