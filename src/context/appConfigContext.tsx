@@ -1,5 +1,6 @@
 import React, { createContext, SetStateAction, useCallback, useState } from "react";
 import { LOCALSTORAGE_KEYS } from "../constraints";
+import { ACCEPT_MIMEs, OUTPUT_FORMATS } from "../utils/imageMIMEs";
 import { getFromLocalStorageAndValidate, saveToLocalStorage } from "../utils/randomUtils";
 
 export type ColorFormatConfig = 'hex' | 'rgb' | 'hsl' | 'hsv';
@@ -28,6 +29,11 @@ export type OutputConfig = {
     /** Remember Collapse (Accordion) open */
     collapseOpenState: boolean[];
 
+    /** Output format for different source image types */
+    outputFormats: {
+        [key in typeof ACCEPT_MIMEs[number]]: typeof OUTPUT_FORMATS[number]
+    };
+
     /** from 0 to 100 */
     JPEG_quality: number;
 
@@ -48,6 +54,12 @@ export const defaultOutputConfig: OutputConfig = {
     imageBaseColor: '#ffffff',
     colorFormat: 'hex',
     collapseOpenState: new Array<boolean>(10).fill(false),
+    outputFormats: {
+        ...ACCEPT_MIMEs.reduce((prev, curr) => ({
+            ...prev,
+            [curr]: 'image/jpeg'
+        }), {}) as OutputConfig['outputFormats']
+    },
     JPEG_quality: 90,
     PNG_keepAlphaChannel: true,
     PNG_compressionOption: 'no-compression',
@@ -86,7 +98,7 @@ export type AppConfigContext = {
     setOutputConfig: React.Dispatch<SetStateAction<AppConfigContext['outputConfig']>>,
     updateOutputConfig: <T extends keyof OutputConfig>(key: T, value: OutputConfig[T]) => void,
     recordCollapseState: (index: number, open: boolean) => void,
-
+    setOutputTargetFormat: (source: typeof ACCEPT_MIMEs[number], target: typeof OUTPUT_FORMATS[number]) => void,
 }
 
 
@@ -100,6 +112,7 @@ export const appConfigContext = createContext<AppConfigContext>({
     setOutputConfig() { },
     updateSiteConfig(key, value) { },
     recordCollapseState(index, open) { },
+    setOutputTargetFormat() { },
 });
 
 
@@ -157,6 +170,21 @@ export function AppConfigContextProvider({ children }: { children: React.ReactNo
         });
     }, []);
 
+    const setOutputTargetFormat = useCallback((source: typeof ACCEPT_MIMEs[number], target: typeof OUTPUT_FORMATS[number]) => {
+        setOutputConfig((prev) => {
+            const result: typeof prev = {
+                ...prev,
+                outputFormats: {
+                    ...defaultOutputConfig.outputFormats,
+                    ...prev.outputFormats,
+                    [source]: target
+                }
+            };
+            saveToLocalStorage(LOCALSTORAGE_KEYS.outputConfig, result);
+            return result;
+        });
+    }, []);
+
 
 
     return <appConfigContext.Provider value={{
@@ -168,6 +196,7 @@ export function AppConfigContextProvider({ children }: { children: React.ReactNo
         setOutputConfig,
         updateSiteConfig,
         recordCollapseState,
+        setOutputTargetFormat,
     }}>
         {children}
     </appConfigContext.Provider>

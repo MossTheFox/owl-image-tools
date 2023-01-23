@@ -5,11 +5,14 @@ import { CONTROL_PANEL_HEIGHT } from "../../App";
 import DialogLoadingIndicator from "../../ui/smallComponents/DialogLoadingIndicator";
 import { ACCEPT_MIMEs, extToMime, mimeToExt, OUTPUT_FORMATS } from "../../utils/imageMIMEs";
 import OutputConfigArea from "./configPanelComponents/OutputConfigArea";
+import { appConfigContext } from "../../context/appConfigContext";
 
 export default function ConfigPanel(props: PaperProps) {
 
     const fileListContext = useContext(_fileListContext);
     const webkitFileListContext = useContext(_webkitFileListContext);
+
+    const { outputConfig, setOutputTargetFormat } = useContext(appConfigContext);
 
     const processing = useMemo(() => !fileListContext.ready || !webkitFileListContext.ready, [fileListContext.ready, webkitFileListContext.ready]);
 
@@ -100,11 +103,14 @@ export default function ConfigPanel(props: PaperProps) {
                                         fullWidth
                                         label={'输出格式'}
                                         size="small"
-                                        value={OUTPUT_FORMATS[0]}
+                                        value={outputConfig.outputFormats[mime]}
                                         variant="standard"
+                                        onChange={(e) => {
+                                            setOutputTargetFormat(mime, e.target.value as typeof OUTPUT_FORMATS[number])
+                                        }}
                                     >
                                         {OUTPUT_FORMATS.map((v, i) =>
-                                            <MenuItem key={v} value={v}>
+                                            <MenuItem key={v} value={extToMime(v)}>
                                                 <Typography variant="body2" display='inline-block' px={0.5}>
                                                     {`${v.toUpperCase()} (${extToMime(v)})`}
                                                 </Typography>
