@@ -39,3 +39,84 @@ export async function tryReadABlob(blob: Blob) {
     reader.releaseLock();
     await whatever.cancel('Aborted');
 }
+
+/**
+ * Validate object from localStorage, and return it.
+ */
+export function getFromLocalStorageAndValidate<T extends Object>(key: string, object: T) {
+    try {
+        const stored = localStorage.getItem(key);
+        if (!stored) return { ...object };
+        const json = JSON.parse(stored);
+        const result: T = {
+            ...object
+        };
+        for (const [key, val] of Object.entries(json)) {
+            // @ts-expect-error
+            if (key in result && typeof result[key] === typeof json[key]) {
+                // no additional check. whatever.
+                // @ts-expect-error
+                result[key] = json[key];
+            }
+        }
+        return result;
+
+    } catch (err) {
+        import.meta.env.DEV && console.log(err);
+        return { ...object };
+    }
+}
+
+/** Save to localStorage. */
+export function saveToLocalStorage(key: string, value: string | object) {
+    try {
+        if (typeof value !== 'string') {
+            value = JSON.stringify(value);
+        }
+        localStorage.setItem(key, value);
+        return true;
+    } catch (err) {
+        import.meta.env.DEV && console.log(err);
+        return false;
+    }
+}
+
+/** estimate storage usage */
+export async function estimateStorageUsage(): Promise<
+    {
+        result: 'success',
+        available: number,
+        used: number,
+        rawUsageObject: Object
+    } | {
+        result: 'error',
+        reason: 'NotSupportError' | 'AccessDenied' | 'UnknownError'
+    }
+> {
+    if (!navigator.storage) {
+        return {
+            result: 'error',
+            reason: 'NotSupportError'
+        };
+    }
+    try {
+        const manager = navigator.storage;
+        const estimate = await manager.estimate();
+
+        return {
+            result: 'success',
+            available: estimate.quota ?? -1,
+            used: estimate.usage ?? -1,
+            // @ts-expect-error
+            rawUsageObject: estimate.usageDetails
+        }
+        
+    } catch (err) {
+        return {
+            result: 'error',
+            reason: 'UnknownError'
+        };
+    }
+}
+
+/** Check for persis (TODO: um) */

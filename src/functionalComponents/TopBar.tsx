@@ -42,6 +42,10 @@ export default function TopBar(props: BoxProps) {
         left={0}
         zIndex={10}
         {...props}
+        sx={{
+            ...props.sx,
+            transition: 'background-color 0.125s'
+        }}
     >
 
         {/* Menu and Drawers */}

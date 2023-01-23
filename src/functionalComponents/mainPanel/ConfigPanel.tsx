@@ -4,9 +4,7 @@ import { defaultFileListStatistic, fileListContext as _fileListContext, FileList
 import { CONTROL_PANEL_HEIGHT } from "../../App";
 import DialogLoadingIndicator from "../../ui/smallComponents/DialogLoadingIndicator";
 import { ACCEPT_MIMEs, extToMime, mimeToExt, OUTPUT_FORMATS } from "../../utils/imageMIMEs";
-import { ExpandMore } from "@mui/icons-material";
-import ConfigPanelAccordion from "./configPanelComponents/ConfigPanelAccordion";
-import BaseColorConfig from "./configPanelComponents/BaseColorConfig";
+import OutputConfigArea from "./configPanelComponents/OutputConfigArea";
 
 export default function ConfigPanel(props: PaperProps) {
 
@@ -125,73 +123,7 @@ export default function ConfigPanel(props: PaperProps) {
             >
                 <Stack spacing={1}>
 
-                    <Box>
-                        <Typography variant="body1" fontWeight='bolder' gutterBottom>
-                            高级输出设置
-                        </Typography>
-
-                        <BaseColorConfig py={1} />
-
-
-                        <Box py={1}>
-
-                            <ConfigPanelAccordion summary="JPEG 设置">
-                                <Typography variant="body2" color="textSecondary" >
-                                    JPEG 质量
-                                </Typography>
-                                <Box display='flex' gap={2}>
-
-                                    <Slider sx={{ flexGrow: 1 }}
-                                        size="small"
-                                        min={0}
-                                        max={100}
-                                        step={1}
-                                        value={11}
-                                        aria-label="JPEG Quality Slider"
-                                    />
-                                    <TextField sx={{
-                                        width: '3em'
-                                    }}
-                                        variant='standard'
-                                        size='small'
-                                        type='number'
-                                        value={11}
-                                        autoComplete='off'
-                                        aria-label="JPEG Quality Input"
-                                    />
-                                </Box>
-                            </ConfigPanelAccordion>
-
-                            <ConfigPanelAccordion summary="PNG 设置">
-                                <Typography variant="body2" color="textSecondary" >
-                                    压缩选项
-                                </Typography>
-                                <Box display='flex' gap={2}>
-
-                                    <Slider sx={{ flexGrow: 1 }}
-                                        size="small"
-                                        min={0}
-                                        max={100}
-                                        step={1}
-                                        value={11}
-                                        aria-label="JPEG Quality Slider"
-                                    />
-                                    <TextField sx={{
-                                        width: '3em'
-                                    }}
-                                        variant='standard'
-                                        size='small'
-                                        type='number'
-                                        value={11}
-                                        autoComplete='off'
-                                        aria-label="JPEG Quality Input"
-                                    />
-                                </Box>
-                            </ConfigPanelAccordion>
-                        </Box>
-
-
-                    </Box>
+                    <OutputConfigArea />
 
                 </Stack>
             </Box>

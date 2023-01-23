@@ -47,6 +47,15 @@ let darkTheme = createTheme({
                     margin: 0
                 }
             }
+        },
+        MuiListSubheader: {
+            styleOverrides: {
+                root: {
+                    paddingTop: '4px',
+                    paddingBottom: '4px',
+                    transition: 'background-color 0.25s',
+                }
+            }
         }
     },
     typography: {
@@ -99,6 +108,15 @@ let lightTheme = createTheme({
                 },
                 paperFullScreen: {
                     margin: 0
+                }
+            }
+        },
+        MuiListSubheader: {
+            styleOverrides: {
+                root: {
+                    paddingTop: '4px',
+                    paddingBottom: '4px',
+                    transition: 'background-color 0.25s'
                 }
             }
         }

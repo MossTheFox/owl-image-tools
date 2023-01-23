@@ -1,19 +1,19 @@
-import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Box } from "@mui/material";
-import { useCallback, useState, useMemo } from "react";
+import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Box, Checkbox, FormControlLabel } from "@mui/material";
+import { useCallback, useState, useMemo, useContext } from "react";
+import { appConfigContext } from "../../context/appConfigContext";
 import { clipboardSupport, compabilityTestResult, FS_Mode, isMacOriOS, storageDisabled } from "../../utils/browserCompability";
 
 /** Automatically open once on startup.
- * 
- * TODO: For firefox, allow 'don't notify me next time'
  * 
  * Not gonna do: when publicFS is supported, allow continue with storage API disabled
  */
 export default function BrowserCompatibilityDetectionDialog() {
 
-    const [open, setOpen] = useState(
-        !compabilityTestResult.WASM || !compabilityTestResult.webWorker
-        || FS_Mode === 'noFS' || storageDisabled || !clipboardSupport
-    );
+    const { siteConfig, setTipDisplay } = useContext(appConfigContext);
+
+    const toggleShowNextTime = useCallback(() => {
+        setTipDisplay('browserCompatibility', !siteConfig.tipDisplay['browserCompatibility']);
+    }, [setTipDisplay, siteConfig.tipDisplay]);
 
     const severity = useMemo(() => {
         if (!compabilityTestResult.WASM || !compabilityTestResult.webWorker || storageDisabled) {
@@ -21,6 +21,12 @@ export default function BrowserCompatibilityDetectionDialog() {
         }
         return 'warning';
     }, []);
+
+    const [open, setOpen] = useState(
+        (siteConfig.tipDisplay['browserCompatibility'] || severity === 'error') &&
+        (!compabilityTestResult.WASM || !compabilityTestResult.webWorker
+            || FS_Mode === 'noFS' || storageDisabled || !clipboardSupport)
+    );
 
     const userOSAndBrowser = useMemo(() => {
         const browser = 'whatever';
@@ -91,6 +97,13 @@ export default function BrowserCompatibilityDetectionDialog() {
                 </Box>}
                 <DialogContentText gutterBottom>这些问题不会影响部分核心功能的使用。</DialogContentText>
 
+                <FormControlLabel control={
+                    <Checkbox checked={!siteConfig.tipDisplay['browserCompatibility']} onClick={toggleShowNextTime} />
+                } label={
+                    <DialogContentText>
+                        下次不再提示
+                    </DialogContentText>
+                } />
 
             </>)}
         </DialogContent>

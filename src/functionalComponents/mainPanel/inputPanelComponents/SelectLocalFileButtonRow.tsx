@@ -4,6 +4,7 @@ import { FolderOpen, Image as ImageIcon } from '@mui/icons-material';
 import { FS_Mode } from "../../../utils/browserCompability";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../../context/fileListContext";
 import useAsync from "../../../hooks/useAsync";
+import { appConfigContext, defaultSiteConfig } from "../../../context/appConfigContext";
 
 export default function SelectLocalFileButtonRow(props: GridProps) {
     const fileListContext = useContext(_fileListContext);
@@ -33,20 +34,25 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
     const directoryInputRef = useRef<HTMLInputElement>(null);
     const webkitDirectoryPickerButton = useRef<HTMLButtonElement>(null);
 
-    // TODO: store in global site config
+    const { siteConfig, setTipDisplay } = useContext(appConfigContext);
     const [notifyPopperOpen, setNotifyPopperOpen] = useState(false);
-    const closeNotify = useCallback(() => setNotifyPopperOpen(false), []);
+    const closeNotify = useCallback(() => {
+        setNotifyPopperOpen(false);
+    }, []);
 
     const openFilePicker = useCallback(() => fileInputRef.current?.click(), [fileInputRef]);
     const openWebkitDirectoryPicker = useCallback(() => {
         setNotifyPopperOpen(false);
+        setTipDisplay('webkitOpenDirectory', false);
         directoryInputRef.current?.click();
-    }, [directoryInputRef]);
+    }, [directoryInputRef], setTipDisplay);
     const openWebkitDirectoryPickerButton = useCallback(() => {
-        // if (...) skip open tip popup, directly open picker
-        // openWebkitDirectoryPicker();
-        setNotifyPopperOpen(true);
-    }, [openWebkitDirectoryPicker]);
+        if (siteConfig.tipDisplay['webkitOpenDirectory']) {
+            setNotifyPopperOpen(true);
+            return;
+        }
+        openWebkitDirectoryPicker();
+    }, [openWebkitDirectoryPicker, openWebkitDirectoryPicker, siteConfig.tipDisplay]);
 
 
 

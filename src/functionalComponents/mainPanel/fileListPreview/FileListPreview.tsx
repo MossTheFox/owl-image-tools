@@ -7,6 +7,7 @@ import { FS_Mode } from "../../../utils/browserCompability";
 import { fileListDialogCallerContext } from "../../../context/fileListDialog/fileListDialogCallerContext";
 import FileTreeItem from "./treeItems/FileTreeItem";
 import FolderTreeItem from "./treeItems/FolderTreeItem";
+import BGTransitionBox from "../../../components/styledComponents/BGTransitionBox";
 
 /**
  * Tree Renderer.
@@ -95,7 +96,7 @@ export default function FileListPreview() {
         {/* Note: The root layer of file array CAN have duplicated filenames or directory names.
             Use tree nodeId as key
         */}
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}
+        <BGTransitionBox display="flex" justifyContent="space-between" alignItems="center" mb={1}
             // Sticky
             position="sticky"
             top={0}
@@ -150,7 +151,7 @@ export default function FileListPreview() {
                     </Button>
                 </Tooltip>
             </ButtonGroup>
-        </Box>
+        </BGTransitionBox>
 
         {FS_Mode === 'publicFS' && fileListContext.inputFileHandleTrees.length > 0 && <Box mb={1}>
             <Box display='flex' justifyContent='space-between' alignItems='center' pb={1}>

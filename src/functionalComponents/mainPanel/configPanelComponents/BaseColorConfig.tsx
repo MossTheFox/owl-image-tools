@@ -1,7 +1,7 @@
 import { Box, BoxProps, ButtonBase, Link, Paper, Typography, FormHelperText, InputBase } from "@mui/material";
 import { TinyColor } from '@ctrl/tinycolor';
-import { useCallback, useRef, useState } from "react";
-import { ColorFormatConfig } from "../../../context/appConfigContext";
+import { useCallback, useContext, useRef, useState } from "react";
+import { appConfigContext, ColorFormatConfig } from "../../../context/appConfigContext";
 
 
 const formats: ColorFormatConfig[] = ['hex', 'rgb', 'hsl', 'hsv'];
@@ -33,13 +33,19 @@ const convertTo = (color: string, target: ColorFormatConfig) => {
 
 export default function BaseColorConfig(props: BoxProps) {
 
-    // TODO: store with global config
+    const { outputConfig, updateOutputConfig } = useContext(appConfigContext);
 
-    const [format, setFormat] = useState<ColorFormatConfig>('hex'); // <- TODO: global
+    const [format, setFormat] = useState<ColorFormatConfig>(outputConfig.colorFormat);
     // 👇 Store Hex. Display format up to the user.
-    const [color, setColor] = useState('#ffffff');          // <-       config
+    const [color, setColor] = useState(outputConfig.imageBaseColor);
 
-    const [colorInput, setColorInput] = useState('#ffffff');
+    const [colorInput, setColorInput] = useState(() => {
+        const savedColor = new TinyColor(outputConfig.imageBaseColor);
+        if (savedColor.isValid) {
+            return convertTo(outputConfig.imageBaseColor, outputConfig.colorFormat);
+        }
+        return defaultColors[outputConfig.colorFormat];
+    });
 
     const nativePicker = useRef<HTMLInputElement>(null);
 
@@ -53,8 +59,9 @@ export default function BaseColorConfig(props: BoxProps) {
         const t = new TinyColor(input);
         if (t.isValid) {
             setColor(t.toHexString());
+            updateOutputConfig('imageBaseColor', t.toHexString());
         }
-    }, []);
+    }, [updateOutputConfig]);
 
     const onLostFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
         let input = e.target.value;
@@ -62,23 +69,27 @@ export default function BaseColorConfig(props: BoxProps) {
         if (t.isValid) {
             setColor(t.toHexString());
             setColorInput(convertTo(input, format));
+            updateOutputConfig('imageBaseColor', t.toHexString());
         } else {
             setColor("#ffffff");
             setColorInput(defaultColors[format]);
+            updateOutputConfig('imageBaseColor', "#ffffff");
         }
-    }, [format])
+    }, [format, updateOutputConfig])
 
 
     const handleNativeColorPickerChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         let result = convertTo(e.target.value, format);
         setColor(e.target.value);   // Hex by default
         setColorInput(result);
-    }, [format]);
+        updateOutputConfig('imageBaseColor', e.target.value)
+    }, [format, updateOutputConfig]);
 
     const handleFormatChange = useCallback((format: ColorFormatConfig) => {
         setFormat(format);
         setColorInput(convertTo(color, format));
-    }, [color]);
+        updateOutputConfig('colorFormat', format)
+    }, [color, updateOutputConfig]);
 
     return <Box {...props}>
         <Box display='flex' justifyContent='space-between'
