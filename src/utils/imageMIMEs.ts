@@ -2,6 +2,7 @@ export const ACCEPT_FILE_EXTs = [
     'jpg',
     'jpeg',
     'png',
+    'apng',
     'gif',
     'svg',
     'tif',
@@ -25,6 +26,7 @@ export const mimeExtMatch = {
     'image/gif': 'gif',
     'image/bmp': 'bmp',
     'image/png': 'png',
+    'image/apng': 'apng',
     'image/svg+xml': 'svg',
     'image/tiff': 'tiff',
     'image/webp': 'webp',
@@ -33,10 +35,11 @@ export const mimeExtMatch = {
     'image/x-icon': 'ico'
 } as const;
 
-export const extMimeMatch: {[key in typeof ACCEPT_FILE_EXTs[number]]: keyof typeof mimeExtMatch} = {
+export const extMimeMatch: { [key in typeof ACCEPT_FILE_EXTs[number]]: keyof typeof mimeExtMatch } = {
     'jpg': 'image/jpeg',
     'jpeg': 'image/jpeg',
     'png': 'image/png',
+    'apng': 'image/apng',
     'gif': 'image/gif',
     'svg': 'image/svg+xml',
     'tif': 'image/tiff',
@@ -49,7 +52,7 @@ export const extMimeMatch: {[key in typeof ACCEPT_FILE_EXTs[number]]: keyof type
 
 
 export const OUTPUT_FORMATS: Readonly<(typeof mimeExtMatch[keyof typeof mimeExtMatch])[]> = [
-    'jpg', 'png', 'webp'
+    'jpg', 'png', 'apng', 'webp', 'avif'
 ] as const;
 
 export const ACCEPT_MIMEs = Object.keys(mimeExtMatch) as (keyof typeof mimeExtMatch)[];

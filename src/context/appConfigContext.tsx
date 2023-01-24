@@ -45,6 +45,21 @@ export type OutputConfig = {
     /** Only when png compressionOption is 'custom' */
     PNG_pngcrushCustomArgs: string;
 
+    // /** ?? */
+    // PNG_apngSupport: boolean;
+
+    // /** ?? */
+    // WEBP_enableAlpha: boolean;
+
+    // /** ?? */
+    // WEBP_loselessMode: boolean;
+
+    // /** ?? */
+    // WEBP_animated: boolean;
+
+    // TODO: webp from libwebp, provide support for loseless and animated webp
+
+    /** WEBP quality when not animated or loseless */
     WEBP_quality: number;
 
     // TODO: advanced settings...

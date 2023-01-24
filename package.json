@@ -21,7 +21,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^12.1.4",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "wasm-vips": "^0.0.4"
   },
   "devDependencies": {
     "@types/react": "^18.0.26",

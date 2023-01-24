@@ -2,7 +2,7 @@
  * necessary APIs only.
  */
 function compabilityTest() {
-    const TEST_KEYS = ['privateFS', 'publicFS', 'webWorker', 'WASM'] as const;
+    const TEST_KEYS = ['privateFS', 'publicFS', 'webWorker', 'WASM', 'sharedArrayBuffer'] as const;
     const testRecords: { [key in typeof TEST_KEYS[number]]: boolean } = {
 
         // Safari 15.2+, with all other browsers ok (https://developer.mozilla.org/en-US/docs/Web/API/Navigator/storage)
@@ -14,6 +14,8 @@ function compabilityTest() {
         webWorker: typeof Worker !== 'undefined',
 
         WASM: typeof WebAssembly !== 'undefined',
+
+        sharedArrayBuffer: typeof SharedArrayBuffer !== 'undefined',
 
         // Browsers will disable localStorage when cookie is disabled. 
     };

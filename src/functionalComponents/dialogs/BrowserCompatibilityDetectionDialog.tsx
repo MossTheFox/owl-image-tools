@@ -70,6 +70,9 @@ export default function BrowserCompatibilityDetectionDialog() {
                     {!compabilityTestResult.webWorker && <DialogContentText gutterBottom>
                         - (必要) 此浏览器不支持 Web Worker
                     </DialogContentText>}
+                    {!compabilityTestResult.sharedArrayBuffer && <DialogContentText gutterBottom>
+                        - (几乎必要) 此浏览器不支持 SharedArrayBuffer API
+                    </DialogContentText>}
                     {FS_Mode === 'noFS' && <DialogContentText gutterBottom>
                         - (可选) 此浏览器不支持 Storage API
                     </DialogContentText>}
@@ -78,6 +81,11 @@ export default function BrowserCompatibilityDetectionDialog() {
             </>) : (<>
                 <DialogContentText gutterBottom>当前浏览器存在以下兼容性问题：</DialogContentText>
 
+                {!compabilityTestResult.sharedArrayBuffer && <Box p={1} mb={1} bgcolor={(theme) => theme.palette.action.hover} borderRadius={1}>
+                    <DialogContentText variant="h6" fontWeight='bolder' gutterBottom>不支持 SharedArrayBuffer API</DialogContentText>
+                    <DialogContentText gutterBottom><strong>相当多的由 libvips 提供的功能将无法正常使用。</strong></DialogContentText>
+                    <DialogContentText gutterBottom>只有少部分基础功能可以正常使用。</DialogContentText>
+                </Box>}
                 {/* noFS */}
                 {FS_Mode === 'noFS' && <Box p={1} mb={1} bgcolor={(theme) => theme.palette.action.hover} borderRadius={1}>
                     <DialogContentText variant="h6" fontWeight='bolder' gutterBottom>不支持 File System API</DialogContentText>
