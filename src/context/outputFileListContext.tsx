@@ -210,7 +210,11 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
             return;
         }
         // TODO: apply config
-        let resultBuffer = await convertToJPEG(node.originalNode.data.file, currentOutputConfig.JPEG_quality);
+        let resultBuffer = await convertToJPEG(node.originalNode.data.file, {
+            quality: currentOutputConfig.JPEG_quality,
+            stripMetaData: currentOutputConfig.keepMetaData,
+            defaultBackground: currentOutputConfig.imageBaseColor
+        });
 
         if (FS_Mode !== 'noFS' && outputFolderHandle) {
             // Write to FS

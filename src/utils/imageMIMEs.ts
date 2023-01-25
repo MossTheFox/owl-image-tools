@@ -10,7 +10,8 @@ export const ACCEPT_FILE_EXTs = [
     'bmp',
     'webp',
     'avif',
-    'ico'
+    'ico',
+    // 'heif'
 ] as const;
 
 export function checkIsFilenameAccepted(filename: string) {
@@ -32,7 +33,8 @@ export const mimeExtMatch = {
     'image/webp': 'webp',
     // ico files... uses multiple mime.
     'image/vnd.microsoft.icon': 'ico',
-    'image/x-icon': 'ico'
+    'image/x-icon': 'ico',
+    // 'image/heif': 'heif'
 } as const;
 
 export const extMimeMatch: { [key in typeof ACCEPT_FILE_EXTs[number]]: keyof typeof mimeExtMatch } = {
@@ -47,16 +49,20 @@ export const extMimeMatch: { [key in typeof ACCEPT_FILE_EXTs[number]]: keyof typ
     'bmp': 'image/bmp',
     'webp': 'image/webp',
     'avif': 'image/avif',
-    'ico': 'image/x-icon'
+    'ico': 'image/x-icon',
+    // 'heif': 'image/heif',
 } as const;
 
 
 export const OUTPUT_MIMEs: Readonly<(typeof extMimeMatch[keyof typeof extMimeMatch])[]> = [
-    'image/jpeg', 'image/png', 'image/apng', 'image/gif', 'image/webp', 'image/avif'
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/tiff' /*, 'image/heif' */
 ] as const;
 
 export const ACCEPT_MIMEs = Object.keys(mimeExtMatch) as (keyof typeof mimeExtMatch)[];
 
+/**
+ * WARNING: DO NOT USE THIS TO DETECT INPUT FILE FORMAT since in some occations mime whon't be parsed
+ */
 export function checkIsMimeSupported(mime: string) {
     return mime in mimeExtMatch;
 }

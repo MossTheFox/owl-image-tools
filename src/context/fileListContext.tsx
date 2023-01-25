@@ -1,6 +1,6 @@
 import { createContext, useState, useCallback, useEffect, useContext } from "react";
 import { randomUUIDv4 } from "../utils/randomUtils";
-import { ACCEPT_MIMEs, checkIsFilenameAccepted, checkIsMimeSupported } from "../utils/imageMIMEs";
+import { ACCEPT_MIMEs, checkIsFilenameAccepted } from "../utils/imageMIMEs";
 import useAsync from "../hooks/useAsync";
 import { loggerContext } from "./loggerContext";
 
@@ -326,6 +326,7 @@ function iterateDirectoryEntry(
 
                     // Count in image files only
                     // IMPORTANT: Firefox don't parst file MIME here. CHECK extentions
+                    // IMPORTANT 2: Browsers don't parse HEIF file MIME. Check here.
                     if (file.type.startsWith('image/') || checkIsFilenameAccepted(file.name)) {
                         const newNode = new TreeNode<WebkitFileNodeData>({
                             kind: 'file',
@@ -451,7 +452,7 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
 
             for (const file of fileList) {
                 // Ignore unsupported file
-                if (!checkIsMimeSupported(file.type)) continue;
+                if (!checkIsFilenameAccepted(file.name)) continue;
 
                 // Directory...
                 const dirPath = file.webkitRelativePath.split('/');
@@ -506,7 +507,7 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
         // From clipboard or multiple select input (file array... No folders)
         const newNodes: TreeNode<WebkitFileNodeData>[] = [];
         for (const file of fileList) {
-            if (!checkIsMimeSupported(file.type)) continue;
+            if (!checkIsFilenameAccepted(file.name)) continue;
             const newNode = new TreeNode<WebkitFileNodeData>({
                 kind: 'file',
                 file: file
@@ -546,10 +547,9 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
         for (const item of e.dataTransfer.items) {
             if (item.kind !== 'file') continue;
             // For non-directories...
-            if (item.type.startsWith('image/')) {
-                const file = item.getAsFile();
-                if (!file) continue;
-
+            const file = item.getAsFile();
+            if (!file) continue;
+            if (checkIsFilenameAccepted(file.name)) {
                 const newNode = new TreeNode<WebkitFileNodeData>({
                     file: file,
                     kind: 'file'

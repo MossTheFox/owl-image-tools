@@ -33,12 +33,12 @@ export default function LogHistoryDrawer(props: SwipeableDrawerProps) {
 
             <Box ref={loggerRef} overflow='auto' p={2} flexGrow={1}>
                 {history.length === 0 &&
-                    <Typography variant='body2' color={'textSecondary'} gutterBottom>
+                    <Typography variant='body2' color={'textSecondary'}>
                         {`当前没有日志输出。`}
                     </Typography>
                 }
                 {history.map((v, i) =>
-                    <Typography key={i} variant='body2' color={'textSecondary'} gutterBottom>
+                    <Typography key={i} variant='body2' color={'textSecondary'}>
                         {`[${v.time.toLocaleTimeString()}] ${v.data}`}
                     </Typography>
                 )}

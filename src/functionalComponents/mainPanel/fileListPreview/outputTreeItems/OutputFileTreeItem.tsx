@@ -86,6 +86,7 @@ export default function OutputFileTreeItem({
                 zIndex={0}
                 overflow="hidden"
             >
+                {/* Progress Bar BG Box */}
                 <Box position="absolute" width='100%' height={0} left={0} top={0} zIndex={-1}>
                     <Box width={`${(node.convertProgress * 100).toFixed(2)}%`} height="3rem" bgcolor={(theme) => theme.palette.primary.main}
                         sx={{
@@ -94,6 +95,7 @@ export default function OutputFileTreeItem({
                         }}
                     />
                 </Box>
+
                 {previewMode && <ImageFilePreviewBox file={node.file}
                     error={!!node.error}
                     height="3rem"

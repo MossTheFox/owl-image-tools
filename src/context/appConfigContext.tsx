@@ -23,6 +23,8 @@ export type OutputConfig = {
     imageBaseColor: string;
     colorFormat: ColorFormatConfig;
 
+    keepMetaData: boolean;
+
 
     /** per format details */
 
@@ -37,27 +39,24 @@ export type OutputConfig = {
     /** from 0 to 100 */
     JPEG_quality: number;
 
+    /** if interlaced, ... um check here https://graphicdesign.stackexchange.com/questions/6677/what-does-the-interlaced-option-in-photoshop-do */
+    JPEG_interlace: boolean;
+
     /** If false, will apply the `imageBaseColor` */
     PNG_keepAlphaChannel: boolean;
 
-    PNG_compressionOption: PNGCompressionOptions;
+    /** um, default 3? */
+    PNG_compressionLevel: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
-    /** Only when png compressionOption is 'custom' */
-    PNG_pngcrushCustomArgs: string;
+    /** if interlaced, ... um check here https://graphicdesign.stackexchange.com/questions/6677/what-does-the-interlaced-option-in-photoshop-do */
+    PNG_interlace: boolean;
 
-    // /** ?? */
-    // PNG_apngSupport: boolean;
+    /** LOSSY compression for png. From 0 to 100 */
+    PNG_quantisationQuality: number;
 
-    // /** ?? */
-    // WEBP_enableAlpha: boolean;
+    /** default: 0 */
+    PNG_bitDepth: 0 | 1 | 2 | 4 | 8 | 16;
 
-    // /** ?? */
-    // WEBP_loselessMode: boolean;
-
-    // /** ?? */
-    // WEBP_animated: boolean;
-
-    // TODO: webp from libwebp, provide support for loseless and animated webp
 
     /** WEBP quality when not animated or loseless */
     WEBP_quality: number;
@@ -68,6 +67,7 @@ export type OutputConfig = {
 export const defaultOutputConfig: OutputConfig = {
     imageBaseColor: '#ffffff',
     colorFormat: 'hex',
+    keepMetaData: true,
     collapseOpenState: new Array<boolean>(10).fill(false),
     outputFormats: {
         ...ACCEPT_MIMEs.reduce((prev, curr) => ({
@@ -76,9 +76,14 @@ export const defaultOutputConfig: OutputConfig = {
         }), {}) as OutputConfig['outputFormats']
     },
     JPEG_quality: 90,
+    JPEG_interlace: false,
     PNG_keepAlphaChannel: true,
-    PNG_compressionOption: 'no-compression',
-    PNG_pngcrushCustomArgs: '',
+    PNG_interlace: false,
+    PNG_compressionLevel: 2,
+    PNG_bitDepth: 0,
+    PNG_quantisationQuality: 100,
+
+
     WEBP_quality: 90,
 };
 
