@@ -4,9 +4,10 @@ import { ExpandMore, ChevronRight, List as ListIcon, ViewList } from "@mui/icons
 import { useContext, useMemo, useCallback, useState } from "react";
 import { fileListContext as _fileListContext, TreeNode, webkitFileListContext as _webkitFileListContext, WebkitFileNodeData } from "../../../context/fileListContext";
 import { fileListDialogCallerContext } from "../../../context/fileListDialog/fileListDialogCallerContext";
-import FileTreeItem from "./treeItems/FileTreeItem";
-import FolderTreeItem from "./treeItems/FolderTreeItem";
 import BGTransitionBox from "../../../components/styledComponents/BGTransitionBox";
+import OutputFileTreeItem from "./outputTreeItems/OutputFileTreeItem";
+import OutputFolderTreeItem from "./outputTreeItems/OutputFolderTreeItem";
+import { outputFileListContext, OutputTreeNode } from "../../../context/outputFileListContext";
 
 /**
  * Tree Renderer.
@@ -15,52 +16,46 @@ function RenderTreeItem({
     rootNode,
     previewMode
 }: {
-    rootNode: TreeNode<WebkitFileNodeData>,
+    rootNode: OutputTreeNode,
 } & {
     previewMode: boolean
 }) {
 
     return <>
-        {rootNode.data.kind === 'file' ? (
-            <FileTreeItem file={rootNode.data.file} nodeId={rootNode.nodeId} previewMode={previewMode} />
+        {rootNode.kind === 'file' ? (
+            <OutputFileTreeItem node={rootNode}
+                previewMode={previewMode} />
         ) : (
-            <FolderTreeItem childrenCount={rootNode.data.childrenCount}
-                type="no_FS"
-                name={rootNode.data.name}
-                nodeId={rootNode.nodeId}>
+            <OutputFolderTreeItem childrenCount={rootNode.childrenCount}
+                node={rootNode}
+            >
 
                 {rootNode.children.sort((a, b) => {
-                    if (a.data.kind === 'directory' && b.data.kind === 'file') return -1;
-                    if (a.data.kind === 'file' && b.data.kind === 'directory') return 1;
+                    if (a.kind === 'directory' && b.kind === 'file') return -1;
+                    if (a.kind === 'file' && b.kind === 'directory') return 1;
                     return 0;
                 }).map((v, i) => (
                     <RenderTreeItem key={i} rootNode={v} previewMode={previewMode} />
                 ))}
-            </FolderTreeItem>
+            </OutputFolderTreeItem>
         )}
 
     </>
 }
 
-export default function FileListPreview() {
+export default function OutputFileListPreview() {
 
-    const webkitFileListContext = useContext(_webkitFileListContext);
+    const {
+        outputStatistic, loading, error,
+        nodeMap, outputTrees
+    } = useContext(outputFileListContext);
     const { contextMenuActiveItem } = useContext(fileListDialogCallerContext);
-
-    const totalFiles = useMemo(() => webkitFileListContext.statistic.totalFiles,
-        [webkitFileListContext.statistic]);
 
     const [previewMode, setPreviewMode] = useState(false);
     const enablePreview = useCallback(() => setPreviewMode(true), []);
     const disablePreview = useCallback(() => setPreviewMode(false), []);
 
     const dialogCaller = useContext(fileListDialogCallerContext);
-
-    const callFullStatisticDialog = useCallback(() => {
-        dialogCaller.callFileListStatisticDialog([
-            webkitFileListContext.statistic
-        ]);
-    }, [dialogCaller.callFileListStatisticDialog, webkitFileListContext.statistic]);
 
 
     return <>
@@ -84,26 +79,25 @@ export default function FileListPreview() {
                 }
             }}
         >
-            {totalFiles > 0 ? (
+            {outputStatistic.inputFiles.totalFiles > 0 ? (
 
                 <Box display="flex" justifyContent="left" alignItems="center" gap={1}>
-                    <Typography variant="body2" color='textSecondary' display="inline-block" whiteSpace="nowrap">
-                        {`${totalFiles} 个文件`}
-                    </Typography>
+                    {loading &&
+                        <Typography variant="body2" color='textSecondary' display="inline-block" whiteSpace="nowrap">
+                            {`进度: ${outputStatistic.converted.totalFiles} / ${outputStatistic.inputFiles.totalFiles}`}
+                        </Typography>
+                    }
+                    {!loading &&
+                        <Typography variant="body2" color='textSecondary' display="inline-block" whiteSpace="nowrap">
+                            {`文件总数: ${outputStatistic.inputFiles.totalFiles}`}
+                        </Typography>
+                    }
 
-                    <Link component="button"
-                        variant="body2"
-                        underline="hover"
-                        whiteSpace="nowrap"
-                        onClick={callFullStatisticDialog}
-                    >
-                        查看详细信息
-                    </Link>
 
                 </Box>
             ) : (
                 <Typography variant="body2" color='textSecondary' display="inline-block">
-                    文件列表为空
+                    输出列表为空
                 </Typography>
             )}
             <ButtonGroup variant="outlined" size="small" disableElevation>
@@ -124,21 +118,21 @@ export default function FileListPreview() {
             </ButtonGroup>
         </BGTransitionBox>
 
-        {webkitFileListContext.inputFileTreeRoots.length > 0 && <Box mb={1}>
+        {outputStatistic.inputFiles.totalFiles > 0 && <Box mb={1}>
             <Box display='flex' justifyContent='space-between' alignItems='center' pb={1}>
                 <Typography variant="body1" fontWeight="bolder">
-                    文件列表 (只读)
+                    图像输出
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                    {`共 ${webkitFileListContext.statistic.totalFiles} 个文件`}
+                    {`共 ${outputStatistic.inputFiles.totalFiles} 个文件`}
                 </Typography>
             </Box>
             <TreeView defaultCollapseIcon={<ExpandMore />} defaultExpandIcon={<ChevronRight />}
                 selected={contextMenuActiveItem}
             >
-                {webkitFileListContext.inputFileTreeRoots.sort((a, b) => {
-                    if (a.data.kind === 'directory' && b.data.kind === 'file') return -1;
-                    if (a.data.kind === 'file' && b.data.kind === 'directory') return 1;
+                {outputTrees.sort((a, b) => {
+                    if (a.kind === 'directory' && b.kind === 'file') return -1;
+                    if (a.kind === 'file' && b.kind === 'directory') return 1;
                     return 0;
                 }).map((v, i) => (
                     <RenderTreeItem rootNode={v} key={v.nodeId} previewMode={previewMode} />

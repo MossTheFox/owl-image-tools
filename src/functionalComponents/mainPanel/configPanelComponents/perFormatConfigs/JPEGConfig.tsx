@@ -14,7 +14,7 @@ export default function JPEGConfig(props: BoxProps) {
 
             <Slider sx={{ flexGrow: 1 }}
                 size="small"
-                min={0}
+                min={1}
                 max={100}
                 step={1}
                 onChange={(e, v) => {

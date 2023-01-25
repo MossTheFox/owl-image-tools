@@ -22,7 +22,7 @@ function useAsync<T>(
     const [fire, setFire] = useState(fireOnMount);
 
     useEffect(() => {
-        if (fire) {
+        if (asyncFunc && fire) {
             let isActive = true;
             let abortController = new AbortController();
             let timeout = setTimeout(() => {

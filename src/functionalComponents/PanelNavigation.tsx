@@ -1,9 +1,10 @@
-import { Container, Grid, Typography, Paper, Box, Divider, Button, useMediaQuery, Theme, BoxProps, SxProps } from '@mui/material';
+import { Box, Button, useMediaQuery, Theme, BoxProps, SxProps } from '@mui/material';
 import { useState, useMemo, useEffect, useCallback, useContext } from 'react';
 import { CONTROL_PANEL_HEIGHT } from '../App';
 import { panelNavigationContext } from '../context/panelNavigationContext';
 import ConfigPanel from './mainPanel/ConfigPanel';
 import InputPanel from './mainPanel/InputPanel';
+import OutputPanel from './mainPanel/OutputPanel';
 
 export type Panels = 'input' | 'config' | 'output';
 
@@ -256,30 +257,18 @@ export default function PanelNavigation(props: BoxProps) {
             <ConfigPanel />
         </PanelBox>
 
-        <Box position="absolute"
-            top={0}
-            px={1}
-            width={widthProp}
-            aria-hidden={!nav.includes('output')}
+        <PanelBox
+            name='output'
             left={containerLeft.output}
+            disabled={!nav.includes('output')}
+            width={widthProp}
             sx={{
-                transition: 'all 0.25s',
                 transitionDuration,
                 filter: filterProp.output,
-                animation: '0.125s ease-in fade-in',
-                // transform: nav === 'output' ? 'scale(1)' : 'scale(0.95)',
             }}
         >
-            <fieldset disabled={!nav.includes('output')}>
-                <Paper>
-                    <Box p={2}>
-                        <Typography variant="h5" fontWeight='bolder' gutterBottom>
-                            输出
-                        </Typography>
-                    </Box>
-                </Paper>
-            </fieldset>
-        </Box>
+            <OutputPanel />
+        </PanelBox>
 
         <Button onClick={navigateTo.bind(null, 'input')}>debug 1</Button>
         <Button onClick={navigateTo.bind(null, 'config')}>debug 2</Button>

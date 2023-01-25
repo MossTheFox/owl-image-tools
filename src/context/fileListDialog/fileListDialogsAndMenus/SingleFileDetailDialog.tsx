@@ -5,15 +5,9 @@ import ImageFilePreviewBox from "../../../components/ImageFilePreviewBox";
 import { fireFileDownload, parseFileSizeString, tryReadABlob } from "../../../utils/randomUtils";
 
 export default function SingleFileDetailDialog(props: DialogProps &
-    ({
-        file: File,
-        // node: TreeNode<FileNodeData>,
-        mode: 'FS'
-    } | {
-        file: File,
-        // node: TreeNode<WebkitFileNodeData>,
-        mode: 'no_FS'
-    })
+{
+    file: File,
+}
 ) {
 
     const closeDialog = useCallback((e: React.MouseEvent) => {
@@ -24,8 +18,6 @@ export default function SingleFileDetailDialog(props: DialogProps &
 
     const {
         file,
-        // node,
-        mode,
         ...dialogProps
     } = props;
 

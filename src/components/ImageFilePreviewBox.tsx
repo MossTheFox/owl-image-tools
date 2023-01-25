@@ -3,7 +3,9 @@ import { useState, useEffect, useCallback } from "react";
 import { BrokenImage } from "@mui/icons-material"
 
 export default function ImageFilePreviewBox(props: BoxProps & {
-    file: File,
+    file?: File | null,
+    loading?: boolean,
+    error?: boolean,
     draggable?: boolean,
     imageOnLoad?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void,
     imageOnError?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void
@@ -20,13 +22,21 @@ export default function ImageFilePreviewBox(props: BoxProps & {
     const [error, setError] = useState(false);  // May not catch the error object. Just record if it happened.
 
     useEffect(() => {
-        const url = URL.createObjectURL(file);
-        setObjectURL(url);
-        setLoading(false);
-        return () => {
-            URL.revokeObjectURL(url);
+        if (file) {
+            const url = URL.createObjectURL(file);
+            setObjectURL(url);
+            setLoading(false);
+            return () => {
+                URL.revokeObjectURL(url);
+            }
         }
-    }, []);
+        if (loading) {
+            setLoading(true);
+        }
+        if (error) {
+            setError(true);
+        }
+    }, [file]);
 
     const imageLoadError = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
         setError(true);
@@ -48,7 +58,7 @@ export default function ImageFilePreviewBox(props: BoxProps & {
         // bgcolor={(theme) => theme.palette.action.selected}
         {...boxProps}>
         {loading && <Skeleton variant="rectangular" width="100%" height="auto" />}
-        {!loading && !error && <Box width="100%" height="auto" display="flex" alignItems="center" justifyContent="center">
+        {!!file && !loading && !error && <Box width="100%" height="auto" display="flex" alignItems="center" justifyContent="center">
 
             <img alt={file.name} src={objectURL} style={{ maxWidth: '100%', maxHeight: '100%' }}
                 loading="lazy"

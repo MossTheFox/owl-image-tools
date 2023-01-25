@@ -1,9 +1,9 @@
-import { Box, Button, Divider, Paper, Typography, Stack, PaperProps, Grid, Select, MenuItem, Accordion, AccordionSummary, AccordionDetails, Slider, TextField } from "@mui/material";
+import { Box, Paper, Typography, Stack, PaperProps, Grid, Select, MenuItem } from "@mui/material";
 import { useContext, useMemo } from "react";
-import { defaultFileListStatistic, fileListContext as _fileListContext, FileListStatistic, webkitFileListContext as _webkitFileListContext } from "../../context/fileListContext";
+import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../context/fileListContext";
 import { CONTROL_PANEL_HEIGHT } from "../../App";
 import DialogLoadingIndicator from "../../ui/smallComponents/DialogLoadingIndicator";
-import { ACCEPT_MIMEs, extToMime, mimeToExt, OUTPUT_FORMATS } from "../../utils/imageMIMEs";
+import { extToMime, mimeToExt, OUTPUT_FORMATS } from "../../utils/imageMIMEs";
 import OutputConfigArea from "./configPanelComponents/OutputConfigArea";
 import { appConfigContext } from "../../context/appConfigContext";
 
@@ -16,26 +16,10 @@ export default function ConfigPanel(props: PaperProps) {
 
     const processing = useMemo(() => !fileListContext.ready || !webkitFileListContext.ready, [fileListContext.ready, webkitFileListContext.ready]);
 
-    const combinedStatistic = useMemo(() => {
-        const statistic = [fileListContext.statistic, webkitFileListContext.statistic];
-        const total: FileListStatistic = {
-            totalFiles: statistic.reduce((prev, curr) => prev + curr.totalFiles, 0),
-            perFormatCount: statistic.reduce((prev, curr) => {
-                for (const _key in curr.perFormatCount) {
-                    let key = _key as typeof ACCEPT_MIMEs[number];
-                    prev[key] += curr.perFormatCount[key];
-                }
-                return prev;
-            }, { ...defaultFileListStatistic.perFormatCount })
-        };
-        return total;
-
-    }, [fileListContext.statistic, webkitFileListContext.statistic])
 
     return <Paper {...props} sx={{
-        // overflowX: 'hidden',
-        // overflowY: 'auto',
         ...props.sx,
+        overflow: 'hidden',
         flexGrow: 1,
         maxHeight: CONTROL_PANEL_HEIGHT,
         transition: 'background-color 0.25s',
@@ -64,12 +48,12 @@ export default function ConfigPanel(props: PaperProps) {
                 <Typography variant="body1" fontWeight='bolder' gutterBottom>
                     目标格式
                 </Typography>
-                {combinedStatistic.totalFiles <= 0 &&
+                {webkitFileListContext.statistic.totalFiles <= 0 &&
                     <Typography variant="body2" color="textSecondary" gutterBottom>
                         请先导入文件。
                     </Typography>
                 }
-                {combinedStatistic.totalFiles > 0 &&
+                {webkitFileListContext.statistic.totalFiles > 0 &&
                     <Grid container spacing={1}>
 
                         <Grid item xs={5}>
@@ -82,9 +66,9 @@ export default function ConfigPanel(props: PaperProps) {
                                 输出格式
                             </Typography>
                         </Grid>
-                        {Object.entries(combinedStatistic.perFormatCount).map((v, i) => {
+                        {Object.entries(webkitFileListContext.statistic.perFormatCount).map((v, i) => {
                             const [_mime, count] = v;
-                            const mime = _mime as keyof typeof combinedStatistic.perFormatCount;
+                            const mime = _mime as keyof typeof webkitFileListContext.statistic.perFormatCount;
                             return [
                                 <Grid key={`${mime}-L`} item xs={5}
                                     display={count > 0 ? 'flex' : 'none'}

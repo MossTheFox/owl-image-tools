@@ -1,4 +1,4 @@
-import { Box, BoxProps, Typography } from "@mui/material";
+import { Box, BoxProps, Checkbox, FormControlLabel, FormHelperText, Typography } from "@mui/material";
 import BaseColorConfig from "./BaseColorConfig";
 import ConfigPanelAccordion from "./ConfigPanelAccordion";
 import JPEGConfig from "./perFormatConfigs/JPEGConfig";
@@ -14,6 +14,25 @@ export default function OutputConfigArea(props: BoxProps) {
         </Typography>
 
         <BaseColorConfig py={1} />
+
+        <Box pb={1}>
+            <FormControlLabel control={
+                <Checkbox size="small"
+                    sx={{ py: 0.5 }}
+                />
+
+            } label={
+                <Typography variant="body2" color="textSecondary" fontWeight="bolder">
+                    保留图像元数据
+                </Typography>
+            } />
+            <FormHelperText>
+                如果勾选，对于支持的格式 (JPG, TIFF, PNG, WEBP) 将会保留原始图片的 Exif meta data。
+            </FormHelperText>
+            <FormHelperText>
+                请留意，一些浏览器可能会在导入图片时默认抹去元数据。
+            </FormHelperText>
+        </Box>
 
 
         <Box py={1}>

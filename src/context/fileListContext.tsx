@@ -19,8 +19,10 @@ export class TreeNode<T> {
     };
 };
 
-/** For those support File System API */
-export type FileNodeData = {
+/** For those support File System API 
+ * **DISCARDED** since 'override source file' is no longer a planned feature.
+*/
+type FileNodeData = {
     kind: 'file',   // ← To let typescript distinguish the two types...
     handle: FileSystemFileHandle,
     file: File,
@@ -63,11 +65,11 @@ export const defaultFileListStatistic: FileListStatistic = {
  * 
  * @returns an array contains all the nodes in the tree of root. Root node included.
  */
-function getAllNodeInTree<T>(root: TreeNode<T>) {
+export function getAllNodeInTree<T extends { children: T[] }>(root: T) {
     if (root.children.length === 0) {
         return [root];
     }
-    const result: TreeNode<T>[] = [root];
+    const result: T[] = [root];
     for (const child of root.children) {
         let iterated = getAllNodeInTree(child);
         result.push(...iterated);
@@ -176,19 +178,6 @@ interface FileListContext {
     /** Append new handle. Previous handles will not be re-iterated in case there's some big deep folders. */
     appendInputFsHandles: (handles: (FileSystemDirectoryHandle | FileSystemFileHandle)[]) => void,
 
-    /** Match the length of `rootFSHandles`, but will iterate and record all valid file handles  */
-    inputFileHandleTrees: TreeNode<FileNodeData>[],
-    setInputFileHandleTrees: React.Dispatch<React.SetStateAction<TreeNode<FileNodeData>[]>>,
-
-    /** Count pictures */
-    statistic: FileListStatistic,
-
-    /** Node Map (uuid -> tree node) */
-    nodeMap: Map<string, TreeNode<FileNodeData>>,
-
-    /** Call to delete a node. Either a file or a directory. */
-    deleteNode: (targetNode: TreeNode<FileNodeData>) => void,
-
     /** File iteration finished or exited with error (on both occations will be true, check `error` to specify whether it's all ok) */
     ready: boolean,
     /** File iteration Error (if `error` is `null` and `ready` is `true`, then it's all ok) */
@@ -197,26 +186,26 @@ interface FileListContext {
 };
 
 export const fileListContext = createContext<FileListContext>({
-    inputFileHandleTrees: [],
     rootInputFSHandles: [],
-    setInputFileHandleTrees: () => { throw new Error('Not initialized.') },
     setRootInputFsHandles: () => { throw new Error('Not initialized.') },
     appendInputFsHandles(handles) { throw new Error('Not initialized.') },
-    statistic: defaultFileListStatistic,
-    nodeMap: new Map(),
-    deleteNode() { throw new Error('Not initialized.') },
     ready: true,
     error: null,
 });
 
+/** 
+ * Will only add nodes to the WebkitFileList sincre wrire back to original file is no longer a planned feature.
+ */
 export function FileListContext({ children }: { children: React.ReactNode }) {
 
     const logger = useContext(loggerContext);
 
+    /////
+    const webkitFileList = useContext(webkitFileListContext);
+    /////
+
     const [rootInputFSHandles, setRootInputFsHandles] = useState<(FileSystemDirectoryHandle | FileSystemFileHandle)[]>([]);
-    const [inputFileHandleTrees, setInputFileHandleTrees] = useState<TreeNode<FileNodeData>[]>([]);
-    const [statistic, setStatistic] = useState<FileListStatistic>(defaultFileListStatistic);
-    const [nodeMap, setNodeMap] = useState<Map<string, TreeNode<FileNodeData>>>(new Map());
+
     const [ready, setReady] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
@@ -229,14 +218,13 @@ export function FileListContext({ children }: { children: React.ReactNode }) {
         // remove empty folders on top level
         fileHandleTrees = fileHandleTrees.filter((v) => v.data.kind === 'file' || v.children.length);
 
-        if (nodeMap) {
-            setNodeMap(nodeMap);
-        }
-
-        setInputFileHandleTrees(fileHandleTrees);
         setReady(true);
         setError(null);
-    }, []);
+
+        if (nodeMap) {
+            webkitFileList.appendNodes(fileHandleTrees, nodeMap);
+        }
+    }, [webkitFileList.appendNodes]);
 
     const doFullIterationOnError = useCallback((err: Error) => {
         setError(err);
@@ -270,20 +258,15 @@ export function FileListContext({ children }: { children: React.ReactNode }) {
         // remove empty folders on top level
         fileHandleTrees = fileHandleTrees.filter((v) => v.data.kind === 'file' || v.children.length);
 
-        if (nodeMap) {
-            setNodeMap((prev) => {
-                const fullMap = new Map([...prev, ...nodeMap]);
-                return fullMap;
-            });
-            // Statistic will be handled when nodemap us updated correctly.
-        }
-        setInputFileHandleTrees((prev) => [...prev, ...fileHandleTrees]);
         setReady(true);
         setError(null);
-    }, []);
+
+        if (nodeMap) {
+            webkitFileList.appendNodes(fileHandleTrees, nodeMap);
+        }
+    }, [webkitFileList.appendNodes]);
 
     const fireDoAppendIteration = useAsync(asyncDoAppendedIteration, doAppendedIterationOnSuccess, doFullIterationOnError);
-
 
     const appendInputFsHandles = useCallback((delta: (FileSystemDirectoryHandle | FileSystemFileHandle)[]) => {
         setReady(false);
@@ -292,71 +275,10 @@ export function FileListContext({ children }: { children: React.ReactNode }) {
         fireDoAppendIteration();
     }, [fireDoAppendIteration]);
 
-    // Delete Node. Check the root first, then do... whatever.
-    const deleteNode = useCallback((node: TreeNode<FileNodeData>) => {
-        // if it's of the root handles... remove it.
-        setRootInputFsHandles((prev) => prev.filter((v) => v !== node.data.handle));
-
-        // then, handle the node map.
-        const allNodesToDelete = getAllNodeInTree(node);
-        const deleteCount = allNodesToDelete.filter((v) => v.data.kind === 'file').length;
-
-        setNodeMap((prev) => {
-            const newMap = new Map(prev);
-            for (const node of allNodesToDelete) {
-                newMap.delete(node.nodeId);
-            }
-            return newMap;
-        });
-
-        if (node.parent) {
-            // remove this node.
-            node.parent.children = node.parent.children.filter((v) => v !== node);
-            // go all the way to the top folder and set the childCount
-            let curr: null | typeof node.parent = node.parent;
-            while (curr && curr.data.kind === 'directory') {
-                curr.data.childrenCount -= deleteCount;
-                // kick empty folder off it's parent
-                if (curr.parent && curr.data.childrenCount <= 0) {
-                    curr.parent.children = curr.parent.children.filter((v) => v !== curr);
-                }
-                curr = curr.parent;
-            }
-        }
-
-        // Now cut the tree.
-        setInputFileHandleTrees((prev) => {
-            return prev.filter((v) => v !== node);
-        });
-
-    }, []);
-
-    // Every time the node map is updated, iterate it and update the state.
-    useEffect(() => {
-        const statistic: FileListStatistic = {
-            totalFiles: 0,
-            perFormatCount: {
-                ...defaultFileListStatistic.perFormatCount
-            }
-        };
-
-        for (const [_, node] of nodeMap) {
-            if (node.data.kind !== 'file') continue;
-            statistic.totalFiles++;
-            statistic.perFormatCount[node.data.file.type as typeof ACCEPT_MIMEs[number]]++;
-        }
-        setStatistic(statistic);
-    }, [nodeMap]);
-
     return <fileListContext.Provider value={{
-        inputFileHandleTrees,
         rootInputFSHandles,
-        setInputFileHandleTrees,
         setRootInputFsHandles: setRootHandlesAndDoFullIteration,
         appendInputFsHandles,
-        statistic,
-        nodeMap,
-        deleteNode,
         ready,
         error
     }}>
@@ -453,6 +375,9 @@ interface WebkitFileListContext {
 
     appendFileList: (fileList: FileList | File[], webkitDirectory?: boolean) => void,
 
+    /** To merge nodes comes from FileListContext which is no longer for storing files */
+    appendNodes: (nodes: TreeNode<WebkitFileNodeData>[], nodeMap: Map<string, TreeNode<WebkitFileNodeData>>) => void,
+
     /** Count pictures */
     statistic: FileListStatistic,
 
@@ -467,6 +392,9 @@ interface WebkitFileListContext {
     /** File iteration Error (if `error` is `null` and `ready` is `true`, then it's all ok) */
     error: Error | null,
 
+    /** Clear and return current nodeList */
+    clearNodes: () => TreeNode<WebkitFileNodeData>[],
+
     // allowDrop: boolean;
     // setAllowDrop: React.Dispatch<React.SetStateAction<boolean>>
 };
@@ -474,12 +402,14 @@ interface WebkitFileListContext {
 export const webkitFileListContext = createContext<WebkitFileListContext>({
     inputFileTreeRoots: [],
     setInputFileTreeRoots: () => { throw new Error('Not Initialized'); },
+    appendNodes(nodes) { throw new Error('Not Initialized'); },
     appendFileList: () => { throw new Error('Not initialized.') },
     statistic: defaultFileListStatistic,
     nodeMap: new Map(),
     deleteNode() { },
     ready: true,
     error: null,
+    clearNodes() { throw new Error('Not initialized.') },
     // allowDrop: false,
     // setAllowDrop: () => { }
 });
@@ -592,6 +522,13 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
             return newMap;
         });
         setInputFileTreeRoots((prev) => [...prev, ...newNodes]);
+    }, []);
+
+    const appendNodes = useCallback((nodes: TreeNode<WebkitFileNodeData>[], nodeMap: Map<string, TreeNode<WebkitFileNodeData>>) => {
+        setNodeMap((prev) => {
+            return new Map([...prev, ...nodeMap]);
+        });
+        setInputFileTreeRoots((prev) => [...prev, ...nodes]);
     }, []);
 
     // Input from Drag and Drop API
@@ -771,15 +708,24 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
         });
     }, []);
 
+
+    const clearNodes = useCallback(() => {
+        setInputFileTreeRoots([]);
+        setNodeMap(new Map());
+        return inputFileTreeRoots;
+    }, [inputFileTreeRoots]);
+
     return <webkitFileListContext.Provider value={{
         inputFileTreeRoots,
         setInputFileTreeRoots,
         appendFileList,
+        appendNodes,
         nodeMap,
         deleteNode,
         statistic,
         error,
         ready,
+        clearNodes,
         // allowDrop,
         // setAllowDrop
     }}>

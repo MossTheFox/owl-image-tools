@@ -1,38 +1,35 @@
 import { TreeItem } from "@mui/lab";
 import { Typography, Box, PopoverPosition } from "@mui/material";
 import React, { useContext, useCallback, useState, useEffect } from "react";
-import { fileListContext, fileListContext as _fileListContext, webkitFileListContext, webkitFileListContext as _webkitFileListContext } from "../../../../context/fileListContext";
+import { fileListContext, fileListContext as _fileListContext, TreeNode, webkitFileListContext, webkitFileListContext as _webkitFileListContext } from "../../../../context/fileListContext";
 import { parseFileSizeString } from "../../../../utils/randomUtils";
 import ImageFilePreviewBox from "../../../../components/ImageFilePreviewBox";
 import { fileListDialogCallerContext } from "../../../../context/fileListDialog/fileListDialogCallerContext";
+import { outputFileListContext, OutputTreeNode } from "../../../../context/outputFileListContext";
 
 
-export default function FileTreeItem({
-    nodeId,
-    file,
+export default function OutputFileTreeItem({
+    node,
     previewMode,
 }: {
-    nodeId: string;
-    file: File;
+    node: OutputTreeNode;
     previewMode: boolean;
 }) {
 
     const caller = useContext(fileListDialogCallerContext);
 
-    const webkitFile = useContext(webkitFileListContext);
+    const outputContext = useContext(outputFileListContext);
 
     const callPreviewDialog = useCallback(() => {
-        const node = webkitFile.nodeMap.get(nodeId);
-        if (!node) return;
-        caller.callFilePreviewDialog(file, node)
+        if (node.kind !== 'file' || !node.file) return;
+        // TODO: outputFileListContext
 
-    }, [webkitFile.nodeMap, caller.callFilePreviewDialog, file]);
+    }, [node, caller.callFilePreviewDialog]);
 
     const callContextMenu = useCallback((anchorPosition: PopoverPosition) => {
-        const node = webkitFile.nodeMap.get(nodeId);
         if (!node) return;
-        caller.callFileListItemContextMenu(anchorPosition, node)
-    }, [webkitFile.nodeMap, caller.callFileListItemContextMenu]);
+        // TODO: outputFilelistContext
+    }, [node, caller.callFileListItemContextMenu]);
 
     const onRightClick = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
@@ -64,7 +61,7 @@ export default function FileTreeItem({
     }, []);
 
 
-    return <TreeItem nodeId={nodeId}
+    return <TreeItem nodeId={node.nodeId}
         // Click: Preview Dialog
         onClick={callPreviewDialog}
 
@@ -74,8 +71,20 @@ export default function FileTreeItem({
         }}
 
         label={
-            <Box display={'flex'} justifyContent={'space-between'} alignItems="center">
-                {previewMode && <ImageFilePreviewBox file={file}
+            <Box display={'flex'} justifyContent={'space-between'} alignItems="center"
+                position="relative"
+                zIndex={0}
+                overflow="hidden"
+            >
+                <Box position="absolute" width='100%' height={0} left={0} top={0} zIndex={-1}>
+                    <Box width={`${(node.convertProgress % 100).toFixed(2)}%`} height="3rem" bgcolor={(theme) => theme.palette.primary.main}
+                        sx={{
+                            transition: 'width 0.125s, opacity 0.125s',
+                            opacity: node.finished ? 0 : 0.25
+                        }}
+                    />
+                </Box>
+                {previewMode && <ImageFilePreviewBox file={node.file}
                     height="3rem"
                     width="3rem"
                     minWidth="3rem"
@@ -91,22 +100,22 @@ export default function FileTreeItem({
                     overflow="hidden"
                 >
                     <Typography variant="body1" whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
-                        {file.name}
+                        {node.name}
                     </Typography>
                     <Box display='flex' alignItems="baseline" justifyContent="space-between">
                         <Typography variant="body2" color="textSecondary" whiteSpace='nowrap' textAlign="end" overflow='hidden'>
                             {imageSizeText}
                         </Typography>
                         <Typography flexGrow={1} variant="body1" color="textSecondary" whiteSpace='nowrap' textAlign="end" ml='1px'>
-                            {parseFileSizeString(file.size)}
+                            {node.file ? parseFileSizeString(node.file.size) : '等待中'}
                         </Typography>
                     </Box>
                 </Box> : <>
                     <Typography variant="body1" color='textSecondary' whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
-                        {file.name}
+                        {node.name}
                     </Typography>
                     <Typography variant="body1" color="textSecondary" whiteSpace='nowrap' ml="1px">
-                        {parseFileSizeString(file.size)}
+                        {node.file ? parseFileSizeString(node.file.size) : '等待中'}
                     </Typography>
                 </>}
             </Box>

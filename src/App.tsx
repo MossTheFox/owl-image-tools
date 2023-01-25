@@ -23,10 +23,12 @@ function App() {
         <PanelNavigationContextProvider>
             {/* Context for the logs (display at the top bar) */}
             <LoggerContextProvider>
-                {/* (FS_MODE !== 'noFS') Context that records all the file handles */}
-                <FileListContext>
-                    {/* For Dropped in folders (or files) and folder selector */}
-                    <WebkitDirectoryFileListContext>
+                {/* For Dropped in folders (or files) and folder selector */}
+                <WebkitDirectoryFileListContext>
+                    {/* (FS_MODE !== 'noFS') Context that records all the file handles 
+                        ** NO LONGER RECORD DATA ** Now will transfer all nodes to webkitFileList.
+                    */}
+                    <FileListContext>
                         {/* For Output File List. Should be children of input file list contexts */}
                         <OutputFileListContextProvider>
 
@@ -57,8 +59,8 @@ function App() {
                             </Box>
 
                         </OutputFileListContextProvider>
-                    </WebkitDirectoryFileListContext>
-                </FileListContext>
+                    </FileListContext>
+                </WebkitDirectoryFileListContext>
             </LoggerContextProvider>
         </PanelNavigationContextProvider>
     </Box>

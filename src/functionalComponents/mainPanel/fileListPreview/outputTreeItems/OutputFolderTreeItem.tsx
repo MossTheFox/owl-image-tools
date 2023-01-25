@@ -2,17 +2,16 @@ import { TreeItem } from "@mui/lab";
 import { Typography, Box } from "@mui/material";
 import { FolderOpen } from "@mui/icons-material";
 import { useContext, useCallback } from "react";
-import { fileListContext, fileListContext as _fileListContext, webkitFileListContext, webkitFileListContext as _webkitFileListContext } from "../../../../context/fileListContext";
+import { fileListContext, fileListContext as _fileListContext, TreeNode, webkitFileListContext, webkitFileListContext as _webkitFileListContext } from "../../../../context/fileListContext";
 import { fileListDialogCallerContext } from "../../../../context/fileListDialog/fileListDialogCallerContext";
+import { OutputTreeNode } from "../../../../context/outputFileListContext";
 
-export default function FolderTreeItem({
-    nodeId,
-    name,
+export default function OutputFolderTreeItem({
+    node,
     childrenCount,
     children,
 }: {
-    nodeId: string;
-    name: string;
+    node: OutputTreeNode;
     childrenCount: number;
     children: React.ReactNode;
 }) {
@@ -27,13 +26,11 @@ export default function FolderTreeItem({
             top: e.clientY,
             left: e.clientX
         };
-        const node = webkitFile.nodeMap.get(nodeId);
-        if (!node) return;
 
-        caller.callFileListItemContextMenu(anchorPositon, node,)
+        // TODO: 
     }, [webkitFile.nodeMap, caller.callFileListItemContextMenu]);
 
-    return <TreeItem nodeId={nodeId}
+    return <TreeItem nodeId={node.nodeId}
         ContentProps={{
             // Right Click (or touch hold): Context Menu
             onContextMenu: callContextMenu
@@ -45,7 +42,7 @@ export default function FolderTreeItem({
                 <Typography variant="body1" fontWeight='bolder' whiteSpace='nowrap' flexGrow={1}
                     overflow='hidden'
                 >
-                    {name}
+                    {node.name}
                 </Typography>
                 <Typography variant="body1" color="textSecondary" whiteSpace='nowrap' ml='1px'>
                     {childrenCount}

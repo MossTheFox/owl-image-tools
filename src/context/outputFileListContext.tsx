@@ -2,46 +2,64 @@ import { createContext, useState, useCallback, useEffect, useContext } from "rea
 import { ACCEPT_MIMEs, checkIsFilenameAccepted, checkIsMimeSupported } from "../utils/imageMIMEs";
 import useAsync from "../hooks/useAsync";
 import { loggerContext } from "./loggerContext";
-import { defaultFileListStatistic, FileListStatistic, FileNodeData, TreeNode, WebkitFileNodeData } from "./fileListContext";
-
-type InputFileNodeData = FileNodeData | WebkitFileNodeData;
+import { defaultFileListStatistic, FileListStatistic, getAllNodeInTree, TreeNode, WebkitFileNodeData } from "./fileListContext";
+import { defaultOutputConfig, OutputConfig } from "./appConfigContext";
 
 /**
  * um.
  */
+export class OutputTreeNode {
 
-/** Output Node. */
-export type OutputFileNodeData = ({
-    kind: 'file',   // ← To let typescript distinguish the two types...
+    flatChildren: OutputTreeNode[] = [];
+    children: OutputTreeNode[] = [];
+    parent: OutputTreeNode | null = null;
+    nodeId: string;
 
-    /** If FS is avalibable, the file object should be fetched from file handle.
-     * 
-     * It could reduce memory usage I guess.
-     */
-    file: File | null,
+    kind: WebkitFileNodeData['kind'];
+    originalNode: TreeNode<WebkitFileNodeData>;
+    name: string;
 
-    originalNode: TreeNode<InputFileNodeData & { kind: 'file' }>
-} | {
-    kind: 'directory',
-    name: string,
-    childrenCount: number,
-    originalNode: TreeNode<InputFileNodeData & { kind: 'directory' }>
-}) & {
-    /** From 0 to 1, as process bar */
-    convertProcess: number;
-    finished: boolean;
-    error: string | null;
-};
+    /** Output File */
+    file: File | null = null;
+    finished: boolean = false;
+    error: string | null = null;
+
+    /** Folder only */
+    childrenCount = 0;
+
+    /** 0 ~ 1 */
+    private _convertProgress: number = 0;
+
+    get convertProgress() {
+        if (this.originalNode.data.kind === 'file') {
+            return this._convertProgress;
+        }
+        // 👇 should calculate children
+        return 0.5;
+    }
+
+    constructor(originalNode: TreeNode<WebkitFileNodeData>, parent: OutputTreeNode | null = null) {
+        this.parent = parent
+        this.originalNode = originalNode;
+        this.kind = originalNode.data.kind;
+        this.name = originalNode.data.kind === 'file' ? originalNode.data.file.name : originalNode.data.name;
+        this.childrenCount = originalNode.data.kind === 'directory' ? originalNode.data.childrenCount : 0;
+        // Keep the same nodeId
+        this.nodeId = originalNode.nodeId;
+        // Store tree structure
+        this.children = originalNode.children.map((v) => new OutputTreeNode(v, this));
+    }
+}
 
 
 export type OutputStatistic = {
-    inputFilesStatistic: FileListStatistic,
+    inputFiles: FileListStatistic,
     converted: FileListStatistic
 }
 
 export const defaultOutputStatistic: OutputStatistic = {
     converted: defaultFileListStatistic,
-    inputFilesStatistic: defaultFileListStatistic
+    inputFiles: defaultFileListStatistic
 } as const;
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -51,28 +69,28 @@ interface OutputFileListContext {
      * 
      * in Private FS Mode it will be specifyed automatically.
      */
-    outputFolderHandle: FileSystemDirectoryHandle[],
+    outputFolderHandle: FileSystemDirectoryHandle | undefined,
 
     /** 
      * FS Mode Only
     */
-    setOutputFolderHandle: React.Dispatch<React.SetStateAction<FileSystemDirectoryHandle[]>>,
+    setOutputFolderHandle: React.Dispatch<React.SetStateAction<FileSystemDirectoryHandle | undefined>>,
 
     /** Match the length of `rootFSHandles`, but will iterate and record all valid file handles  */
-    outputTrees: TreeNode<OutputFileNodeData>[],
-    setOutputTrees: React.Dispatch<React.SetStateAction<TreeNode<OutputFileNodeData>[]>>,
+    outputTrees: OutputTreeNode[],
+    setOutputTrees: React.Dispatch<React.SetStateAction<OutputTreeNode[]>>,
 
     /** Count pictures */
     outputStatistic: OutputStatistic,
 
     /** Node Map (uuid -> tree node) */
-    nodeMap: Map<string, TreeNode<OutputFileNodeData>>,
+    nodeMap: Map<string, OutputTreeNode>,
 
     /** Call to delete a node. Either a file or a directory. */
     // deleteNode: (targetNode: TreeNode<FileNodeData>) => void,
 
-    /** Converting is ready to start (or is finished) */
-    ready: boolean,
+    /** isProcessing */
+    loading: boolean,
     /** 
      * Fatal error only, like ROOT file handle fail to access.
      * 
@@ -80,29 +98,86 @@ interface OutputFileListContext {
      */
     error: Error | null,
 
+    startConvertion: (nodes: TreeNode<WebkitFileNodeData>[], outputConfig: OutputConfig) => void,
+
 };
 
 export const outputFileListContext = createContext<OutputFileListContext>({
-    outputFolderHandle: [],
-    setOutputFolderHandle: () => { throw new Error('Not init') },
+    outputFolderHandle: undefined,
+    setOutputFolderHandle: () => { throw new Error('Not init'); },
     outputTrees: [],
-    setOutputTrees: () => { throw new Error('Not init') },
+    setOutputTrees: () => { throw new Error('Not init'); },
     outputStatistic: defaultOutputStatistic,
     nodeMap: new Map(),
-    ready: false,
+    loading: false,
     error: null,
+    startConvertion(nodes) { throw new Error('Not init'); },
 });
 
 export function OutputFileListContextProvider({ children }: { children: React.ReactNode }) {
 
     const logger = useContext(loggerContext);
 
-    const [outputFolderHandle, setOutputFolderHandle] = useState<FileSystemDirectoryHandle[]>([]);
-    const [outputTrees, setOutputTrees] = useState<TreeNode<OutputFileNodeData>[]>([]);
+    // only in FS mode
+    const [outputFolderHandle, setOutputFolderHandle] = useState<FileSystemDirectoryHandle>();
+
+    const [outputTrees, setOutputTrees] = useState<OutputTreeNode[]>([]);
     const [outputStatistic, setOutputStatistic] = useState<OutputStatistic>(defaultOutputStatistic);
-    const [nodeMap, setNodeMap] = useState<Map<string, TreeNode<OutputFileNodeData>>>(new Map());
-    const [ready, setReady] = useState(true);
+    const [nodeMap, setNodeMap] = useState<Map<string, OutputTreeNode>>(new Map());
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
+
+    // For converting:
+    const [currentOutputConfig, setCurrentOutputConfig] = useState(defaultOutputConfig);
+
+
+
+    const startConvertion = useCallback((nodes: TreeNode<WebkitFileNodeData>[], config: OutputConfig) => {
+        // Original nodes should already be removed from source file list after calling this.
+
+        setCurrentOutputConfig(config);
+
+        const map: typeof nodeMap = new Map();
+        const trees: typeof outputTrees = [];
+
+        const statistic: typeof outputStatistic = {
+            inputFiles: {
+                totalFiles: 0,
+                perFormatCount: { ...defaultOutputStatistic.inputFiles.perFormatCount }
+            },
+            converted: {
+                totalFiles: 0,
+                perFormatCount: { ...defaultOutputStatistic.converted.perFormatCount }
+            }
+        };
+
+        // build map, copy tree node
+        for (const node of nodes) {
+            const newNode = new OutputTreeNode(node);
+            trees.push(newNode)
+            continue;
+        }
+
+        for (const tree of trees) {
+            for (const node of getAllNodeInTree(tree)) {
+                map.set(node.nodeId, node);
+                if (node.originalNode.data.kind === 'file') {
+                    statistic.inputFiles.totalFiles++;
+                    statistic.inputFiles.perFormatCount[node.originalNode.data.file.type as typeof ACCEPT_MIMEs[number]]++;
+                }
+
+            }
+        }
+
+        setOutputTrees(trees);
+        setNodeMap(map);
+        setOutputStatistic(statistic);
+
+        // start
+        setLoading(true);
+        setError(null);
+        // todo
+    }, []);
 
 
 
@@ -111,10 +186,11 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
         nodeMap,
         outputFolderHandle,
         outputStatistic,
-        ready,
+        loading,
         outputTrees,
         setOutputFolderHandle,
         setOutputTrees,
+        startConvertion,
     }}>
         {children}
     </outputFileListContext.Provider>

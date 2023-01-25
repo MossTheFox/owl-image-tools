@@ -1,19 +1,20 @@
-import { Box, Button, Divider, Paper, Typography, Stack, PaperProps, Grid } from "@mui/material";
-import { useContext, useMemo } from "react";
-import FileListPreview from "./fileListPreview/FileListPreview";
+import { Box, Paper, Typography, Stack, PaperProps } from "@mui/material";
+import { useContext } from "react";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../context/fileListContext";
 import { CONTROL_PANEL_HEIGHT } from "../../App";
-import ReadFromClipboardButton from "./inputPanelComponents/ReadFromClipboardButton";
-import SelectLocalFileButtonRow from "./inputPanelComponents/SelectLocalFileButtonRow";
 import { FileListDialogCallerContextProvider } from "../../context/fileListDialog/fileListDialogCallerContext";
 import DialogLoadingIndicator from "../../ui/smallComponents/DialogLoadingIndicator";
+import { outputFileListContext as _outputFileListContext } from "../../context/outputFileListContext";
+import OutputFileListPreview from "./fileListPreview/OutputFileListPreview";
+import StartTaskButton from "./outputPanelComponents/StartTaskButton";
 
-export default function InputPanel(props: PaperProps) {
+export default function OutputPanel(props: PaperProps) {
 
-    const fileListContext = useContext(_fileListContext);
-    const webkitFileListContext = useContext(_webkitFileListContext);
+    const {
+        outputTrees, nodeMap, setOutputFolderHandle, // TODO
+        loading
+    } = useContext(_outputFileListContext);
 
-    const processing = useMemo(() => !fileListContext.ready || !webkitFileListContext.ready, [fileListContext.ready, webkitFileListContext.ready]);
 
 
     return <Paper {...props} sx={{
@@ -27,31 +28,27 @@ export default function InputPanel(props: PaperProps) {
         justifyContent: 'stretch'
     }}>
         {/* Loading Indicator with ZIndex higher than content box */}
-        <DialogLoadingIndicator loading={processing} zIndex={2} position="relative" />
+        <DialogLoadingIndicator loading={loading} zIndex={2} position="relative" />
 
         <Box px={2} pt={2} pb={1}
             borderBottom={1}
             borderColor="divider"
         >
-
             <Typography variant="h5" fontWeight='bolder'>
-                源文件
+                输出
             </Typography>
         </Box>
         <Box px={2} py={1}
             borderBottom={1}
             borderColor="divider"
         >
-            <Stack spacing={1} pb={1}>
+            <Stack spacing={1} py={1}>
 
-                <Typography variant="body2" color="primary" gutterBottom>
-                    将文件拖动至此处以快速导入图片。
-                </Typography>
+                {/* <Typography variant="body2" color="primary" gutterBottom>
+                    进度
+                </Typography> */}
 
-                {/* 2 Cases: Clipboard API or popup an input then let user paste */}
-                <ReadFromClipboardButton fullWidth />
-
-                <SelectLocalFileButtonRow />
+                <StartTaskButton />
             </Stack>
         </Box>
 
@@ -60,7 +57,7 @@ export default function InputPanel(props: PaperProps) {
         >
 
             <FileListDialogCallerContextProvider>
-                <FileListPreview />
+                <OutputFileListPreview />
             </FileListDialogCallerContextProvider>
 
         </Box>
