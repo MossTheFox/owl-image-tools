@@ -77,14 +77,15 @@ export default function OutputFileTreeItem({
                 overflow="hidden"
             >
                 <Box position="absolute" width='100%' height={0} left={0} top={0} zIndex={-1}>
-                    <Box width={`${(node.convertProgress % 100).toFixed(2)}%`} height="3rem" bgcolor={(theme) => theme.palette.primary.main}
+                    <Box width={`${(node.convertProgress * 100).toFixed(2)}%`} height="3rem" bgcolor={(theme) => theme.palette.primary.main}
                         sx={{
-                            transition: 'width 0.125s, opacity 0.125s',
+                            transition: 'width 0.25s, opacity 0.25s 0.5s',
                             opacity: node.finished ? 0 : 0.25
                         }}
                     />
                 </Box>
                 {previewMode && <ImageFilePreviewBox file={node.file}
+                    error={!!node.error}
                     height="3rem"
                     width="3rem"
                     minWidth="3rem"
@@ -106,16 +107,23 @@ export default function OutputFileTreeItem({
                         <Typography variant="body2" color="textSecondary" whiteSpace='nowrap' textAlign="end" overflow='hidden'>
                             {imageSizeText}
                         </Typography>
-                        <Typography flexGrow={1} variant="body1" color="textSecondary" whiteSpace='nowrap' textAlign="end" ml='1px'>
-                            {node.file ? parseFileSizeString(node.file.size) : '等待中'}
+                        <Typography flexGrow={1} variant="body1" color={
+                            node.error ? "error" : "textSecondary"
+                        } whiteSpace='nowrap' textAlign="end" ml='1px'>
+                            {!node.error && (node.file ? parseFileSizeString(node.file.size) : '等待中')}
+                            {!!node.error && '出错'}
                         </Typography>
                     </Box>
                 </Box> : <>
                     <Typography variant="body1" color='textSecondary' whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
                         {node.name}
                     </Typography>
-                    <Typography variant="body1" color="textSecondary" whiteSpace='nowrap' ml="1px">
-                        {node.file ? parseFileSizeString(node.file.size) : '等待中'}
+                    <Typography variant="body1" color={
+                        node.error ? "error" : "textSecondary"
+                    }
+                        whiteSpace='nowrap' ml="1px">
+                        {!node.error && (node.file ? parseFileSizeString(node.file.size) : '等待中')}
+                        {!!node.error && '出错'}
                     </Typography>
                 </>}
             </Box>

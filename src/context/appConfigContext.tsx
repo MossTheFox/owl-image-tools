@@ -1,6 +1,6 @@
 import React, { createContext, SetStateAction, useCallback, useState } from "react";
 import { LOCALSTORAGE_KEYS } from "../constraints";
-import { ACCEPT_MIMEs, OUTPUT_FORMATS } from "../utils/imageMIMEs";
+import { ACCEPT_MIMEs, OUTPUT_MIMEs } from "../utils/imageMIMEs";
 import { getFromLocalStorageAndValidate, saveToLocalStorage } from "../utils/randomUtils";
 
 export type ColorFormatConfig = 'hex' | 'rgb' | 'hsl' | 'hsv';
@@ -31,7 +31,7 @@ export type OutputConfig = {
 
     /** Output format for different source image types */
     outputFormats: {
-        [key in typeof ACCEPT_MIMEs[number]]: typeof OUTPUT_FORMATS[number]
+        [key in typeof ACCEPT_MIMEs[number]]: typeof OUTPUT_MIMEs[number]
     };
 
     /** from 0 to 100 */
@@ -113,7 +113,7 @@ export type AppConfigContext = {
     setOutputConfig: React.Dispatch<SetStateAction<AppConfigContext['outputConfig']>>,
     updateOutputConfig: <T extends keyof OutputConfig>(key: T, value: OutputConfig[T]) => void,
     recordCollapseState: (index: number, open: boolean) => void,
-    setOutputTargetFormat: (source: typeof ACCEPT_MIMEs[number], target: typeof OUTPUT_FORMATS[number]) => void,
+    setOutputTargetFormat: (source: typeof ACCEPT_MIMEs[number], target: typeof OUTPUT_MIMEs[number]) => void,
 }
 
 
@@ -185,7 +185,7 @@ export function AppConfigContextProvider({ children }: { children: React.ReactNo
         });
     }, []);
 
-    const setOutputTargetFormat = useCallback((source: typeof ACCEPT_MIMEs[number], target: typeof OUTPUT_FORMATS[number]) => {
+    const setOutputTargetFormat = useCallback((source: typeof ACCEPT_MIMEs[number], target: typeof OUTPUT_MIMEs[number]) => {
         setOutputConfig((prev) => {
             const result: typeof prev = {
                 ...prev,

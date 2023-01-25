@@ -3,7 +3,7 @@ import { useContext, useMemo } from "react";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../context/fileListContext";
 import { CONTROL_PANEL_HEIGHT } from "../../App";
 import DialogLoadingIndicator from "../../ui/smallComponents/DialogLoadingIndicator";
-import { extToMime, mimeToExt, OUTPUT_FORMATS } from "../../utils/imageMIMEs";
+import { extToMime, mimeToExt, OUTPUT_MIMEs } from "../../utils/imageMIMEs";
 import OutputConfigArea from "./configPanelComponents/OutputConfigArea";
 import { appConfigContext } from "../../context/appConfigContext";
 
@@ -90,13 +90,13 @@ export default function ConfigPanel(props: PaperProps) {
                                         value={outputConfig.outputFormats[mime]}
                                         variant="standard"
                                         onChange={(e) => {
-                                            setOutputTargetFormat(mime, e.target.value as typeof OUTPUT_FORMATS[number])
+                                            setOutputTargetFormat(mime, e.target.value as typeof OUTPUT_MIMEs[number])
                                         }}
                                     >
-                                        {OUTPUT_FORMATS.map((v, i) =>
-                                            <MenuItem key={v} value={extToMime(v)}>
+                                        {OUTPUT_MIMEs.map((v, i) =>
+                                            <MenuItem key={v} value={v}>
                                                 <Typography variant="body2" display='inline-block' px={0.5}>
-                                                    {`${v.toUpperCase()} (${extToMime(v)})`}
+                                                    {`${mimeToExt(v)} (${v})`}
                                                 </Typography>
                                             </MenuItem>
                                         )}

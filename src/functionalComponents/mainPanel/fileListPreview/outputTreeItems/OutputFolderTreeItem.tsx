@@ -37,7 +37,17 @@ export default function OutputFolderTreeItem({
         }}
 
         label={
-            <Box display={'flex'} justifyContent={'space-between'}>
+            <Box display={'flex'} justifyContent={'space-between'}
+                position="relative" zIndex={0} overflow="hidden"
+            >
+                <Box position="absolute" width='100%' height={0} left={0} top={0} zIndex={-1}>
+                    <Box width={`${(node.convertProgress * 100).toFixed(2)}%`} height="3rem" bgcolor={(theme) => theme.palette.primary.main}
+                        sx={{
+                            transition: 'width 0.25s, opacity 0.25s 0.5s',
+                            opacity: node.finished ? 0 : 0.25
+                        }}
+                    />
+                </Box>
                 <Box component={FolderOpen} color='inherit' mr={1} />
                 <Typography variant="body1" fontWeight='bolder' whiteSpace='nowrap' flexGrow={1}
                     overflow='hidden'

@@ -15,6 +15,13 @@ export function parseFileSizeString(size: number, detailed = false) {
     if (size < 1024 * 1024 * 1024 * 1024) return `${(size / 1024 / 1024 / 1024).toFixed(2)} GB` + detail;
 }
 
+export function parseDateDelta(dateA: Date, dateB: Date) {
+    const delta = Math.abs(dateA.getTime() - dateB.getTime());
+    if (delta < 1000) return `${delta} ms`;
+    if (delta < 1000 * 60) return `${(delta / 1000).toFixed(2)} s`;
+    if (delta < 1000 * 60 * 60) return `${Math.floor(delta / (1000 * 60))} min, ${(delta % (1000 * 60) / 1000).toFixed(2)} s`;
+}
+
 /**
  * Won't validate the blob (file). If the file object is no longer accessible, no download will be fired and no error will occurr.
  */
@@ -110,7 +117,7 @@ export async function estimateStorageUsage(): Promise<
             // @ts-expect-error
             rawUsageObject: estimate.usageDetails
         }
-        
+
     } catch (err) {
         return {
             result: 'error',

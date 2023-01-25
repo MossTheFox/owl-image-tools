@@ -11,7 +11,7 @@ export default function ImageFilePreviewBox(props: BoxProps & {
     imageOnError?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void
 }) {
 
-    const { file, draggable,
+    const { file, draggable, error: shouldDisplayError, loading: shouldDisplayLoading,
         imageOnLoad: imageOnLoadCallback,
         imageOnError: imageOnErrorCallback,
         ...boxProps
@@ -19,7 +19,7 @@ export default function ImageFilePreviewBox(props: BoxProps & {
 
     const [objectURL, setObjectURL] = useState('');
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);  // May not catch the error object. Just record if it happened.
+    const [error, setError] = useState(!!shouldDisplayError);  // May not catch the error object. Just record if it happened.
 
     useEffect(() => {
         if (file) {
@@ -30,13 +30,15 @@ export default function ImageFilePreviewBox(props: BoxProps & {
                 URL.revokeObjectURL(url);
             }
         }
-        if (loading) {
+        if (shouldDisplayLoading) {
             setLoading(true);
+            setError(false);
         }
-        if (error) {
+        if (shouldDisplayError) {
             setError(true);
+            setLoading(false);
         }
-    }, [file]);
+    }, [file, shouldDisplayError, shouldDisplayLoading]);
 
     const imageLoadError = useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
         setError(true);

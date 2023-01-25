@@ -47,7 +47,7 @@ const errorBuilder = (message: string, cause: ConvertWithVipsCause) => new Error
  * 
  * @param quality From 1 to 100.
  */
-async function convertToJPEG(file: Blob, quality: number = 75) {
+export async function convertToJPEG(file: Blob, quality: number = 75) {
     if (!vips) {
         vips = await initVips();
     }

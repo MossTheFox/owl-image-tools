@@ -51,8 +51,8 @@ export const extMimeMatch: { [key in typeof ACCEPT_FILE_EXTs[number]]: keyof typ
 } as const;
 
 
-export const OUTPUT_FORMATS: Readonly<(typeof mimeExtMatch[keyof typeof mimeExtMatch])[]> = [
-    'jpg', 'png', 'apng', 'webp', 'avif'
+export const OUTPUT_MIMEs: Readonly<(typeof extMimeMatch[keyof typeof extMimeMatch])[]> = [
+    'image/jpeg', 'image/png', 'image/apng', 'image/gif', 'image/webp', 'image/avif'
 ] as const;
 
 export const ACCEPT_MIMEs = Object.keys(mimeExtMatch) as (keyof typeof mimeExtMatch)[];
@@ -75,4 +75,12 @@ export function extToMime(ext: string) {
         return extMimeMatch[ext as keyof typeof extMimeMatch];
     }
     return '';
+}
+
+export function changeFileExt(fileName: string, targetExt: string) {
+    let splited = fileName.split('.');
+    if (splited.length === 1) return `${fileName}.${targetExt}`;
+    splited.pop();
+    splited.push(targetExt);
+    return splited.join('.');
 }

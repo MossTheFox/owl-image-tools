@@ -25,7 +25,6 @@ function RenderTreeItem({
             <FileTreeItem file={rootNode.data.file} nodeId={rootNode.nodeId} previewMode={previewMode} />
         ) : (
             <FolderTreeItem childrenCount={rootNode.data.childrenCount}
-                type="no_FS"
                 name={rootNode.data.name}
                 nodeId={rootNode.nodeId}>
 
@@ -135,6 +134,9 @@ export default function FileListPreview() {
             </Box>
             <TreeView defaultCollapseIcon={<ExpandMore />} defaultExpandIcon={<ChevronRight />}
                 selected={contextMenuActiveItem}
+                onNodeToggle={(e, nodeIds) => {
+
+                }}
             >
                 {webkitFileListContext.inputFileTreeRoots.sort((a, b) => {
                     if (a.data.kind === 'directory' && b.data.kind === 'file') return -1;
