@@ -4,9 +4,10 @@ import useAsync from "../hooks/useAsync";
 import { loggerContext } from "./loggerContext";
 import { defaultFileListStatistic, FileListStatistic, getAllNodeInTree, TreeNode, WebkitFileNodeData } from "./fileListContext";
 import { defaultOutputConfig, OutputConfig } from "./appConfigContext";
-import { parseDateDelta } from "../utils/randomUtils";
+import { parseDateDelta, parseFileSizeString } from "../utils/randomUtils";
 import { convertToJPEG } from "../utils/converter/libvipsConverter";
 import { FS_Mode } from "../utils/browserCompability";
+import { isFileExists, renameFileForDuplication } from "../utils/FS";
 
 /**
  * um.
@@ -89,6 +90,50 @@ export const defaultOutputStatistic: OutputStatistic = {
     inputFiles: defaultFileListStatistic
 } as const;
 
+/**
+ * iterate to the top level, and create directories all the way to this file.
+ */
+async function getFileHandle(node: OutputTreeNode, root: FileSystemDirectoryHandle, overrideFile = false) {
+
+    const path = [node];
+    let _it = node;
+    while (_it.parent) {
+        path.push(_it.parent);
+        _it = _it.parent;
+    }
+    let handle = root;
+    for (const dirNode of path.reverse()) {
+        if (dirNode.kind !== 'directory') {
+            break;
+        }
+        // get the folder
+        handle = await handle.getDirectoryHandle(dirNode.name, {
+            create: true
+        });
+    }
+
+    // Now check if the file exises.
+
+
+    let filename = node.name;
+    let deadloop = 1000;
+    while (await isFileExists(filename, handle)) {
+        filename = renameFileForDuplication(filename);
+        deadloop--;
+        if (deadloop < 0) {
+            throw new Error('Error when rename saved file: Too many retry times.', {
+                cause: 'whatThe'
+            });
+        }
+    }
+    const fileHandle = await handle.getFileHandle(filename, {
+        create: true
+    });
+
+    return fileHandle;
+
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 
 interface OutputFileListContext {
@@ -167,15 +212,23 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
         // TODO: apply config
         let resultBuffer = await convertToJPEG(node.originalNode.data.file, currentOutputConfig.JPEG_quality);
 
-        switch (FS_Mode) {
-            case 'publicFS':
-            case 'privateFS':
-                // TODO: write to local file and get as file object
-                if (!outputFolderHandle) break;
+        if (FS_Mode !== 'noFS' && outputFolderHandle) {
+            // Write to FS
+            const fileHandle = await getFileHandle(node, outputFolderHandle);
+            node.name = fileHandle.name;
+            const writable = await fileHandle.createWritable({
+                keepExistingData: false
+            });
+            await writable.write(resultBuffer);
+            await writable.close();
 
-                break;
-            case 'noFS':
-                break;
+            resultBuffer = await fileHandle.getFile();
+
+            writeLine((FS_Mode === 'publicFS' ?
+                `已保存文件: ` :
+                `已在临时存储中保存文件: `)
+                + `${fileHandle.name} (${parseFileSizeString(resultBuffer.size)})`
+            );
         }
 
         node.file = new File([resultBuffer], node.name, {
@@ -185,7 +238,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
         node.finished = true;
         node.convertProgress = 1;
 
-    }, [currentOutputConfig, outputFolderHandle]);
+    }, [currentOutputConfig, outputFolderHandle, writeLine]);
 
     useEffect(() => {
         if (currentMapNodeIndex < 0 || nodeArray.length <= 0) {
@@ -213,17 +266,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
 
         let stateChanged = false;
 
-        convertOne(curr).then(() => {
-            if (stateChanged) return;
-            // let the treeview to rerender
-            setNodeMap((prev) => new Map([...prev]));
-
-            // record in the node and update curr index
-            curr.error = null;
-            curr.finished = true;
-            curr.convertProgress = 1;
-            setCurrentMapNodeIndex((prev) => prev + 1);
-
+        const updateStatusFn = () => {
             // update status, so ugly
             setOutputStatistic((prev) => {
                 if (curr.originalNode.data.kind !== 'file') return prev;
@@ -242,15 +285,36 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
                 }
                 return newStat;
             });
+        };
+
+        convertOne(curr).then(() => {
+            if (stateChanged) return;
+            // let the treeview to rerender
+            setNodeMap((prev) => new Map([...prev]));
+
+            // record in the node and update curr index
+            curr.error = null;
+            curr.finished = true;
+            curr.convertProgress = 1;
+            setCurrentMapNodeIndex((prev) => prev + 1);
+
+            updateStatusFn();
+
         }).catch((err) => {
             if (stateChanged) return;
             // record in node
+            import.meta.env.DEV && console.log(err);
             curr.error = `${err?.message}`;
+
+            // log it
+            writeLine(`${err} (文件: ${curr.name})`);
+
+            // Mark as finished
             curr.finished = true;
 
+            updateStatusFn();
             // go on anyway
             setCurrentMapNodeIndex((prev) => prev + 1);
-
         });
         return () => {
             stateChanged = true;

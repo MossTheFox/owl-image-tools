@@ -8,11 +8,11 @@ import SingleFileDetailDialog from "./fileListDialogsAndMenus/SingleFileDetailDi
 import FileListStatisticDialog from "./fileListDialogsAndMenus/FileListStatisticDialog";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../context/fileListContext";
 
-type FileNode =TreeNode<WebkitFileNodeData>;
+type FileNode = TreeNode<WebkitFileNodeData>;
 
 type FileListDialogCallerContext = {
     callFileListStatisticDialog: (detail: FileListStatistic | FileListStatistic[]) => void,
-    callFilePreviewDialog: (file: File,  node: FileNode) => void,
+    callFilePreviewDialog: (file: File, node: FileNode) => void,
 
     callFileListItemContextMenu: (anchorPosition: { top: number, left: number }, node: FileNode) => void,
 
@@ -94,7 +94,7 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
         console.log("WARRR")
         if (!contextMenuNodeHold) return;
 
-                webkitFileListContext.deleteNode(contextMenuNodeHold as TreeNode<WebkitFileNodeData>);
+        webkitFileListContext.deleteNode(contextMenuNodeHold as TreeNode<WebkitFileNodeData>);
 
         setContextMenuOpen(false);
     }, [contextMenuNodeHold, webkitFileListContext.deleteNode]);
@@ -170,7 +170,7 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
                 <MenuItem key={2} onClick={deleteNode} >
                     <ListItemIcon><Delete color="error" /></ListItemIcon>
                     <ListItemText>
-                        <Typography color="error">
+                        <Typography color={(theme) => theme.palette.error.main}>
                             {`移除目录 (${contextMenuNodeHold.data.childrenCount} 个子项)`}
                         </Typography>
                     </ListItemText>
@@ -209,7 +209,7 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
                 <MenuItem key={3} onClick={deleteNode} >
                     <ListItemIcon><Delete color="error" /></ListItemIcon>
                     <ListItemText>
-                        <Typography color="error">
+                        <Typography color={(theme) => theme.palette.error.main}>
                             移除
                         </Typography>
                     </ListItemText>

@@ -1,24 +1,34 @@
 import { TreeItem } from "@mui/lab";
 import { Typography, Box, PopoverPosition } from "@mui/material";
-import React, { useContext, useCallback, useState, useEffect } from "react";
+import React, { useContext, useCallback, useState, useEffect, useMemo } from "react";
 import { fileListContext, fileListContext as _fileListContext, TreeNode, webkitFileListContext, webkitFileListContext as _webkitFileListContext } from "../../../../context/fileListContext";
 import { parseFileSizeString } from "../../../../utils/randomUtils";
 import ImageFilePreviewBox from "../../../../components/ImageFilePreviewBox";
 import { fileListDialogCallerContext } from "../../../../context/fileListDialog/fileListDialogCallerContext";
 import { outputFileListContext, OutputTreeNode } from "../../../../context/outputFileListContext";
+import { OutputTreeItemDataDisplayMode } from "../OutputFileListPreview";
 
 
 export default function OutputFileTreeItem({
     node,
     previewMode,
+    dataDisplay
 }: {
     node: OutputTreeNode;
     previewMode: boolean;
+    dataDisplay: OutputTreeItemDataDisplayMode;
 }) {
 
     const caller = useContext(fileListDialogCallerContext);
 
     const outputContext = useContext(outputFileListContext);
+
+    const deltaSize = useMemo(() => {
+        if (node.kind !== 'file' || !node.file || node.originalNode.data.kind !== 'file') {
+            return 0;
+        }
+        return node.file.size - node.originalNode.data.file.size;
+    }, [node]);
 
     const callPreviewDialog = useCallback(() => {
         if (node.kind !== 'file' || !node.file) return;
@@ -94,39 +104,73 @@ export default function OutputFileTreeItem({
                     onLoad={onImageLoad}
                     onError={onImageError}
                 />}
-                {previewMode ? <Box flexGrow={1}
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="space-between"
-                    overflow="hidden"
-                >
-                    <Typography variant="body1" whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
-                        {node.name}
-                    </Typography>
-                    <Box display='flex' alignItems="baseline" justifyContent="space-between">
-                        <Typography variant="body2" color="textSecondary" whiteSpace='nowrap' textAlign="end" overflow='hidden'>
-                            {imageSizeText}
+                {previewMode ?
+                    //  Preview Mode
+                    <Box flexGrow={1}
+                        display="flex"
+                        flexDirection="column"
+                        justifyContent="space-between"
+                        overflow="hidden"
+                    >
+                        <Box flexGrow={1} display="flex" alignItems="baseline">
+
+                            <Typography variant="body1" whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
+                                {node.name}
+                            </Typography>
+                            <Typography variant="body2" color={
+                                node.error ? "error" : "textSecondary"
+                            }
+                                whiteSpace='nowrap' ml="1px">
+                                {/* So ugly ↓ */}
+                                {!node.error && (node.file ?
+                                    <>
+                                        <Typography variant="body2" color={deltaSize > 0 ? (theme) => theme.palette.error.main :
+                                            deltaSize === 0 ? 'inherit' : (theme) => theme.palette.primary.main}>
+                                            {deltaSize >= 0 ? `+` : '-'}{parseFileSizeString(Math.abs(deltaSize))}
+                                        </Typography>
+                                    </>
+                                    : '等待中')}
+                            </Typography>
+                        </Box>
+                        <Box display='flex' alignItems="baseline" justifyContent="space-between">
+                            <Typography variant="body2" color="textSecondary" whiteSpace='nowrap' textAlign="end" overflow='hidden'>
+                                {imageSizeText}
+                            </Typography>
+                            <Typography flexGrow={1} variant="body1" color={
+                                node.error ? "error" : "textSecondary"
+                            } whiteSpace='nowrap' textAlign="end" ml='1px'>
+                                {!node.error && (node.file ? parseFileSizeString(node.file.size) : '等待中')}
+                                {!!node.error && '出错'}
+                            </Typography>
+                        </Box>
+                    </Box> :
+                    <>
+                        {/* Non-preview Mode */}
+                        <Typography variant="body1" color='textSecondary' whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
+                            {node.name}
                         </Typography>
-                        <Typography flexGrow={1} variant="body1" color={
+                        <Typography variant="body1" color={
                             node.error ? "error" : "textSecondary"
-                        } whiteSpace='nowrap' textAlign="end" ml='1px'>
-                            {!node.error && (node.file ? parseFileSizeString(node.file.size) : '等待中')}
+                        }
+                            whiteSpace='nowrap' ml="1px">
+                            {/* So ugly ↓ */}
+                            {!node.error && (node.file ?
+                                <>
+                                    {dataDisplay === 'size' ?
+                                        (deltaSize >= 0 ? `↑ ` : '↓ ') + parseFileSizeString(node.file.size)
+                                        :
+                                        <Typography color={deltaSize > 0 ? (theme) => theme.palette.error.main :
+                                            deltaSize === 0 ? 'inherit' : (theme) => theme.palette.primary.main}>
+                                            {deltaSize >= 0 ? `+` : '-'}{parseFileSizeString(Math.abs(deltaSize))}
+                                        </Typography>
+                                    }</>
+                                : '等待中')}
                             {!!node.error && '出错'}
+
                         </Typography>
-                    </Box>
-                </Box> : <>
-                    <Typography variant="body1" color='textSecondary' whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
-                        {node.name}
-                    </Typography>
-                    <Typography variant="body1" color={
-                        node.error ? "error" : "textSecondary"
-                    }
-                        whiteSpace='nowrap' ml="1px">
-                        {!node.error && (node.file ? parseFileSizeString(node.file.size) : '等待中')}
-                        {!!node.error && '出错'}
-                    </Typography>
-                </>}
-            </Box>
+                    </>
+                }
+            </Box >
 
         } />
 }

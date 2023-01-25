@@ -45,7 +45,7 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
         setNotifyPopperOpen(false);
         setTipDisplay('webkitOpenDirectory', false);
         directoryInputRef.current?.click();
-    }, [directoryInputRef], setTipDisplay);
+    }, [directoryInputRef, setTipDisplay]);
     const openWebkitDirectoryPickerButton = useCallback(() => {
         if (siteConfig.tipDisplay['webkitOpenDirectory']) {
             setNotifyPopperOpen(true);

@@ -9,21 +9,24 @@ import OutputFileTreeItem from "./outputTreeItems/OutputFileTreeItem";
 import OutputFolderTreeItem from "./outputTreeItems/OutputFolderTreeItem";
 import { outputFileListContext, OutputTreeNode } from "../../../context/outputFileListContext";
 
+export type OutputTreeItemDataDisplayMode = 'size' | 'sizeChange';
+
 /**
  * Tree Renderer.
  */
 function RenderTreeItem({
     rootNode,
-    previewMode
+    previewMode,
+    dataDisplay
 }: {
-    rootNode: OutputTreeNode,
-} & {
-    previewMode: boolean
+    rootNode: OutputTreeNode;
+    previewMode: boolean;
+    dataDisplay: OutputTreeItemDataDisplayMode;
 }) {
 
     return <>
         {rootNode.kind === 'file' ? (
-            <OutputFileTreeItem node={rootNode}
+            <OutputFileTreeItem node={rootNode} dataDisplay={dataDisplay}
                 previewMode={previewMode} />
         ) : (
             <OutputFolderTreeItem childrenCount={rootNode.childrenCount}
@@ -35,7 +38,7 @@ function RenderTreeItem({
                     if (a.kind === 'file' && b.kind === 'directory') return 1;
                     return 0;
                 }).map((v, i) => (
-                    <RenderTreeItem key={i} rootNode={v} previewMode={previewMode} />
+                    <RenderTreeItem key={i} rootNode={v} previewMode={previewMode} dataDisplay={dataDisplay} />
                 ))}
             </OutputFolderTreeItem>
         )}
@@ -54,6 +57,8 @@ export default function OutputFileListPreview() {
     const [previewMode, setPreviewMode] = useState(false);
     const enablePreview = useCallback(() => setPreviewMode(true), []);
     const disablePreview = useCallback(() => setPreviewMode(false), []);
+
+    const [detailDataDisplay, setDetailDataDisplay] = useState<OutputTreeItemDataDisplayMode>('sizeChange');
 
     const dialogCaller = useContext(fileListDialogCallerContext);
 
@@ -79,27 +84,56 @@ export default function OutputFileListPreview() {
                 }
             }}
         >
-            {outputStatistic.inputFiles.totalFiles > 0 ? (
+            <Box display="flex" justifyContent="space-between" alignItems="center" flexGrow={1}
+                flexWrap='wrap'
+            >
+                <Box flexGrow={1} mr={0.5}>
 
-                <Box display="flex" justifyContent="left" alignItems="center" gap={1}>
-                    {loading &&
-                        <Typography variant="body2" color='textSecondary' display="inline-block" whiteSpace="nowrap">
-                            {`进度: ${outputStatistic.converted.totalFiles} / ${outputStatistic.inputFiles.totalFiles}`}
+                    {outputStatistic.inputFiles.totalFiles > 0 ? (
+
+                        <Box display="flex" justifyContent="left" alignItems="center" gap={1}>
+                            {loading &&
+                                <Typography variant="body2" color='textSecondary' display="inline-block" whiteSpace="nowrap">
+                                    {`进度: ${outputStatistic.converted.totalFiles} / ${outputStatistic.inputFiles.totalFiles}`}
+                                </Typography>
+                            }
+                            {!loading &&
+                                <Typography variant="body2" color='textSecondary' display="inline-block" whiteSpace="nowrap">
+                                    {`文件总数: ${outputStatistic.inputFiles.totalFiles}`}
+                                </Typography>
+                            }
+                        </Box>
+                    ) : (
+                        <Typography variant="body2" color='textSecondary' display="inline-block">
+                            输出列表为空
                         </Typography>
-                    }
-                    {!loading &&
-                        <Typography variant="body2" color='textSecondary' display="inline-block" whiteSpace="nowrap">
-                            {`文件总数: ${outputStatistic.inputFiles.totalFiles}`}
-                        </Typography>
-                    }
-
-
+                    )}
                 </Box>
-            ) : (
-                <Typography variant="body2" color='textSecondary' display="inline-block">
-                    输出列表为空
-                </Typography>
-            )}
+                {!previewMode &&
+                    <Box display="flex" alignItems='baseline' gap={0.5} mr={0.5}
+                        sx={{
+                            '& > *': {
+                                whiteSpace: 'nowrap'
+                            }
+                        }}
+                    >
+                        <Typography variant="body2" color="textSecondary">
+                            显示:
+                        </Typography>
+                        <Link component="button" underline={detailDataDisplay === 'size' ? 'always' : 'none'}
+                            onClick={() => setDetailDataDisplay('size')}
+                        >
+                            文件大小
+                        </Link>
+                        <Link component="button" underline={detailDataDisplay === 'sizeChange' ? 'always' : 'none'}
+                            onClick={() => setDetailDataDisplay('sizeChange')}
+                        >
+                            变化量
+                        </Link>
+                    </Box>
+                }
+            </Box>
+
             <ButtonGroup variant="outlined" size="small" disableElevation>
                 <Tooltip title="紧凑列表" arrow>
                     <Button variant={previewMode ? "outlined" : "contained"} aria-label="Show list"
@@ -135,7 +169,7 @@ export default function OutputFileListPreview() {
                     if (a.kind === 'file' && b.kind === 'directory') return 1;
                     return 0;
                 }).map((v, i) => (
-                    <RenderTreeItem rootNode={v} key={v.nodeId} previewMode={previewMode} />
+                    <RenderTreeItem rootNode={v} key={v.nodeId} previewMode={previewMode} dataDisplay={detailDataDisplay} />
                 ))}
             </TreeView>
         </Box>}

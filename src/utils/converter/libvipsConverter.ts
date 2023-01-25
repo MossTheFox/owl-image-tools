@@ -1,4 +1,4 @@
-import Vips from "wasm-vips";
+import type Vips from "wasm-vips";
 
 /** the comments (JSDoc) of the lib is way too detailed so here I'll just write nothing.
  * 
@@ -14,22 +14,39 @@ import Vips from "wasm-vips";
  */
 let vips: (typeof Vips) | null = null;
 
-async function initVips() {
-    if (!vips) {
-        vips = await Vips({
-            // local file ** important **
-            locateFile(url, scriptDirectory) {
-                return `/wasm/vips/${url}`;
-            },
-            print(str) {
-                console.log(str);
-            },
-            printErr(str) {
-                console.warn(str);
-            },
-        });
-    }
-    return vips;
+// TODO: let a worker to load this... It blocks main thread.
+
+function initVips() {
+    return new Promise<typeof Vips>(async (resolve, reject) => {
+        // firefox doesn't supprot dynamic module import in workers (https://bugzil.la/1540913)
+        // so the createModule function will be initialized in the script tag
+        const VipsCreateModule = typeof globalThis.Vips === 'undefined' ? null : globalThis.Vips;
+        if (!VipsCreateModule) {
+            reject(new Error('Module Not Loaded', {
+                cause: 'moduleNotFound'
+            }));
+            return;
+        }
+
+        if (!vips) {
+            vips = await VipsCreateModule({
+                // local file ** important **
+                locateFile(url, scriptDirectory) {
+                    return `/wasm/vips/${url}`;
+                },
+                print(str) {
+                    console.log(str);
+                },
+                printErr(str) {
+                    console.warn(str);
+                },
+                onAbort(what) {
+                    reject(new Error(what));
+                },
+            });
+        }
+        resolve(vips);
+    })
 };
 
 ///////////////////////////////////////////////////////////

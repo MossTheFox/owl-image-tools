@@ -1,5 +1,5 @@
-import { Box, Paper, Typography, Stack, PaperProps } from "@mui/material";
-import { useContext } from "react";
+import { Box, Paper, Typography, Stack, PaperProps, LinearProgress } from "@mui/material";
+import { useContext, useMemo } from "react";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../context/fileListContext";
 import { CONTROL_PANEL_HEIGHT } from "../../App";
 import { FileListDialogCallerContextProvider } from "../../context/fileListDialog/fileListDialogCallerContext";
@@ -12,8 +12,13 @@ export default function OutputPanel(props: PaperProps) {
 
     const {
         outputTrees, nodeMap, setOutputFolderHandle, // TODO
-        loading
+        loading, outputStatistic
     } = useContext(_outputFileListContext);
+
+    const progress = useMemo(() => {
+        if (outputStatistic.inputFiles.totalFiles <= 0) return 0;
+        return outputStatistic.converted.totalFiles / outputStatistic.inputFiles.totalFiles * 100;
+    }, [outputStatistic])
 
 
 
@@ -28,7 +33,14 @@ export default function OutputPanel(props: PaperProps) {
         justifyContent: 'stretch'
     }}>
         {/* Loading Indicator with ZIndex higher than content box */}
-        <DialogLoadingIndicator loading={loading} zIndex={2} position="relative" />
+        <Box height={0} overflow="visible" zIndex={2} position="relative"
+            sx={{
+                opacity: loading ? 1 : 0,
+                transition: 'opacity 0.25s'
+            }}
+        >
+            <LinearProgress variant="determinate" value={progress} />
+        </Box>
 
         <Box px={2} pt={2} pb={1}
             borderBottom={1}
