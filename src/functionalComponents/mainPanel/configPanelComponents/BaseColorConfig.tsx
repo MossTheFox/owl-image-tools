@@ -2,6 +2,7 @@ import { Box, BoxProps, ButtonBase, Link, Paper, Typography, FormHelperText, Inp
 import { TinyColor } from '@ctrl/tinycolor';
 import { useCallback, useContext, useRef, useState } from "react";
 import { appConfigContext, ColorFormatConfig } from "../../../context/appConfigContext";
+import TypographyWithTooltip from "../../../components/styledComponents/TypographyWithTooltip";
 
 
 const formats: ColorFormatConfig[] = ['hex', 'rgb', 'hsl', 'hsv'];
@@ -96,9 +97,11 @@ export default function BaseColorConfig(props: BoxProps) {
             alignItems='baseline'
             pb={0.5}
         >
-            <Typography variant="body2" color="textSecondary" fontWeight='bolder'>
+            <TypographyWithTooltip variant="body2" color="textSecondary" fontWeight='bolder'
+                tooltip='丢失透明度信息时，默认的图像底色。不会影响支持透明通道的图像格式，除非手动指定丢弃透明度信息。'
+            >
                 图片底色
-            </Typography>
+            </TypographyWithTooltip>
 
             <Box flexGrow={1} display='flex' gap={0.5} flexWrap='nowrap' overflow='hidden'
                 justifyContent='end'
@@ -149,9 +152,6 @@ export default function BaseColorConfig(props: BoxProps) {
                     </Box>
                 </Box>
             </Paper>
-            <FormHelperText>
-                丢失透明度信息时，默认的图像底色
-            </FormHelperText>
 
 
             <input ref={nativePicker} type='color' autoComplete="off" aria-label="Color Picker Hidden"

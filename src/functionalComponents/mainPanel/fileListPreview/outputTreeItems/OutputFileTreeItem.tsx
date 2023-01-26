@@ -126,8 +126,9 @@ export default function OutputFileTreeItem({
                                 {/* So ugly ↓ */}
                                 {!node.error && (node.file ?
                                     <>
-                                        <Typography variant="body2" color={deltaSize > 0 ? (theme) => theme.palette.error.main :
-                                            deltaSize === 0 ? 'inherit' : (theme) => theme.palette.primary.main}>
+                                        <Typography component="span"
+                                            variant="body2" color={deltaSize > 0 ? (theme) => theme.palette.error.main :
+                                                deltaSize === 0 ? 'inherit' : (theme) => theme.palette.primary.main}>
                                             {deltaSize >= 0 ? `+` : '-'}{parseFileSizeString(Math.abs(deltaSize))}
                                         </Typography>
                                     </>
@@ -161,8 +162,9 @@ export default function OutputFileTreeItem({
                                     {dataDisplay === 'size' ?
                                         (deltaSize >= 0 ? `↑ ` : '↓ ') + parseFileSizeString(node.file.size)
                                         :
-                                        <Typography color={deltaSize > 0 ? (theme) => theme.palette.error.main :
-                                            deltaSize === 0 ? 'inherit' : (theme) => theme.palette.primary.main}>
+                                        <Typography component="span"
+                                            color={deltaSize > 0 ? (theme) => theme.palette.error.main :
+                                                deltaSize === 0 ? 'inherit' : (theme) => theme.palette.primary.main}>
                                             {deltaSize >= 0 ? `+` : '-'}{parseFileSizeString(Math.abs(deltaSize))}
                                         </Typography>
                                     }</>

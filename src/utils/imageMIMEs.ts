@@ -55,7 +55,7 @@ export const extMimeMatch: { [key in typeof ACCEPT_FILE_EXTs[number]]: keyof typ
 
 
 export const OUTPUT_MIMEs: Readonly<(typeof extMimeMatch[keyof typeof extMimeMatch])[]> = [
-    'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/tiff' /*, 'image/heif' */
+    'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/tiff' /*, 'image/heif', 'image/avif' */
 ] as const;
 
 export const ACCEPT_MIMEs = Object.keys(mimeExtMatch) as (keyof typeof mimeExtMatch)[];

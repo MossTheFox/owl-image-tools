@@ -1,4 +1,7 @@
 import { Box, BoxProps, Checkbox, FormControlLabel, FormHelperText, Typography } from "@mui/material";
+import { useContext } from "react";
+import CheckboxWithTooltop from "../../../components/styledComponents/CheckboxWithTooltip";
+import { appConfigContext } from "../../../context/appConfigContext";
 import BaseColorConfig from "./BaseColorConfig";
 import ConfigPanelAccordion from "./ConfigPanelAccordion";
 import JPEGConfig from "./perFormatConfigs/JPEGConfig";
@@ -7,32 +10,28 @@ import WEBPConfig from "./perFormatConfigs/WEBPConfig";
 
 export default function OutputConfigArea(props: BoxProps) {
 
+    const { outputConfig, updateOutputConfig } = useContext(appConfigContext);
 
     return <Box {...props}>
         <Typography variant="body1" fontWeight='bolder' gutterBottom>
             高级输出设置
         </Typography>
 
-        <BaseColorConfig py={1} />
+        <BaseColorConfig py={1} pb={2} />
 
-        <Box pb={1}>
-            <FormControlLabel control={
-                <Checkbox size="small"
-                    sx={{ py: 0.5 }}
-                />
-
-            } label={
-                <Typography variant="body2" color="textSecondary" fontWeight="bolder">
-                    保留图像元数据
-                </Typography>
-            } />
-            <FormHelperText>
-                如果勾选，对于支持的格式 (JPG, TIFF, PNG, WEBP) 将会保留原始图片的 Exif meta data。
-            </FormHelperText>
-            <FormHelperText>
+        <CheckboxWithTooltop label="保留图像元数据"
+            tooltip={<>
+                如果勾选，对于支持的格式 (JPG, TIFF, PNG, WEBP) 将会保留原始图片的 Exif meta data。<br />
+                对于照片，这些数据可以包含图片的拍摄曝光信息、拍摄地点等信息。 <br />
                 请留意，一些浏览器可能会在导入图片时默认抹去元数据。
-            </FormHelperText>
-        </Box>
+            </>}
+            checkboxProps={{
+                checked: outputConfig.keepMetaData,
+                onChange: (e, checked) => {
+                    updateOutputConfig('keepMetaData', checked);
+                }
+            }}
+        />
 
 
         <Box py={1}>
@@ -45,15 +44,19 @@ export default function OutputConfigArea(props: BoxProps) {
                 <PNGConfig />
             </ConfigPanelAccordion>
 
-            <ConfigPanelAccordion recordIndex={3} summary="APNG 设置">
+            <ConfigPanelAccordion hidden recordIndex={3} summary="APNG 设置">
                 TODO
             </ConfigPanelAccordion>
 
-            <ConfigPanelAccordion recordIndex={4} summary="WEBP 设置">
+            <ConfigPanelAccordion recordIndex={4} summary="GIF 设置">
+                TODO
+            </ConfigPanelAccordion>
+
+            <ConfigPanelAccordion recordIndex={5} summary="WEBP 设置">
                 <WEBPConfig />
             </ConfigPanelAccordion>
 
-            <ConfigPanelAccordion recordIndex={5} summary="AVIF 设置">
+            <ConfigPanelAccordion disabled recordIndex={6} summary="AVIF 设置 (暂时不可用)">
                 TODO
             </ConfigPanelAccordion>
         </Box>

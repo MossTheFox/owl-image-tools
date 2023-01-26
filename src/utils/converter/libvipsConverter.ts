@@ -17,6 +17,7 @@ let vips: (typeof Vips) | null = null;
 
 // Now here is some more details for the supported formats. 
 // (Not sure if there's a way to build with plug-ins but here is what is already ready to use)
+// avif will be in 0.0.5
 /* DEBUG OUTPUT:
     vips version:                  8.13.3
     Emscripten version:            3.1.24
@@ -91,7 +92,7 @@ export async function parseBackground(hex: string) {
     }
     const color = new TinyColor(hex);
 
-    return [color.r, color.g, color.b, color.a];
+    return [color.r, color.g, color.b];
 }
 
 const blobToUint8Array = async (blob: Blob) => {
@@ -157,34 +158,36 @@ export async function convertToPNG(file: Blob, config = {
     });
 }
 
-// export async function convertToWebp(file: Blob, config = {
-//     /** 0 ~ 9 */
-//     compression: 2,
-//     /** Interlace () */
-//     interlace: false,
-//     stripMetaData: false,
-//     keepAlphaChannel: true,
-//     defaultBackground: "#ffffff"
-// }) {
-//     if (!vips) {
-//         vips = await initVips();
-//     }
+export async function convertToWebp(file: Blob, config = {
+    quality: 75,
+    loseless: false,
+    lossyCompressionPreset: 'default',
+    smartSubsample: false,
+    alphaQuality: 100,
+    stripMetaData: false,
+    keepAlphaChannel: true,
+    defaultBackground: "#ffffff",
+}) {
+    if (!vips) {
+        vips = await initVips();
+    }
 
-//     // try read the blob
-
-//     const img = vips.Image.newFromBuffer(await blobToUint8Array(file));
-//     const result = img.writeToBuffer('.webp', {
-//         compression: config.compression,
-//         strip: config.stripMetaData,
-//         ...config.keepAlphaChannel ? {} : {
-//             background: await parseBackground(config.defaultBackground)
-//         },
-//         interlace: config.interlace
-//     });
-//     return new Blob([result], {
-//         type: 'image/webp',
-//     });
-// }
+    const img = vips.Image.newFromBuffer(await blobToUint8Array(file));
+    const result = img.writeToBuffer('.webp', {
+        Q: config.quality,
+        strip: config.stripMetaData,
+        ...config.keepAlphaChannel ? {} : {
+            background: await parseBackground(config.defaultBackground)
+        },
+        loseless: config.loseless,
+        preset: config.lossyCompressionPreset,
+        'smart-subsample': config.smartSubsample,
+        'alpha-q': config.alphaQuality,
+    });
+    return new Blob([result], {
+        type: 'image/webp',
+    });
+}
 
 // @ts-expect-error
 window.__DEBUG = convertToJPEG;

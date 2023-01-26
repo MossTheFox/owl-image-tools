@@ -5,24 +5,13 @@ import { getFromLocalStorageAndValidate, saveToLocalStorage } from "../utils/ran
 
 export type ColorFormatConfig = 'hex' | 'rgb' | 'hsl' | 'hsv';
 
-
-export const pngCompressionOptions = [
-    'no-compression',
-    'quick',
-    'slow',
-    'slow-as-hell',
-    'custom'
-] as const;
-
-export type PNGCompressionOptions = typeof pngCompressionOptions[number];
-
-
 // Output Config (Keep it not nested since when converting starts, a copy will need to be made to handle)
 export type OutputConfig = {
     /** Base color when alpha data is lost or deprecated. Hex (#ffffff) */
     imageBaseColor: string;
     colorFormat: ColorFormatConfig;
 
+    /** match the strip param for libvips */
     keepMetaData: boolean;
 
 
@@ -43,25 +32,40 @@ export type OutputConfig = {
     JPEG_interlace: boolean;
 
     /** If false, will apply the `imageBaseColor` */
-    PNG_keepAlphaChannel: boolean;
+    PNG_removeAlphaChannel: boolean;
 
-    /** um, default 3? */
-    PNG_compressionLevel: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+    /** default 6
+     * 0 ~ 9
+    */
+    PNG_compressionLevel: number /* 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 */;
 
     /** if interlaced, ... um check here https://graphicdesign.stackexchange.com/questions/6677/what-does-the-interlaced-option-in-photoshop-do */
     PNG_interlace: boolean;
 
     /** LOSSY compression for png. From 0 to 100 */
     PNG_quantisationQuality: number;
+    /** 0 ~ 1, double */
+    PNG_dither: number;
 
     /** default: 0 */
     PNG_bitDepth: 0 | 1 | 2 | 4 | 8 | 16;
 
 
-    /** WEBP quality when not animated or loseless */
+    /** WEBP quality when not loseless. 1 ~ 100 */
     WEBP_quality: number;
 
-    // TODO: advanced settings...
+    /** Enable loseless compression, default false */
+    WEBP_loseless: boolean;
+
+    /** Preset for lossy compression */
+    WEBP_lossyCompressionPreset: 'default' | 'picture' | 'photo' | 'drawing' | 'icon' | 'text';
+
+    /** Enable high quality chroma subsampling, default false */
+    WEBP_smartSubsample: boolean;
+
+    /** Change alpha plane fidelity for lossy compression, default 100 */
+    WEBP_alphaQuality: number;
+
 };
 
 export const defaultOutputConfig: OutputConfig = {
@@ -77,14 +81,17 @@ export const defaultOutputConfig: OutputConfig = {
     },
     JPEG_quality: 90,
     JPEG_interlace: false,
-    PNG_keepAlphaChannel: true,
+    PNG_removeAlphaChannel: false,
     PNG_interlace: false,
-    PNG_compressionLevel: 2,
+    PNG_compressionLevel: 6,
     PNG_bitDepth: 0,
     PNG_quantisationQuality: 100,
-
-
-    WEBP_quality: 90,
+    PNG_dither: 1,
+    WEBP_quality: 75,
+    WEBP_alphaQuality: 100,
+    WEBP_loseless: false,
+    WEBP_lossyCompressionPreset: 'default',
+    WEBP_smartSubsample: false,
 };
 
 const TIPS_DIALOG_FLAGS = [
