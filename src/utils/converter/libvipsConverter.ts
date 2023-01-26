@@ -70,6 +70,7 @@ function initVips() {
                     reject(new Error(what));
                 },
             });
+            import.meta.env.DEV && console.log(`${vips.version(0)}.${vips.version(1)}.${vips.version(2)}`);
         }
         resolve(vips);
     })
@@ -107,8 +108,15 @@ const blobToUint8Array = async (blob: Blob) => {
     return buffer
 };
 
+const isMultiframePic = (type: string) => {
+    return ['image/gif', 'image/webp'].includes(type);
+};
+
+//////////////////////////////////////////////////////////////
+
 export async function convertToJPEG(file: Blob, config = {
     quality: 75,
+    interlace: false,
     stripMetaData: false,
     defaultBackground: "#ffffff"
 }) {
@@ -122,8 +130,10 @@ export async function convertToJPEG(file: Blob, config = {
     const result = img.writeToBuffer('.jpg', {
         Q: config.quality,
         strip: config.stripMetaData,
-        background: await parseBackground(config.defaultBackground)
+        background: await parseBackground(config.defaultBackground),
+        interlace: config.interlace,
     });
+    img.delete();
     return new Blob([result], {
         type: 'image/jpeg',
     });
@@ -132,8 +142,10 @@ export async function convertToJPEG(file: Blob, config = {
 export async function convertToPNG(file: Blob, config = {
     /** 0 ~ 9 */
     compression: 2,
-    /** Interlace () */
     interlace: false,
+    Q: 100,
+    dither: 1,
+    bitdepth: 0,
     stripMetaData: false,
     keepAlphaChannel: true,
     defaultBackground: "#ffffff"
@@ -151,8 +163,12 @@ export async function convertToPNG(file: Blob, config = {
         ...config.keepAlphaChannel ? {} : {
             background: await parseBackground(config.defaultBackground)
         },
-        interlace: config.interlace
+        interlace: config.interlace,
+        dither: config.dither,
+        ...config.bitdepth !== 0 ? { bitdepth: config.bitdepth } : {},
+        Q: config.Q
     });
+    img.delete();
     return new Blob([result], {
         type: 'image/png',
     });
@@ -160,7 +176,7 @@ export async function convertToPNG(file: Blob, config = {
 
 export async function convertToWebp(file: Blob, config = {
     quality: 75,
-    loseless: false,
+    lossless: false,
     lossyCompressionPreset: 'default',
     smartSubsample: false,
     alphaQuality: 100,
@@ -171,21 +187,56 @@ export async function convertToWebp(file: Blob, config = {
     if (!vips) {
         vips = await initVips();
     }
-
-    const img = vips.Image.newFromBuffer(await blobToUint8Array(file));
+    const props = isMultiframePic(file.type) ? 'n=-1' : '';
+    const img = vips.Image.newFromBuffer(await blobToUint8Array(file), props);
     const result = img.writeToBuffer('.webp', {
         Q: config.quality,
         strip: config.stripMetaData,
         ...config.keepAlphaChannel ? {} : {
             background: await parseBackground(config.defaultBackground)
         },
-        loseless: config.loseless,
+        lossless: config.lossless,
         preset: config.lossyCompressionPreset,
         'smart-subsample': config.smartSubsample,
         'alpha-q': config.alphaQuality,
     });
+    img.delete();
     return new Blob([result], {
         type: 'image/webp',
+    });
+}
+
+export async function convertToGIF(file: Blob, config = {
+    bitdepth: 8,
+    effort: 7,
+    // interlace: false,    // ⚠ Not supported by 8.13
+    dither: 1,
+    'interframe-maxerror': 0,
+    'interpalette-maxerror': 3,
+    stripMetaData: false,
+    keepAlphaChannel: true,
+    defaultBackground: "#ffffff",
+}) {
+    if (!vips) {
+        vips = await initVips();
+    }
+    const props = isMultiframePic(file.type) ? 'n=-1' : '';
+    const img = vips.Image.newFromBuffer(await blobToUint8Array(file), props);
+    const result = img.writeToBuffer('.gif', {
+        bitdepth: config.bitdepth,
+        strip: config.stripMetaData,
+        ...config.keepAlphaChannel ? {} : {
+            background: await parseBackground(config.defaultBackground)
+        },
+        effort: config.effort,
+        // interlace: config.interlace,
+        dither: config.dither,
+        'interframe-maxerror': config["interframe-maxerror"],
+        'interpalette-maxerror': config["interpalette-maxerror"],
+    });
+    img.delete();
+    return new Blob([result], {
+        type: 'image/gif',
     });
 }
 

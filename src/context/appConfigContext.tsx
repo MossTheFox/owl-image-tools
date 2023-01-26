@@ -51,11 +51,11 @@ export type OutputConfig = {
     PNG_bitDepth: 0 | 1 | 2 | 4 | 8 | 16;
 
 
-    /** WEBP quality when not loseless. 0 ~ 100 */
+    /** WEBP quality when not lossless. 0 ~ 100 */
     WEBP_quality: number;
 
-    /** Enable loseless compression, default false */
-    WEBP_loseless: boolean;
+    /** Enable lossless compression, default false */
+    WEBP_lossless: boolean;
 
     WEBP_keepAlphaChannel: boolean;
 
@@ -113,7 +113,7 @@ export const defaultOutputConfig: OutputConfig = {
     WEBP_quality: 75,
     WEBP_keepAlphaChannel: true,
     WEBP_alphaQuality: 100,
-    WEBP_loseless: false,
+    WEBP_lossless: false,
     WEBP_lossyCompressionPreset: 'default',
     WEBP_smartSubsample: false,
     WEBP_cpuEffortToRediceSize: 4,

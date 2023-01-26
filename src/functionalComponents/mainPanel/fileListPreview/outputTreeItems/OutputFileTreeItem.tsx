@@ -23,12 +23,15 @@ export default function OutputFileTreeItem({
 
     const outputContext = useContext(outputFileListContext);
 
-    const deltaSize = useMemo(() => {
-        if (node.kind !== 'file' || !node.file || node.originalNode.data.kind !== 'file') {
+    /** Rerender cannot detect the node change (since it's the same object)
+     * so here is an update on every rerender.
+     */
+    const deltaSize = (() => {
+        if (node.kind !== 'file' || !node.finished || !node.file || node.originalNode.data.kind !== 'file') {
             return 0;
         }
         return node.file.size - node.originalNode.data.file.size;
-    }, [node]);
+    })();
 
     const callPreviewDialog = useCallback(() => {
         if (node.kind !== 'file' || !node.file) return;

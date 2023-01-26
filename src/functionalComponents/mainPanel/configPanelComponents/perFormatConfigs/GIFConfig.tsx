@@ -13,7 +13,9 @@ export default function GIFConfig(props: BoxProps) {
     return <Box {...props}>
         <Box pb={2}>
 
-            <CheckboxWithTooltop containerBoxProps={{ pb: 2 }}
+            {/* ⚠ vips 1.18.3 does NOT support GIF interlace. */}
+
+            {/* <CheckboxWithTooltop containerBoxProps={{ pb: 2 }}
                 label='交错 (for Progressive GIF)'
                 tooltip='在例如弱网环境下会比较适用。解码这类图像会使用更多的内存。'
                 checkboxProps={{
@@ -22,7 +24,7 @@ export default function GIFConfig(props: BoxProps) {
                         updateOutputConfig('GIF_interlace', v);
                     }
                 }}
-            />
+            /> */}
 
 
             <TypographyWithTooltip variant="body2" fontWeight="bolder" color="textSecondary" gutterBottom
@@ -69,7 +71,7 @@ export default function GIFConfig(props: BoxProps) {
 
             <SliderWithInput value={outputConfig.GIF_interframeMaxError}
                 onChange={(n) => updateOutputConfig('GIF_interframeMaxError', n)}
-                min={0} max={100} step={1} label="GIF_interframeMaxError"
+                min={0} max={32} step={1} label="GIF_interframeMaxError"
             />
 
         </Box>
@@ -77,7 +79,7 @@ export default function GIFConfig(props: BoxProps) {
         <Box pb={2}>
             <TypographyWithTooltip variant="body2" fontWeight="bolder" color="textSecondary" gutterBottom
                 tooltip={<>
-                    Interpalette Maxerror, 对于是否重用已生成的纹理。<br />
+                    Interpalette Maxerror, 用于决定是否重用已生成的纹理。<br />
                     默认 {defaultOutputConfig.GIF_interpaletteMaxError}。
                 </>
                 }
@@ -87,7 +89,7 @@ export default function GIFConfig(props: BoxProps) {
 
             <SliderWithInput value={outputConfig.GIF_interpaletteMaxError}
                 onChange={(n) => updateOutputConfig('GIF_interpaletteMaxError', n)}
-                min={0} max={100} step={1} label="GIF_interpaletteMaxError"
+                min={0} max={256} step={1} label="GIF_interpaletteMaxError"
             />
 
         </Box>

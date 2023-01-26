@@ -28,11 +28,11 @@ export default function WEBPConfig(props: BoxProps) {
         </Typography>
         <Box pb={2}>
             <ButtonGroup fullWidth disableElevation size="small" variant="outlined">
-                <Button variant={outputConfig.WEBP_loseless ? 'outlined' : 'contained'}
-                    onClick={() => updateOutputConfig('WEBP_loseless', false)}
+                <Button variant={outputConfig.WEBP_lossless ? 'outlined' : 'contained'}
+                    onClick={() => updateOutputConfig('WEBP_lossless', false)}
                 >有损压缩</Button>
-                <Button variant={outputConfig.WEBP_loseless ? 'contained' : 'outlined'}
-                    onClick={() => updateOutputConfig('WEBP_loseless', true)}
+                <Button variant={outputConfig.WEBP_lossless ? 'contained' : 'outlined'}
+                    onClick={() => updateOutputConfig('WEBP_lossless', true)}
                 >无损编码</Button>
             </ButtonGroup>
         </Box>
@@ -47,7 +47,9 @@ export default function WEBPConfig(props: BoxProps) {
                 }}
             />
         </Box>
-        <Box pb={2}>
+
+        {/* ↓ This is useless */}
+        {/* <Box pb={2}>
             <TypographyWithTooltip variant="body2" color="textSecondary" fontWeight="bolder" gutterBottom
                 tooltip="用于尝试减小文件体积的 CPU 时间。"
             >
@@ -60,9 +62,9 @@ export default function WEBPConfig(props: BoxProps) {
                 label="WEBP effort"
                 mark
             />
-        </Box>
+        </Box> */}
 
-        <Collapse in={!outputConfig.WEBP_loseless}>
+        <Collapse in={!outputConfig.WEBP_lossless}>
             <Box>
                 <Box pb={2}>
                     <Typography variant="body2" color="textSecondary" fontWeight="bolder" gutterBottom>

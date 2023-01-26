@@ -36,7 +36,7 @@ export default function OutputConfigArea(props: BoxProps) {
 
         {/* MENU START */}
         <Menu open={menuOpen} onClose={closeMenu} anchorEl={menuAnchor.current}>
-            <MenuItem onClick={resetConfig}>
+            <MenuItem dense onClick={resetConfig}>
                 <Typography variant="body2" fontWeight="bolder" color={(theme) => theme.palette.warning.main}>
                     重置为默认值
                 </Typography>
@@ -48,7 +48,7 @@ export default function OutputConfigArea(props: BoxProps) {
 
         <CheckboxWithTooltop label="保留图像元数据"
             tooltip={<>
-                如果勾选，对于支持的格式 (JPG, TIFF, PNG, WEBP) 将会保留原始图片的 Exif meta data。<br />
+                如果勾选，对于支持的格式将会保留原始图片的 Exif meta data。<br />
                 对于照片，这些数据可以包含图片的拍摄曝光信息、拍摄地点等信息。 <br />
                 请留意，一些浏览器可能会在导入图片时默认抹去元数据。
             </>}

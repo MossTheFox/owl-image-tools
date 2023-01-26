@@ -90,3 +90,9 @@ export function changeFileExt(fileName: string, targetExt: string) {
     splited.push(targetExt);
     return splited.join('.');
 }
+
+export function getFileExt(fileName: string) {
+    let splited = fileName.split('.');
+    if (splited.length === 1) return '';
+    return splited.pop()?.toLowerCase();
+}

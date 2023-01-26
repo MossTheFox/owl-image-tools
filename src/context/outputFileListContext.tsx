@@ -1,11 +1,11 @@
 import { createContext, useState, useCallback, useEffect, useContext, useMemo } from "react";
-import { ACCEPT_MIMEs, changeFileExt, checkIsFilenameAccepted, checkIsMimeSupported, mimeToExt } from "../utils/imageMIMEs";
+import { ACCEPT_MIMEs, changeFileExt, checkIsFilenameAccepted, checkIsMimeSupported, getFileExt, mimeToExt } from "../utils/imageMIMEs";
 import useAsync from "../hooks/useAsync";
 import { loggerContext } from "./loggerContext";
 import { defaultFileListStatistic, FileListStatistic, getAllNodeInTree, TreeNode, WebkitFileNodeData } from "./fileListContext";
 import { defaultOutputConfig, OutputConfig } from "./appConfigContext";
 import { parseDateDelta, parseFileSizeString } from "../utils/randomUtils";
-import { convertToJPEG } from "../utils/converter/libvipsConverter";
+import { convertToGIF, convertToJPEG, convertToPNG, convertToWebp } from "../utils/converter/libvipsConverter";
 import { FS_Mode } from "../utils/browserCompability";
 import { isFileExists, renameFileForDuplication } from "../utils/FS";
 
@@ -209,12 +209,62 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
         if (node.kind !== 'file' || node.originalNode.data.kind !== 'file') {
             return;
         }
-        // TODO: apply config
-        let resultBuffer = await convertToJPEG(node.originalNode.data.file, {
-            quality: currentOutputConfig.JPEG_quality,
-            stripMetaData: currentOutputConfig.keepMetaData,
-            defaultBackground: currentOutputConfig.imageBaseColor
-        });
+        // Apply config
+        const C = currentOutputConfig;
+
+        // TARGET ext
+        const ext = getFileExt(node.name);
+        let resultBuffer: Blob;
+        switch (ext) {
+            case 'jpg':
+                resultBuffer = await convertToJPEG(node.originalNode.data.file, {
+                    quality: C.JPEG_quality,
+                    stripMetaData: !C.keepMetaData,  // !
+                    defaultBackground: C.imageBaseColor,
+                    interlace: C.JPEG_interlace,
+                });
+                break;
+            case 'png':
+                resultBuffer = await convertToPNG(node.originalNode.data.file, {
+                    Q: C.PNG_quantisationQuality,
+                    bitdepth: C.PNG_bitDepth,
+                    compression: C.PNG_compressionLevel,
+                    defaultBackground: C.imageBaseColor,
+                    dither: C.PNG_dither,
+                    interlace: C.PNG_interlace,
+                    keepAlphaChannel: !C.PNG_removeAlphaChannel,    // !
+                    stripMetaData: !C.keepMetaData                  // !
+                });
+                break;
+            case 'gif':
+                resultBuffer = await convertToGIF(node.originalNode.data.file, {
+                    "interframe-maxerror": C.GIF_interframeMaxError,
+                    "interpalette-maxerror": C.GIF_interpaletteMaxError,
+                    bitdepth: C.GIF_bitdepth,
+                    defaultBackground: C.imageBaseColor,
+                    dither: C.GIF_dither,
+                    effort: 7,
+                    // interlace: C.GIF_interlace,
+                    keepAlphaChannel: true, // TO BE TESTED 
+                    stripMetaData: C.keepMetaData
+                });
+                break;
+            case 'webp':
+                resultBuffer = await convertToWebp(node.originalNode.data.file, {
+                    alphaQuality: C.WEBP_alphaQuality,
+                    defaultBackground: C.imageBaseColor,
+                    keepAlphaChannel: C.WEBP_keepAlphaChannel,
+                    lossless: C.WEBP_lossless,
+                    lossyCompressionPreset: C.WEBP_lossyCompressionPreset,
+                    quality: C.WEBP_quality,
+                    smartSubsample: false, // TO
+                    stripMetaData: C.keepMetaData
+                });
+                break;
+
+            default:
+                throw new Error('Unknown target format: ' + ext);
+        }
 
         if (FS_Mode !== 'noFS' && outputFolderHandle) {
             // Write to FS

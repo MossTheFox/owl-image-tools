@@ -50,41 +50,7 @@ export default function PNGConfig(props: BoxProps) {
             />
         </Box>
 
-        <Box pb={2}>
-            <TypographyWithTooltip variant="body2" fontWeight="bolder" color="textSecondary" gutterBottom
-                tooltip={<>
-                    (Quantisation quality) 减小输出图片的色彩数量。<br />
-                    <strong>小于 100 的数值将会使得将压缩方式变为有损压缩。</strong>
-                </>
-                }
-            >
-                色彩量化质量
-            </TypographyWithTooltip>
-
-            <SliderWithInput value={outputConfig.PNG_quantisationQuality}
-                onChange={(n) => updateOutputConfig('PNG_quantisationQuality', n)}
-                min={0} max={100} step={1} label="PNG quantisation quality"
-            />
-
-        </Box>
-
-        <Collapse in={outputConfig.PNG_quantisationQuality < 100}>
-            <Box pb={2}>
-                <TypographyWithTooltip variant="body2" fontWeight="bolder" color="textSecondary" gutterBottom
-                    tooltip={`Dithering，对于输出图片包含的可用色彩中缺失的色彩，采用例如栅格状像素布局来近似地表示目标颜色。`}
-                >
-                    Dithering
-                </TypographyWithTooltip>
-
-                <SliderWithInput value={outputConfig.PNG_dither}
-                    onChange={(n) => updateOutputConfig('PNG_dither', n)}
-                    min={0} max={1} step={0.01} label="PNG dithering"
-                />
-
-            </Box>
-        </Collapse>
-
-        <Box pb={1}>
+        <Box pb={3}>
             <TypographyWithTooltip variant="body2" fontWeight="bolder" color="textSecondary" gutterBottom
                 tooltip={<Box sx={{ whiteSpace: 'pre-wrap' }}>
                     {`这里指的是 PNG 图像第 24 字节的标记。\n` +
@@ -120,6 +86,38 @@ export default function PNGConfig(props: BoxProps) {
                 )}
             </ButtonGroup>
         </Box>
+
+        <Collapse in={![0, 8, 16].includes(outputConfig.PNG_bitDepth)}>
+            <Box pb={2}>
+                <TypographyWithTooltip variant="body2" fontWeight="bolder" color="textSecondary" gutterBottom
+                    tooltip={<>
+                        (Quantisation quality)<br />对于非真彩色图像，色彩的选择质量。
+                    </>
+                    }
+                >
+                    色彩量化质量
+                </TypographyWithTooltip>
+
+                <SliderWithInput value={outputConfig.PNG_quantisationQuality}
+                    onChange={(n) => updateOutputConfig('PNG_quantisationQuality', n)}
+                    min={0} max={100} step={1} label="PNG quantisation quality"
+                />
+
+            </Box>
+            <Box pb={2}>
+                <TypographyWithTooltip variant="body2" fontWeight="bolder" color="textSecondary" gutterBottom
+                    tooltip={`Dithering，对于输出图片包含的可用色彩中缺失的色彩，采用例如栅格状像素布局来近似地表示目标颜色。`}
+                >
+                    Dithering
+                </TypographyWithTooltip>
+
+                <SliderWithInput value={outputConfig.PNG_dither}
+                    onChange={(n) => updateOutputConfig('PNG_dither', n)}
+                    min={0} max={1} step={0.01} label="PNG dithering"
+                />
+
+            </Box>
+        </Collapse>
 
     </Box >
 }
