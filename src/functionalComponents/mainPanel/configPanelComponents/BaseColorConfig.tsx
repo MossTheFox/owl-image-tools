@@ -1,6 +1,6 @@
 import { Box, BoxProps, ButtonBase, Link, Paper, Typography, FormHelperText, InputBase } from "@mui/material";
 import { TinyColor } from '@ctrl/tinycolor';
-import { useCallback, useContext, useRef, useState } from "react";
+import { useCallback, useContext, useMemo, useRef, useState } from "react";
 import { appConfigContext, ColorFormatConfig } from "../../../context/appConfigContext";
 import TypographyWithTooltip from "../../../components/styledComponents/TypographyWithTooltip";
 
@@ -34,11 +34,12 @@ const convertTo = (color: string, target: ColorFormatConfig) => {
 
 export default function BaseColorConfig(props: BoxProps) {
 
+    // 👇 Store Hex. Display format up to the user.
     const { outputConfig, updateOutputConfig } = useContext(appConfigContext);
 
     const [format, setFormat] = useState<ColorFormatConfig>(outputConfig.colorFormat);
-    // 👇 Store Hex. Display format up to the user.
-    const [color, setColor] = useState(outputConfig.imageBaseColor);
+
+    const [focused, setFocused] = useState(false);
 
     const [colorInput, setColorInput] = useState(() => {
         const savedColor = new TinyColor(outputConfig.imageBaseColor);
@@ -47,6 +48,10 @@ export default function BaseColorConfig(props: BoxProps) {
         }
         return defaultColors[outputConfig.colorFormat];
     });
+
+    const storedColorDisplay = useMemo(() => {
+        return convertTo(outputConfig.imageBaseColor, format);
+    }, [outputConfig.imageBaseColor, format]);
 
     const nativePicker = useRef<HTMLInputElement>(null);
 
@@ -59,7 +64,6 @@ export default function BaseColorConfig(props: BoxProps) {
         let input = e.target.value;
         const t = new TinyColor(input);
         if (t.isValid) {
-            setColor(t.toHexString());
             updateOutputConfig('imageBaseColor', t.toHexString());
         }
     }, [updateOutputConfig]);
@@ -68,29 +72,32 @@ export default function BaseColorConfig(props: BoxProps) {
         let input = e.target.value;
         const t = new TinyColor(input);
         if (t.isValid) {
-            setColor(t.toHexString());
             setColorInput(convertTo(input, format));
             updateOutputConfig('imageBaseColor', t.toHexString());
         } else {
-            setColor("#ffffff");
             setColorInput(defaultColors[format]);
             updateOutputConfig('imageBaseColor', "#ffffff");
         }
+        setFocused(false);
     }, [format, updateOutputConfig])
+
+    const handleInputFocus = useCallback(() => {
+        setColorInput(convertTo(outputConfig.imageBaseColor, format));
+        setFocused(true);
+    }, [format, outputConfig.imageBaseColor]);
 
 
     const handleNativeColorPickerChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         let result = convertTo(e.target.value, format);
-        setColor(e.target.value);   // Hex by default
         setColorInput(result);
-        updateOutputConfig('imageBaseColor', e.target.value)
+        updateOutputConfig('imageBaseColor', e.target.value);   // HEX
     }, [format, updateOutputConfig]);
 
     const handleFormatChange = useCallback((format: ColorFormatConfig) => {
         setFormat(format);
-        setColorInput(convertTo(color, format));
+        setColorInput(convertTo(outputConfig.imageBaseColor, format));
         updateOutputConfig('colorFormat', format)
-    }, [color, updateOutputConfig]);
+    }, [outputConfig.imageBaseColor, updateOutputConfig]);
 
     return <Box {...props}>
         <Box display='flex' justifyContent='space-between'
@@ -133,14 +140,16 @@ export default function BaseColorConfig(props: BoxProps) {
                         <Box boxShadow={1} sx={{
                             width: '24px',
                             height: '24px',
-                            bgcolor: color,
+                            bgcolor: outputConfig.imageBaseColor,
                             borderRadius: (theme) => `${theme.shape.borderRadius / 2}px`,
                         }} />
                     </ButtonBase>
+
                     <Box pl={1} flexGrow={1}>
                         <InputBase fullWidth size="small"
-                            value={colorInput}
+                            value={focused ? colorInput : storedColorDisplay}
                             onChange={handleColorInputChange}
+                            onFocus={handleInputFocus}
                             onBlur={onLostFocus}
                             spellCheck={false}
                             sx={{
@@ -150,12 +159,14 @@ export default function BaseColorConfig(props: BoxProps) {
                                 }
                             }} />
                     </Box>
+
                 </Box>
             </Paper>
 
 
             <input ref={nativePicker} type='color' autoComplete="off" aria-label="Color Picker Hidden"
                 style={{ height: 0, margin: 0, padding: 0, border: 0, outline: 0, display: 'block', opacity: 0 }}
+                value={outputConfig.imageBaseColor}
                 onChange={handleNativeColorPickerChange}
             />
 

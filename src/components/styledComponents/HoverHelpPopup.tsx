@@ -7,7 +7,11 @@ export function HoverHelpPopup(props: {
 
     const { iconProps, ...tooltipProps } = props;
 
-    return <Tooltip arrow enterTouchDelay={0} {...tooltipProps}>
+    return <Tooltip arrow
+        enterTouchDelay={0}
+        leaveTouchDelay={10000}
+        {...tooltipProps}
+    >
         <Box display='flex' justifyContent='center' alignItems='center' color={(theme) => theme.palette.text.secondary}>
             <HelpOutline fontSize="small" color="inherit" {...iconProps} />
         </Box>

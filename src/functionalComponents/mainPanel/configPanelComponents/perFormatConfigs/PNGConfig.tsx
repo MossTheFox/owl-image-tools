@@ -1,6 +1,7 @@
-import { Box, BoxProps, Typography, FormHelperText, TextField, Slider, Collapse, ButtonGroup, Button } from "@mui/material";
+import { Box, BoxProps, Collapse, ButtonGroup, Button } from "@mui/material";
 import { useContext } from "react";
 import CheckboxWithTooltop from "../../../../components/styledComponents/CheckboxWithTooltip";
+import SliderWithInput from "../../../../components/styledComponents/SliderWithInput";
 import TypographyWithTooltip from "../../../../components/styledComponents/TypographyWithTooltip";
 import { appConfigContext } from "../../../../context/appConfigContext";
 
@@ -10,7 +11,7 @@ export default function PNGConfig(props: BoxProps) {
 
 
     return <Box {...props}>
-        <Box pb={1}>
+        <Box pb={2}>
 
             <CheckboxWithTooltop
                 label='丢弃透明度信息'
@@ -24,7 +25,7 @@ export default function PNGConfig(props: BoxProps) {
             />
 
             <CheckboxWithTooltop
-                label='交错 (interlace)'
+                label='交错 (Interlace)'
                 tooltip='启用交错，可以让图片在没有被加载完成时也可以有低分辨率的预览。'
                 checkboxProps={{
                     checked: outputConfig.PNG_interlace,
@@ -41,41 +42,15 @@ export default function PNGConfig(props: BoxProps) {
             >
                 压缩等级
             </TypographyWithTooltip>
-            <Box display="flex" gap={2}>
 
-                <Slider value={outputConfig.PNG_compressionLevel}
-                    size="small"
-                    min={0}
-                    max={9}
-                    step={1}
-                    marks
-                    valueLabelDisplay="auto"
-                    onChange={(e, value) => {
-                        updateOutputConfig('PNG_compressionLevel', value as number);
-                    }}
-                    sx={{
-                        flexGrow: 1
-                    }}
-                />
-                <TextField sx={{
-                    width: '3em'
-                }}
-                    variant='standard'
-                    size='small'
-                    type='number'
-                    value={outputConfig.PNG_compressionLevel}
-                    onChange={(e) => {
-                        const trimed = Math.floor(Math.abs(+e.target.value) % 10);
-
-                        updateOutputConfig('PNG_compressionLevel', isNaN(trimed) ? 7 : trimed);
-                    }}
-                    autoComplete='off'
-                    aria-label="JPEG Quality Input"
-                />
-            </Box>
+            <SliderWithInput value={outputConfig.PNG_compressionLevel}
+                onChange={(n) => updateOutputConfig('PNG_compressionLevel', n)}
+                min={0} max={9} step={1} label="PNG compression level"
+                sliderProps={{ marks: true }}
+            />
         </Box>
 
-        <Box pb={1}>
+        <Box pb={2}>
             <TypographyWithTooltip variant="body2" fontWeight="bolder" color="textSecondary" gutterBottom
                 tooltip={<>
                     (Quantisation quality) 减小输出图片的色彩数量。<br />
@@ -85,83 +60,27 @@ export default function PNGConfig(props: BoxProps) {
             >
                 色彩量化质量
             </TypographyWithTooltip>
-            <Box display="flex" gap={2}>
 
-                <Slider value={outputConfig.PNG_quantisationQuality}
-                    size="small"
-                    min={0}
-                    max={100}
-                    step={1}
-                    valueLabelDisplay="auto"
-                    onChange={(e, value) => {
-                        updateOutputConfig('PNG_quantisationQuality', value as number);
-                    }}
-                    sx={{
-                        flexGrow: 1
-                    }}
-                />
-                <TextField sx={{
-                    width: '3em'
-                }}
-                    variant='standard'
-                    size='small'
-                    type='number'
-                    value={outputConfig.PNG_quantisationQuality}
-                    onChange={(e) => {
-                        const trimed = Math.floor(Math.abs(+e.target.value) % 101);
-                        if (!isNaN(trimed)) {
-                            updateOutputConfig('PNG_quantisationQuality', trimed);
-                        }
-                    }}
-                    autoComplete='off'
-                    aria-label="JPEG Quality Input"
-                />
-            </Box>
+            <SliderWithInput value={outputConfig.PNG_quantisationQuality}
+                onChange={(n) => updateOutputConfig('PNG_quantisationQuality', n)}
+                min={0} max={100} step={1} label="PNG quantisation quality"
+            />
+
         </Box>
 
         <Collapse in={outputConfig.PNG_quantisationQuality < 100}>
-            <Box pb={1}>
+            <Box pb={2}>
                 <TypographyWithTooltip variant="body2" fontWeight="bolder" color="textSecondary" gutterBottom
                     tooltip={`Dithering，对于输出图片包含的可用色彩中缺失的色彩，采用例如栅格状像素布局来近似地表示目标颜色。`}
                 >
                     Dithering
                 </TypographyWithTooltip>
-                <Box display="flex" gap={2}>
 
-                    <Slider value={outputConfig.PNG_dither}
-                        size="small"
-                        min={0}
-                        max={1}
-                        step={0.01}
-                        valueLabelDisplay="auto"
-                        onChange={(e, value) => {
-                            updateOutputConfig('PNG_dither', value as number);
-                        }}
-                        sx={{
-                            flexGrow: 1
-                        }}
-                    />
-                    <TextField sx={{
-                        width: '3em'
-                    }}
-                        variant='standard'
-                        size='small'
-                        type='number'
-                        value={outputConfig.PNG_dither}
-                        onChange={(e) => {
-                            const curr = Math.abs(+e.target.value);
-                            if (isNaN(curr) || curr === 1) {
-                                updateOutputConfig('PNG_dither', 1);
-                                return;
-                            }
-                            const trimed = curr - Math.floor(curr);
-                            updateOutputConfig('PNG_dither', trimed);
+                <SliderWithInput value={outputConfig.PNG_dither}
+                    onChange={(n) => updateOutputConfig('PNG_dither', n)}
+                    min={0} max={1} step={0.01} label="PNG dithering"
+                />
 
-                        }}
-                        autoComplete='off'
-                        aria-label="JPEG Quality Input"
-                    />
-                </Box>
             </Box>
         </Collapse>
 

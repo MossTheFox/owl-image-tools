@@ -51,11 +51,13 @@ export type OutputConfig = {
     PNG_bitDepth: 0 | 1 | 2 | 4 | 8 | 16;
 
 
-    /** WEBP quality when not loseless. 1 ~ 100 */
+    /** WEBP quality when not loseless. 0 ~ 100 */
     WEBP_quality: number;
 
     /** Enable loseless compression, default false */
     WEBP_loseless: boolean;
+
+    WEBP_keepAlphaChannel: boolean;
 
     /** Preset for lossy compression */
     WEBP_lossyCompressionPreset: 'default' | 'picture' | 'photo' | 'drawing' | 'icon' | 'text';
@@ -65,6 +67,27 @@ export type OutputConfig = {
 
     /** Change alpha plane fidelity for lossy compression, default 100 */
     WEBP_alphaQuality: number;
+
+    /** 0 ~ 6, default 4 */
+    WEBP_cpuEffortToRediceSize: number;
+
+    /** Progressive GIF, default false */
+    GIF_interlace: boolean;
+
+    /** From 1 to 8 */
+    GIF_bitdepth: number;
+
+    /** From 0 to 1 (double) */
+    GIF_dither: number;
+
+    /** From 0 to 32 */
+    GIF_interframeMaxError: number;
+
+    /** From 0 to 256 */
+    GIF_interpaletteMaxError: number;
+
+    /** Quantisation effort */
+    // GIF_effort: number;
 
 };
 
@@ -88,10 +111,17 @@ export const defaultOutputConfig: OutputConfig = {
     PNG_quantisationQuality: 100,
     PNG_dither: 1,
     WEBP_quality: 75,
+    WEBP_keepAlphaChannel: true,
     WEBP_alphaQuality: 100,
     WEBP_loseless: false,
     WEBP_lossyCompressionPreset: 'default',
     WEBP_smartSubsample: false,
+    WEBP_cpuEffortToRediceSize: 4,
+    GIF_bitdepth: 8,
+    GIF_dither: 1,
+    GIF_interframeMaxError: 0,
+    GIF_interpaletteMaxError: 3,
+    GIF_interlace: false,
 };
 
 const TIPS_DIALOG_FLAGS = [
@@ -126,6 +156,7 @@ export type AppConfigContext = {
     updateOutputConfig: <T extends keyof OutputConfig>(key: T, value: OutputConfig[T]) => void,
     recordCollapseState: (index: number, open: boolean) => void,
     setOutputTargetFormat: (source: typeof ACCEPT_MIMEs[number], target: typeof OUTPUT_MIMEs[number]) => void,
+    resetOutputConfigToDefault: () => void,
 }
 
 
@@ -140,6 +171,7 @@ export const appConfigContext = createContext<AppConfigContext>({
     updateSiteConfig(key, value) { },
     recordCollapseState(index, open) { },
     setOutputTargetFormat() { },
+    resetOutputConfigToDefault() { },
 });
 
 
@@ -212,6 +244,12 @@ export function AppConfigContextProvider({ children }: { children: React.ReactNo
         });
     }, []);
 
+    // Extra
+
+    const resetOutputConfigToDefault = useCallback(() => {
+        setOutputConfig(defaultOutputConfig);
+        saveToLocalStorage(LOCALSTORAGE_KEYS.outputConfig, defaultOutputConfig);
+    }, []);
 
 
     return <appConfigContext.Provider value={{
@@ -224,6 +262,7 @@ export function AppConfigContextProvider({ children }: { children: React.ReactNo
         updateSiteConfig,
         recordCollapseState,
         setOutputTargetFormat,
+        resetOutputConfigToDefault,
     }}>
         {children}
     </appConfigContext.Provider>
