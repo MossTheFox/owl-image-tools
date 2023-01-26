@@ -1,7 +1,7 @@
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Box, Checkbox, FormControlLabel } from "@mui/material";
 import { useCallback, useState, useMemo, useContext } from "react";
 import { appConfigContext } from "../../context/appConfigContext";
-import { clipboardSupport, compabilityTestResult, FS_Mode, isMacOriOS, storageDisabled } from "../../utils/browserCompability";
+import { clipboardSupport, compatibilityTestResult, FS_Mode, isMacOriOS, isWebkit, storageDisabled } from "../../utils/browserCompability";
 
 /** Automatically open once on startup.
  * 
@@ -16,7 +16,7 @@ export default function BrowserCompatibilityDetectionDialog() {
     }, [setTipDisplay, siteConfig.tipDisplay]);
 
     const severity = useMemo(() => {
-        if (!compabilityTestResult.WASM || !compabilityTestResult.webWorker || storageDisabled) {
+        if (!compatibilityTestResult.WASM || !compatibilityTestResult.webWorker || !compatibilityTestResult.sharedArrayBuffer || storageDisabled) {
             return 'error';
         }
         return 'warning';
@@ -24,7 +24,7 @@ export default function BrowserCompatibilityDetectionDialog() {
 
     const [open, setOpen] = useState(
         (siteConfig.tipDisplay['browserCompatibility'] || severity === 'error') &&
-        (!compabilityTestResult.WASM || !compabilityTestResult.webWorker
+        (!compatibilityTestResult.WASM || !compatibilityTestResult.webWorker
             || FS_Mode === 'noFS' || storageDisabled || !clipboardSupport)
     );
 
@@ -64,15 +64,29 @@ export default function BrowserCompatibilityDetectionDialog() {
 
                     </>}
                     <DialogContentText gutterBottom>检测到的问题如下：</DialogContentText>
-                    {!compabilityTestResult.WASM && <DialogContentText gutterBottom>
-                        - (必要) 此浏览器不支持 WebAssembly
-                    </DialogContentText>}
-                    {!compabilityTestResult.webWorker && <DialogContentText gutterBottom>
+                    {!compatibilityTestResult.WASM && <Box p={1} mb={1} bgcolor={(theme) => theme.palette.action.hover} borderRadius={1}>
+                        <DialogContentText variant="h6" fontWeight='bolder' gutterBottom>
+                            不支持 WebAssembly
+                        </DialogContentText>
+                        <DialogContentText gutterBottom>
+                            图像处理内核 wasm-vips 将无法正常运行。
+                        </DialogContentText>
+                    </Box>}
+                    {!compatibilityTestResult.webWorker && <Box p={1} mb={1} bgcolor={(theme) => theme.palette.action.hover} borderRadius={1}>
+                        <DialogContentText variant="h6" fontWeight='bolder' gutterBottom>
+                            不支持 Web Worker
+                        </DialogContentText>
+                        <DialogContentText gutterBottom>
+                            WebAssembly 模块将不可以在主线程以外加载。
+                        </DialogContentText>
+                    </Box>}
+                    {!compatibilityTestResult.webWorker && <DialogContentText gutterBottom>
                         - (必要) 此浏览器不支持 Web Worker
                     </DialogContentText>}
-                    {!compabilityTestResult.sharedArrayBuffer && <DialogContentText gutterBottom>
-                        - (几乎必要) 此浏览器不支持 SharedArrayBuffer API
-                    </DialogContentText>}
+                    {!compatibilityTestResult.sharedArrayBuffer && <Box p={1} mb={1} bgcolor={(theme) => theme.palette.action.hover} borderRadius={1}>
+                        <DialogContentText variant="h6" fontWeight='bolder' gutterBottom>不支持 SharedArrayBuffer API</DialogContentText>
+                        <DialogContentText gutterBottom>这是驱动 WebAssembly 多线程任务的必要 API。由 libvips 提供的功能将无法正常使用。</DialogContentText>
+                    </Box>}
                     {FS_Mode === 'noFS' && <DialogContentText gutterBottom>
                         - (可选) 此浏览器不支持 Storage API
                     </DialogContentText>}
@@ -81,11 +95,19 @@ export default function BrowserCompatibilityDetectionDialog() {
             </>) : (<>
                 <DialogContentText gutterBottom>当前浏览器存在以下兼容性问题：</DialogContentText>
 
-                {!compabilityTestResult.sharedArrayBuffer && <Box p={1} mb={1} bgcolor={(theme) => theme.palette.action.hover} borderRadius={1}>
-                    <DialogContentText variant="h6" fontWeight='bolder' gutterBottom>不支持 SharedArrayBuffer API</DialogContentText>
-                    <DialogContentText gutterBottom><strong>相当多的由 libvips 提供的功能将无法正常使用。</strong></DialogContentText>
-                    <DialogContentText gutterBottom>只有少部分基础功能可以正常使用。</DialogContentText>
+                {/* Safari? */}
+                {isWebkit && <Box p={1} mb={1} bgcolor={(theme) => theme.palette.action.hover} borderRadius={1}>
+                    <DialogContentText variant="h6" fontWeight='bolder' gutterBottom>
+                        无法确定 wasm-vips 是否可以正常运行
+                    </DialogContentText>
+                    <DialogContentText gutterBottom>
+                        Safari 在内的基于 JavaScriptCore 的浏览器环境对于 WebAssembly SIMD 的支持可能存在问题。
+                    </DialogContentText>
+                    <DialogContentText gutterBottom>
+                        截至此程序当前版本发布，较新的预览版浏览器似乎解决了此问题。请确保你的浏览器版本为最新，然后，在开始转换的时留意一下模块是否工作正常。
+                    </DialogContentText>
                 </Box>}
+
                 {/* noFS */}
                 {FS_Mode === 'noFS' && <Box p={1} mb={1} bgcolor={(theme) => theme.palette.action.hover} borderRadius={1}>
                     <DialogContentText variant="h6" fontWeight='bolder' gutterBottom>不支持 File System API</DialogContentText>

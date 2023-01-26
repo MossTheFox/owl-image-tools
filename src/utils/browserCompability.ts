@@ -23,11 +23,11 @@ function compabilityTest() {
     return testRecords;
 }
 
-export const compabilityTestResult = compabilityTest();
+export const compatibilityTestResult = compabilityTest();
 
 export const FS_Mode = (() => {
-    if (compabilityTestResult.publicFS) return 'publicFS';
-    if (compabilityTestResult.privateFS) return 'privateFS';
+    if (compatibilityTestResult.publicFS) return 'publicFS';
+    if (compatibilityTestResult.privateFS) return 'privateFS';
     return 'noFS';
 })();
 
