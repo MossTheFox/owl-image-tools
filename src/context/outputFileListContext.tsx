@@ -5,9 +5,10 @@ import { loggerContext } from "./loggerContext";
 import { defaultFileListStatistic, FileListStatistic, getAllNodeInTree, TreeNode, WebkitFileNodeData } from "./fileListContext";
 import { defaultOutputConfig, OutputConfig } from "./appConfigContext";
 import { parseDateDelta, parseFileSizeString } from "../utils/randomUtils";
-import { convertToGIF, convertToJPEG, convertToPNG, convertToWebp } from "../utils/converter/libvipsConverter";
+import { convertToGIF, convertToJPEG, convertToPNG, convertToWebp, isFormatAcceptedByVips } from "../utils/converter/libvipsConverter";
 import { FS_Mode } from "../utils/browserCompability";
 import { isFileExists, renameFileForDuplication } from "../utils/FS";
+import { convertViaCanvas } from "../utils/converter/canvasConverter";
 
 /**
  * um.
@@ -188,7 +189,7 @@ export const outputFileListContext = createContext<OutputFileListContext>({
 
 export function OutputFileListContextProvider({ children }: { children: React.ReactNode }) {
 
-    const { writeLine } = useContext(loggerContext);
+    const { writeLine, fireAlertSnackbar } = useContext(loggerContext);
 
     // only in FS mode
     const [outputFolderHandle, setOutputFolderHandle] = useState<FileSystemDirectoryHandle>();
@@ -214,10 +215,23 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
 
         // TARGET ext
         const ext = getFileExt(node.name);
+        let originalFile: Blob = node.originalNode.data.file;
+
+        const originalFileExt = getFileExt(node.originalNode.data.file.name);
+        if (!isFormatAcceptedByVips(originalFileExt)) {
+            writeLine(`文件 ${node.originalNode.data.file.name} 不受当前版本的 libvips 支持，将借助浏览器进行第一次转换。元数据和透明度信息会丢失。`);
+            originalFile = await convertViaCanvas(originalFile, {
+                outputMIME: 'image/png',
+                background: C.imageBaseColor
+            });
+        }
+
+        writeLine(`开始处理文件: ${node.originalNode.data.file.name}, 目标类型: ${ext}`);
+
         let resultBuffer: Blob;
         switch (ext) {
             case 'jpg':
-                resultBuffer = await convertToJPEG(node.originalNode.data.file, {
+                resultBuffer = await convertToJPEG(originalFile, {
                     quality: C.JPEG_quality,
                     stripMetaData: !C.keepMetaData,  // !
                     defaultBackground: C.imageBaseColor,
@@ -225,7 +239,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
                 });
                 break;
             case 'png':
-                resultBuffer = await convertToPNG(node.originalNode.data.file, {
+                resultBuffer = await convertToPNG(originalFile, {
                     Q: C.PNG_quantisationQuality,
                     bitdepth: C.PNG_bitDepth,
                     compression: C.PNG_compressionLevel,
@@ -237,7 +251,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
                 });
                 break;
             case 'gif':
-                resultBuffer = await convertToGIF(node.originalNode.data.file, {
+                resultBuffer = await convertToGIF(originalFile, {
                     "interframe-maxerror": C.GIF_interframeMaxError,
                     "interpalette-maxerror": C.GIF_interpaletteMaxError,
                     bitdepth: C.GIF_bitdepth,
@@ -250,7 +264,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
                 });
                 break;
             case 'webp':
-                resultBuffer = await convertToWebp(node.originalNode.data.file, {
+                resultBuffer = await convertToWebp(originalFile, {
                     alphaQuality: C.WEBP_alphaQuality,
                     defaultBackground: C.imageBaseColor,
                     keepAlphaChannel: C.WEBP_keepAlphaChannel,
@@ -281,7 +295,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
             writeLine((FS_Mode === 'publicFS' ?
                 `已保存文件: ` :
                 `已在临时存储中保存文件: `)
-                + `${fileHandle.name} (${parseFileSizeString(resultBuffer.size)})`
+                + `${fileHandle.name} (${parseFileSizeString(node.originalNode.data.file.size)} → ${parseFileSizeString(resultBuffer.size)})`
             );
         }
 
@@ -302,6 +316,10 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
             setCurrentMapNodeIndex(-1); // end it. May call a finish function here or something if needed
             setLoading(false);
             writeLine('转换任务已完成，耗时 ' + parseDateDelta(new Date(), startTime));
+            fireAlertSnackbar({
+                severity: 'success',
+                message: '任务已完成。'
+            });
             return;
         }
         const curr = nodeArray[currentMapNodeIndex];
@@ -376,13 +394,12 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
 
 
 
-    }, [startTime, nodeArray, currentMapNodeIndex, writeLine, convertOne]);
+    }, [startTime, nodeArray, currentMapNodeIndex, writeLine, convertOne, fireAlertSnackbar]);
 
 
 
     const startConvertion = useCallback((nodes: TreeNode<WebkitFileNodeData>[], config: OutputConfig) => {
         // Original nodes should already be removed from source file list after calling this.
-        console.log(config.outputFormats);
 
         setCurrentOutputConfig(config);
 

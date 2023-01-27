@@ -1,5 +1,5 @@
-import { Box, Button, useMediaQuery, Theme, BoxProps, SxProps } from '@mui/material';
-import { useState, useMemo, useEffect, useCallback, useContext } from 'react';
+import { Box, useMediaQuery, Theme, BoxProps, SxProps } from '@mui/material';
+import { useMemo, useEffect, useCallback, useContext } from 'react';
 import { CONTROL_PANEL_HEIGHT } from '../App';
 import { panelNavigationContext } from '../context/panelNavigationContext';
 import ConfigPanel from './mainPanel/ConfigPanel';
@@ -64,6 +64,15 @@ function PanelBox({ left, width, sx, name, disabled, children }: {
 
 export default function PanelNavigation(props: BoxProps) {
 
+    // Context
+    const {
+        registerFunction,
+        unregisterFunction,
+        setOnScreenPanelCount,
+        focused,
+        setFocused
+    } = useContext(panelNavigationContext);
+
     // Screen Size
     const screenSizePad = useMediaQuery((theme: Theme) => theme.breakpoints.between('sm', 'md'));
     const screenSizeDesktop = useMediaQuery((theme: Theme) => theme.breakpoints.up('md'));
@@ -74,82 +83,40 @@ export default function PanelNavigation(props: BoxProps) {
         return 1;
     }, [screenSizePad, screenSizeDesktop]);
 
-    // Current Active Panel(s)
-    const [nav, setNav] = useState<Panels[]>(() => {
-        if (screenSizeDesktop) {
-            return ['input', 'config', 'output'];
-        }
-        if (screenSizePad) {
-            return ['input', 'config'];
-        }
-        return ['input'];
-    });
+    useEffect(() => {
+        setOnScreenPanelCount(onScreenPanelCount);
+    }, [onScreenPanelCount, setOnScreenPanelCount]);
 
     // Update active panels when screen size changed
     useEffect(() => {
         if (screenSizeDesktop) {
-            setNav(['input', 'config', 'output']);
+            setFocused(['input', 'config', 'output']);
             return;
         }
         if (screenSizePad) {
-            setNav((prev) => prev[0] === 'input' ? ['input', 'config'] : ['config', 'output']);
+            setFocused((prev) => prev[0] === 'input' ? ['input', 'config'] : ['config', 'output']);
             return;
         }
-        setNav((prev) => [prev[0]]);
-    }, [screenSizePad, screenSizeDesktop]);
-
-    // [Next] button
-    const goNext = useCallback(() => {
-        setNav((prev) => {
-            let startIndex = navOrder.indexOf(prev[0]);
-            if (onScreenPanelCount === 1 && startIndex < navOrder.length - 1) {
-                return [navOrder[startIndex + 1]];
-            }
-            if (onScreenPanelCount === 2 && startIndex < navOrder.length - 2) {
-                return [navOrder[startIndex + 1], navOrder[startIndex + 2]];
-            }
-            if (onScreenPanelCount === 3) {
-                return [...navOrder];
-            }
-            return [...prev];
-        })
-    }, [onScreenPanelCount]);
-
-    // [Prev] button
-    const goPrev = useCallback(() => {
-        setNav((prev) => {
-            let startIndex = navOrder.indexOf(prev[0]);
-            if (onScreenPanelCount === 1 && startIndex > 0) {
-                return [navOrder[startIndex - 1]];
-            }
-            if (onScreenPanelCount === 2 && startIndex > 0) {
-                return [navOrder[startIndex - 1], navOrder[startIndex]];
-            }
-            if (onScreenPanelCount === 3) {
-                return [...navOrder];
-            }
-            return [...prev];
-        })
-    }, [onScreenPanelCount]);
+        setFocused((prev) => [prev[0]]);
+    }, [screenSizePad, screenSizeDesktop, setFocused]);
 
     const navigateTo = useCallback((target: Panels) => {
         if (onScreenPanelCount === 3) {
-            setNav([...navOrder]);
+            setFocused([...navOrder]);
             return;
         }
         if (onScreenPanelCount === 2) {
-            (target === navOrder[2]) && setNav(['config', 'output']);
-            (target === navOrder[1]) && setNav(['input', 'config']);
-            (target === navOrder[0]) && setNav(['input', 'config']);
+            (target === navOrder[2]) && setFocused(['config', 'output']);
+            (target === navOrder[1]) && setFocused(['input', 'config']);
+            (target === navOrder[0]) && setFocused(['input', 'config']);
             return;
         }
-        setNav([target]);
-    }, [onScreenPanelCount]);
+        setFocused([target]);
+    }, [onScreenPanelCount, setFocused]);
 
-    const panelNavContext = useContext(panelNavigationContext);
     useEffect(() => {
-        panelNavContext.registerFunction(navigateTo);
-    }, [navigateTo, panelNavContext.registerFunction]);
+        registerFunction(navigateTo);
+    }, [navigateTo, registerFunction]);
 
     // Width for each panel
     const widthProp = useMemo(() => {
@@ -161,29 +128,23 @@ export default function PanelNavigation(props: BoxProps) {
     // Filter (CSS filter: brightness) for each panel
     const filterProp = useMemo(() => {
         return {
-            'input': nav.includes('input') ? 'brightness(100%)' : 'brightness(90%)',
-            'config': nav.includes('config') ? 'brightness(100%)' : 'brightness(90%)',
-            'output': nav.includes('output') ? 'brightness(100%)' : 'brightness(90%)'
+            'input': focused.includes('input') ? 'brightness(100%)' : 'brightness(90%)',
+            'config': focused.includes('config') ? 'brightness(100%)' : 'brightness(90%)',
+            'output': focused.includes('output') ? 'brightness(100%)' : 'brightness(90%)'
         };
-    }, [screenSizePad, screenSizeDesktop, nav]);
+    }, [screenSizePad, screenSizeDesktop, focused]);
 
-
-    // Touch screen swipping action
-    // TODO: (?) do or skip?
-    const [swipping, setSwipping] = useState(false);
-
-    // When swipping, duratio should be 0
+    // Was planned to allow swipping but now let's forget it
     const transitionDuration = useMemo(() => {
-        if (swipping) return '0';
         return '0.25s';
-    }, [swipping]);
+    }, []);
 
     // Left property (CSS positioning) for the three panels
     const containerLeft = useMemo(() => {
-        if (nav.length === 1) {
+        if (focused.length === 1) {
             // mind blown up. Hard coded here. whatever.
             let indexOrder = [0, 1, 2];
-            switch (nav[0]) {
+            switch (focused[0]) {
                 case 'input':
                     indexOrder = [2, 3, 4];
                     break;
@@ -201,8 +162,8 @@ export default function PanelNavigation(props: BoxProps) {
             }
         }
 
-        if (nav.length === 2) {
-            const firstIndex = Math.max(navOrder.indexOf(nav[0]), 0);
+        if (focused.length === 2) {
+            const firstIndex = Math.max(navOrder.indexOf(focused[0]), 0);
             if (firstIndex === 0 /* input panel be the first */) {
                 return {
                     'input': leftPositionAnchorsSM[1],
@@ -222,7 +183,7 @@ export default function PanelNavigation(props: BoxProps) {
             'config': leftPositionAnchorsMD[1],
             'output': leftPositionAnchorsMD[2]
         };
-    }, [nav]);
+    }, [focused]);
 
     return <Box position="relative"
         overflow="visible"
@@ -234,7 +195,7 @@ export default function PanelNavigation(props: BoxProps) {
         <PanelBox
             name='input'
             left={containerLeft.input}
-            disabled={!nav.includes('input')}
+            disabled={!focused.includes('input')}
             width={widthProp}
             sx={{
                 transitionDuration,
@@ -247,7 +208,7 @@ export default function PanelNavigation(props: BoxProps) {
         <PanelBox
             name='config'
             left={containerLeft.config}
-            disabled={!nav.includes('config')}
+            disabled={!focused.includes('config')}
             width={widthProp}
             sx={{
                 transitionDuration,
@@ -260,7 +221,7 @@ export default function PanelNavigation(props: BoxProps) {
         <PanelBox
             name='output'
             left={containerLeft.output}
-            disabled={!nav.includes('output')}
+            disabled={!focused.includes('output')}
             width={widthProp}
             sx={{
                 transitionDuration,
@@ -269,10 +230,6 @@ export default function PanelNavigation(props: BoxProps) {
         >
             <OutputPanel />
         </PanelBox>
-
-        <Button onClick={navigateTo.bind(null, 'input')}>debug 1</Button>
-        <Button onClick={navigateTo.bind(null, 'config')}>debug 2</Button>
-        <Button onClick={navigateTo.bind(null, 'output')}>debug 3</Button>
 
     </Box>
 }

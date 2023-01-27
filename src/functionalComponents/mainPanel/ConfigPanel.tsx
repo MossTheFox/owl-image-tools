@@ -1,18 +1,21 @@
-import { Box, Paper, Typography, Stack, PaperProps, Grid, Select, MenuItem, Link, Menu, ListItem } from "@mui/material";
+import { Box, Paper, Typography, Stack, PaperProps, Grid, Select, MenuItem, Link, Menu, ListItem, Button } from "@mui/material";
 import { useCallback, useContext, useMemo, useRef, useState } from "react";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../context/fileListContext";
 import { CONTROL_PANEL_HEIGHT } from "../../App";
 import DialogLoadingIndicator from "../../ui/smallComponents/DialogLoadingIndicator";
-import { extToMime, mimeToExt, OUTPUT_MIMEs } from "../../utils/imageMIMEs";
+import { mimeToExt, OUTPUT_MIMEs } from "../../utils/imageMIMEs";
 import OutputConfigArea from "./configPanelComponents/OutputConfigArea";
 import { appConfigContext } from "../../context/appConfigContext";
 import { KNOWN_ISSUES } from "../../constraints";
-import { t } from "i18next";
+import { panelNavigationContext } from "../../context/panelNavigationContext";
+import { Forward } from "@mui/icons-material";
 
 export default function ConfigPanel(props: PaperProps) {
 
     const fileListContext = useContext(_fileListContext);
     const webkitFileListContext = useContext(_webkitFileListContext);
+
+    const { onScreenPanelCount, navigateTo, focused } = useContext(panelNavigationContext);
 
     const { outputConfig, setOutputTargetFormat } = useContext(appConfigContext);
 
@@ -42,14 +45,49 @@ export default function ConfigPanel(props: PaperProps) {
         {/* Loading Indicator with ZIndex higher than content box */}
         <DialogLoadingIndicator loading={processing} zIndex={2} position="relative" />
 
-        <Box px={2} pt={2} pb={1}
+        <Box px={2} pb={1}
             borderBottom={1}
-            borderColor='divider'
+            borderColor="divider"
+            display='flex' justifyContent='baseline' alignItems='stretch'
         >
+            <Box pt={2}>
+                <Typography variant="h5" fontWeight='bolder'
+                    component='div' display='flex' alignItems='stretch' justifyContent='space-between'
+                >
+                    <span>输出设置</span>
 
-            <Typography variant="h5" fontWeight='bolder'>
-                输出设置
-            </Typography>
+                </Typography>
+            </Box>
+
+            {/* Navigation Here */}
+            <Box pt={1} flexGrow={1} display="flex" justifyContent="end" alignItems="stretch" gap={1}
+                sx={{
+                    transition: 'opacity 0.25s',
+                    opacity: onScreenPanelCount <= 2 ? 1 : 0
+                }}
+            >
+                <Box display="flex" alignItems="stretch"
+                    overflow="hidden" gap={1}
+                >
+                    {(!focused.includes('input') || onScreenPanelCount === 1) && <Button variant='outlined' size="small"
+                        startIcon={<Forward sx={{ transform: 'scaleX(-1)' }} />}
+                        onClick={() => navigateTo('input')}
+                        sx={{ whiteSpace: 'nowrap', py: 0 }}
+                    >
+                        导入文件
+                    </Button>}
+                    {(!focused.includes('output') || onScreenPanelCount === 1) &&
+                        <Button variant={'contained'} size="small"
+                            disableElevation
+                            endIcon={<Forward />}
+                            onClick={() => navigateTo('output')}
+                            sx={{ whiteSpace: 'nowrap', py: 0 }}
+                        >
+                            开始任务
+                        </Button>}
+                </Box>
+
+            </Box>
         </Box>
 
         <Box overflow='auto'>

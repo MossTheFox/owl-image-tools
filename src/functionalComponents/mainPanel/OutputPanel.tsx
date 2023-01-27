@@ -1,12 +1,13 @@
-import { Box, Paper, Typography, Stack, PaperProps, LinearProgress } from "@mui/material";
+import { Box, Paper, Typography, Stack, PaperProps, LinearProgress, Button } from "@mui/material";
 import { useContext, useMemo } from "react";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../context/fileListContext";
 import { CONTROL_PANEL_HEIGHT } from "../../App";
 import { FileListDialogCallerContextProvider } from "../../context/fileListDialog/fileListDialogCallerContext";
-import DialogLoadingIndicator from "../../ui/smallComponents/DialogLoadingIndicator";
 import { outputFileListContext as _outputFileListContext } from "../../context/outputFileListContext";
 import OutputFileListPreview from "./fileListPreview/OutputFileListPreview";
 import StartTaskButton from "./outputPanelComponents/StartTaskButton";
+import { Forward } from "@mui/icons-material";
+import { panelNavigationContext } from "../../context/panelNavigationContext";
 
 export default function OutputPanel(props: PaperProps) {
 
@@ -20,6 +21,7 @@ export default function OutputPanel(props: PaperProps) {
         return outputStatistic.converted.totalFiles / outputStatistic.inputFiles.totalFiles * 100;
     }, [outputStatistic])
 
+    const { onScreenPanelCount, navigateTo } = useContext(panelNavigationContext);
 
 
     return <Paper {...props} sx={{
@@ -42,14 +44,37 @@ export default function OutputPanel(props: PaperProps) {
             <LinearProgress variant="determinate" value={progress} />
         </Box>
 
-        <Box px={2} pt={2} pb={1}
+        <Box px={2} pb={1}
             borderBottom={1}
             borderColor="divider"
+            display='flex' justifyContent='baseline' alignItems='stretch'
         >
-            <Typography variant="h5" fontWeight='bolder'>
-                输出
-            </Typography>
+            <Box pt={2}>
+                <Typography variant="h5" fontWeight='bolder'
+                    component='div' display='flex' alignItems='stretch' justifyContent='space-between'
+                >
+                    <span>输出</span>
+
+                </Typography>
+            </Box>
+
+            <Box pt={1} flexGrow={1} display="flex" justifyContent="end"
+                sx={{
+                    transition: 'opacity 0.25s',
+                    opacity: onScreenPanelCount === 1 ? 1 : 0
+                }}
+            >
+                <Button variant={'outlined'} size="small"
+                    startIcon={<Forward sx={{ transform: 'scaleX(-1)' }} />}
+                    onClick={() => navigateTo('config')}
+                    disableElevation
+                    sx={{ whiteSpace: 'nowrap', py: 0 }}
+                >
+                    输出设置
+                </Button>
+            </Box>
         </Box>
+
         <Box px={2} py={1}
             borderBottom={1}
             borderColor="divider"

@@ -33,6 +33,13 @@ export default function OutputFileTreeItem({
         return node.file.size - node.originalNode.data.file.size;
     })();
 
+    const percentage = (() => {
+        if (node.kind !== 'file' || !node.finished || !node.file || node.originalNode.data.kind !== 'file') {
+            return 100;
+        }
+        return node.file.size / node.originalNode.data.file.size;
+    })();
+
     const callPreviewDialog = useCallback(() => {
         if (node.kind !== 'file' || !node.file) return;
         // TODO: outputFileListContext
@@ -133,9 +140,10 @@ export default function OutputFileTreeItem({
                                             variant="body2" color={deltaSize > 0 ? (theme) => theme.palette.error.main :
                                                 deltaSize === 0 ? 'inherit' : (theme) => theme.palette.primary.main}>
                                             {deltaSize >= 0 ? `+` : '-'}{parseFileSizeString(Math.abs(deltaSize))}
+                                            {` (${Math.round(percentage * 100)}%)`}
                                         </Typography>
                                     </>
-                                    : '等待中')}
+                                    : '')}
                             </Typography>
                         </Box>
                         <Box display='flex' alignItems="baseline" justifyContent="space-between">
@@ -145,7 +153,7 @@ export default function OutputFileTreeItem({
                             <Typography flexGrow={1} variant="body1" color={
                                 node.error ? "error" : "textSecondary"
                             } whiteSpace='nowrap' textAlign="end" ml='1px'>
-                                {!node.error && (node.file ? parseFileSizeString(node.file.size) : '等待中')}
+                                {!node.error && (node.file ? parseFileSizeString(node.file.size) : '')}
                                 {!!node.error && '出错'}
                             </Typography>
                         </Box>
@@ -169,9 +177,10 @@ export default function OutputFileTreeItem({
                                             color={deltaSize > 0 ? (theme) => theme.palette.error.main :
                                                 deltaSize === 0 ? 'inherit' : (theme) => theme.palette.primary.main}>
                                             {deltaSize >= 0 ? `+` : '-'}{parseFileSizeString(Math.abs(deltaSize))}
+                                            {` (${Math.round(percentage * 100)}%)`}
                                         </Typography>
                                     }</>
-                                : '等待中')}
+                                : '')}
                             {!!node.error && '出错'}
 
                         </Typography>

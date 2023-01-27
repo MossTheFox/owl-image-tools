@@ -61,10 +61,10 @@ function initVips() {
                     return `/wasm/vips/${url}`;
                 },
                 print(str) {
-                    console.log(str);
+                    import.meta.env.DEV && console.log(str);
                 },
                 printErr(str) {
-                    console.warn(str);
+                    import.meta.env.DEV && console.warn(str);
                 },
                 onAbort(what) {
                     reject(new Error(what));
@@ -105,10 +105,10 @@ const blobToUint8Array = async (blob: Blob) => {
         throw errorBuilder('Unable to read File', 'ImageFileUnreadable');
     }
     const buffer = new Uint8Array(arrayBuffer);
-    return buffer
+    return buffer;
 };
 
-export function isFormatAccepted(fileExtention: string) {
+export function isFormatAcceptedByVips(fileExtention: string) {
     return ['png', 'jpg', 'jpeg', 'webp', 'gif', 'tif', 'tiff'].includes(fileExtention.toLowerCase());
 }
 
