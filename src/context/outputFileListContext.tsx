@@ -245,8 +245,8 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
                     dither: C.GIF_dither,
                     effort: 7,
                     // interlace: C.GIF_interlace,
-                    keepAlphaChannel: true, // TO BE TESTED 
-                    stripMetaData: C.keepMetaData
+                    keepAlphaChannel: C.GIF_keepAlphaChannel,
+                    stripMetaData: !C.keepMetaData                  // !
                 });
                 break;
             case 'webp':
@@ -257,8 +257,8 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
                     lossless: C.WEBP_lossless,
                     lossyCompressionPreset: C.WEBP_lossyCompressionPreset,
                     quality: C.WEBP_quality,
-                    smartSubsample: false, // TO
-                    stripMetaData: C.keepMetaData
+                    smartSubsample: false, // TO BE TESTED
+                    stripMetaData: !C.keepMetaData                  // !
                 });
                 break;
 

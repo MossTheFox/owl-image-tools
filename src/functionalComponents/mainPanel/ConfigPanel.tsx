@@ -1,11 +1,13 @@
-import { Box, Paper, Typography, Stack, PaperProps, Grid, Select, MenuItem } from "@mui/material";
-import { useContext, useMemo } from "react";
+import { Box, Paper, Typography, Stack, PaperProps, Grid, Select, MenuItem, Link, Menu, ListItem } from "@mui/material";
+import { useCallback, useContext, useMemo, useRef, useState } from "react";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../context/fileListContext";
 import { CONTROL_PANEL_HEIGHT } from "../../App";
 import DialogLoadingIndicator from "../../ui/smallComponents/DialogLoadingIndicator";
 import { extToMime, mimeToExt, OUTPUT_MIMEs } from "../../utils/imageMIMEs";
 import OutputConfigArea from "./configPanelComponents/OutputConfigArea";
 import { appConfigContext } from "../../context/appConfigContext";
+import { KNOWN_ISSUES } from "../../constraints";
+import { t } from "i18next";
 
 export default function ConfigPanel(props: PaperProps) {
 
@@ -16,6 +18,16 @@ export default function ConfigPanel(props: PaperProps) {
 
     const processing = useMemo(() => !fileListContext.ready || !webkitFileListContext.ready, [fileListContext.ready, webkitFileListContext.ready]);
 
+    const [menuOpen, setMenuOpen] = useState(false);
+    const menuAnchor = useRef<HTMLDivElement>(null);
+
+    const openMenu = useCallback(() => setMenuOpen(true), []);
+    const closeMenu = useCallback(() => setMenuOpen(false), []);
+
+    const setAllTo = useCallback((mime: typeof OUTPUT_MIMEs[number]) => {
+        setOutputTargetFormat('ALL', mime);
+        closeMenu();
+    }, [setOutputTargetFormat, closeMenu]);
 
     return <Paper {...props} sx={{
         ...props.sx,
@@ -45,9 +57,29 @@ export default function ConfigPanel(props: PaperProps) {
                 borderBottom={1}
                 borderColor='divider'
             >
-                <Typography variant="body1" fontWeight='bolder' gutterBottom>
-                    目标格式
+                <Typography ref={menuAnchor} variant="body1" fontWeight='bolder' gutterBottom
+                    component="div" display="flex" alignItems="baseline" justifyContent="left" gap={1}
+                >
+                    <span>目标格式</span>
+                    <Link component="button" underline="hover" variant="body2" onClick={openMenu}>
+                        选项
+                    </Link>
                 </Typography>
+
+                <Menu open={menuOpen} anchorEl={menuAnchor.current} onClose={closeMenu}>
+                    <ListItem dense>
+                        <Typography fontWeight="bolder">全部设置为:</Typography>
+                    </ListItem>
+                    {OUTPUT_MIMEs.map((v, i) =>
+                        <MenuItem dense key={v} value={v} onClick={setAllTo.bind(null, v)}>
+                            <Typography variant="body2" display='inline-block' px={0.5}>
+                                {`${mimeToExt(v)} (${v})`}
+                            </Typography>
+                        </MenuItem>
+                    )}
+                </Menu>
+
+
                 {webkitFileListContext.statistic.totalFiles <= 0 &&
                     <Typography variant="body2" color="textSecondary" gutterBottom>
                         请先导入文件。
@@ -65,6 +97,7 @@ export default function ConfigPanel(props: PaperProps) {
                             <Typography variant="body2" fontWeight="bolder">
                                 输出格式
                             </Typography>
+
                         </Grid>
                         {Object.entries(webkitFileListContext.statistic.perFormatCount).map((v, i) => {
                             const [_mime, count] = v;
@@ -116,7 +149,13 @@ export default function ConfigPanel(props: PaperProps) {
                     <OutputConfigArea />
 
                 </Stack>
+                <Box py={2}>
+                    <Typography variant="body2" color="textSecondary" whiteSpace="pre-wrap">
+                        {KNOWN_ISSUES['zh-CN']}
+                    </Typography>
+                </Box>
             </Box>
+
         </Box >
     </Paper >;
 }

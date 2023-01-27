@@ -108,6 +108,10 @@ const blobToUint8Array = async (blob: Blob) => {
     return buffer
 };
 
+export function isFormatAccepted(fileExtention: string) {
+    return ['png', 'jpg', 'jpeg', 'webp', 'gif', 'tif', 'tiff'].includes(fileExtention.toLowerCase());
+}
+
 const isMultiframePic = (type: string) => {
     return ['image/gif', 'image/webp'].includes(type);
 };
@@ -156,13 +160,17 @@ export async function convertToPNG(file: Blob, config = {
 
     // try read the blob
 
-    const img = vips.Image.newFromBuffer(await blobToUint8Array(file));
+    let img = vips.Image.newFromBuffer(await blobToUint8Array(file));
+    if (!config.keepAlphaChannel) {
+        const flattened = img.flatten({
+            background: await parseBackground(config.defaultBackground),
+        });
+        img.delete();
+        img = flattened;
+    }
     const result = img.writeToBuffer('.png', {
         compression: config.compression,
         strip: config.stripMetaData,
-        ...config.keepAlphaChannel ? {} : {
-            background: await parseBackground(config.defaultBackground)
-        },
         interlace: config.interlace,
         dither: config.dither,
         ...config.bitdepth !== 0 ? { bitdepth: config.bitdepth } : {},
@@ -188,7 +196,14 @@ export async function convertToWebp(file: Blob, config = {
         vips = await initVips();
     }
     const props = isMultiframePic(file.type) ? 'n=-1' : '';
-    const img = vips.Image.newFromBuffer(await blobToUint8Array(file), props);
+    let img = vips.Image.newFromBuffer(await blobToUint8Array(file), props);
+    if (!config.keepAlphaChannel) {
+        const flattened = img.flatten({
+            background: await parseBackground(config.defaultBackground),
+        });
+        img.delete();
+        img = flattened;
+    }
     const result = img.writeToBuffer('.webp', {
         Q: config.quality,
         strip: config.stripMetaData,
@@ -221,7 +236,14 @@ export async function convertToGIF(file: Blob, config = {
         vips = await initVips();
     }
     const props = isMultiframePic(file.type) ? 'n=-1' : '';
-    const img = vips.Image.newFromBuffer(await blobToUint8Array(file), props);
+    let img = vips.Image.newFromBuffer(await blobToUint8Array(file), props);
+    if (!config.keepAlphaChannel) {
+        const flattened = img.flatten({
+            background: await parseBackground(config.defaultBackground),
+        });
+        img.delete();
+        img = flattened;
+    }
     const result = img.writeToBuffer('.gif', {
         bitdepth: config.bitdepth,
         strip: config.stripMetaData,

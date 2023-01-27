@@ -15,7 +15,7 @@ export default function PNGConfig(props: BoxProps) {
 
             <CheckboxWithTooltop
                 label='丢弃透明度信息'
-                tooltip='如果丢弃透明度信息，输出的图像将会应用设置的图片底色。'
+                tooltip='如果丢弃透明度信息，输出的图像将会应用设置的图片底色。对于真彩色 (RGB) 图像，则由 PNG32 变为 PNG24。'
                 checkboxProps={{
                     checked: outputConfig.PNG_removeAlphaChannel,
                     onChange: (e, v) => {

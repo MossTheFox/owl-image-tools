@@ -19,9 +19,10 @@ const errorBuilder = (message: string, cause: ConvertWithCanvasErrorCause) => ne
 /**
  * When catching Errors, the `err.cause` is one of `CANVAS_ACTION_ERROR_CAUSES` exported.
  */
-export function convertViaCanvas(fileOrBlob: File | Blob, { outputMIME, jpegQualityParam }: {
+export function convertViaCanvas(fileOrBlob: File | Blob, { outputMIME, jpegQualityParam, background }: {
     outputMIME: 'image/png' | 'image/jpeg' | 'image/webp',
-    jpegQualityParam?: number
+    jpegQualityParam?: number,
+    background?: string,
 }) {
     return new Promise<Blob>(async (resolve, reject) => {
 
@@ -63,6 +64,10 @@ export function convertViaCanvas(fileOrBlob: File | Blob, { outputMIME, jpegQual
             if (!context) {
                 reject(errorBuilder('Canvas 出错。', 'CanvasError'));
                 return;
+            }
+            if (background) {
+                context.fillStyle = background;
+                context.fillRect(0, 0, width, height);
             }
             context.drawImage(img, 0, 0);
             try {

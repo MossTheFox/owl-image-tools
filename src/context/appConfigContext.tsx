@@ -71,6 +71,9 @@ export type OutputConfig = {
     /** 0 ~ 6, default 4 */
     WEBP_cpuEffortToRediceSize: number;
 
+    
+    GIF_keepAlphaChannel: boolean;
+
     /** Progressive GIF, default false */
     GIF_interlace: boolean;
 
@@ -117,6 +120,7 @@ export const defaultOutputConfig: OutputConfig = {
     WEBP_lossyCompressionPreset: 'default',
     WEBP_smartSubsample: false,
     WEBP_cpuEffortToRediceSize: 4,
+    GIF_keepAlphaChannel: false,
     GIF_bitdepth: 8,
     GIF_dither: 1,
     GIF_interframeMaxError: 0,
@@ -155,7 +159,7 @@ export type AppConfigContext = {
     setOutputConfig: React.Dispatch<SetStateAction<AppConfigContext['outputConfig']>>,
     updateOutputConfig: <T extends keyof OutputConfig>(key: T, value: OutputConfig[T]) => void,
     recordCollapseState: (index: number, open: boolean) => void,
-    setOutputTargetFormat: (source: typeof ACCEPT_MIMEs[number], target: typeof OUTPUT_MIMEs[number]) => void,
+    setOutputTargetFormat: (source: typeof ACCEPT_MIMEs[number] | 'ALL', target: typeof OUTPUT_MIMEs[number]) => void,
     resetOutputConfigToDefault: () => void,
 }
 
@@ -229,7 +233,25 @@ export function AppConfigContextProvider({ children }: { children: React.ReactNo
         });
     }, []);
 
-    const setOutputTargetFormat = useCallback((source: typeof ACCEPT_MIMEs[number], target: typeof OUTPUT_MIMEs[number]) => {
+    const setOutputTargetFormat = useCallback((source: typeof ACCEPT_MIMEs[number] | 'ALL', target: typeof OUTPUT_MIMEs[number]) => {
+        if (source === 'ALL') {
+            setOutputConfig((prev) => {
+                const result = {
+                    ...prev,
+                    outputFormats: {
+                        ...defaultOutputConfig.outputFormats,
+                        ...ACCEPT_MIMEs.reduce((prev, curr) => ({
+                            ...prev,
+                            [curr]: target
+                        }), {}) as OutputConfig['outputFormats']
+                    }
+                }
+                saveToLocalStorage(LOCALSTORAGE_KEYS.outputConfig, result);
+                return result;
+            });
+            return;
+        }
+
         setOutputConfig((prev) => {
             const result: typeof prev = {
                 ...prev,

@@ -11,6 +11,18 @@ export default function GIFConfig(props: BoxProps) {
 
 
     return <Box {...props}>
+
+        <Box pb={1}>
+            <CheckboxWithTooltop
+                label="保留透明度信息"
+                tooltip="GIF 支持携带透明度信息，但是不支持半透明像素。即，每一个像素只可以是全透明或完全不透明。"
+                checkboxProps={{
+                    checked: outputConfig.GIF_keepAlphaChannel,
+                    onChange: (e, v) => updateOutputConfig('GIF_keepAlphaChannel', v)
+                }}
+            />
+        </Box>
+
         <Box pb={2}>
 
             {/* ⚠ vips 1.18.3 does NOT support GIF interlace. */}
@@ -61,12 +73,12 @@ export default function GIFConfig(props: BoxProps) {
         <Box pb={2}>
             <TypographyWithTooltip variant="body2" fontWeight="bolder" color="textSecondary" gutterBottom
                 tooltip={<>
-                    Interframe Maxerror, 帧与帧之间低于这个阈值的像素变化会被视为未改变，以此可以将这些像素视作透明。<br />
+                    Interframe Maxerror, 帧与帧之间低于这个阈值的像素变化会被视为未改变，因此可以将这些像素视作透明。<br />
                     可以提高图像压缩率。默认 {defaultOutputConfig.GIF_interframeMaxError}。
                 </>
                 }
             >
-                帧间色彩阈值
+                帧间最大误差
             </TypographyWithTooltip>
 
             <SliderWithInput value={outputConfig.GIF_interframeMaxError}
@@ -84,7 +96,7 @@ export default function GIFConfig(props: BoxProps) {
                 </>
                 }
             >
-                纹理阈值
+                纹理最大误差
             </TypographyWithTooltip>
 
             <SliderWithInput value={outputConfig.GIF_interpaletteMaxError}

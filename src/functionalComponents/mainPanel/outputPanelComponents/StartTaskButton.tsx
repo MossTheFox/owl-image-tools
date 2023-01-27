@@ -30,15 +30,14 @@ export default function StartTaskButton(props: BoxProps) {
 
     const { fireAlertSnackbar } = useContext(loggerContext);
 
-    const notFirstTaskToRun = useMemo(() => {
-        return outputStatistic.inputFiles.totalFiles > 0;
-    }, [outputStatistic]);
+    const [lastTastFolderName, setLastTaskFolderName] = useState('');
 
     const { outputConfig } = useContext(appConfigContext);
     const { clearNodes, statistic } = useContext(webkitFileListContext);
 
     const handleGet = useCallback((handle?: FileSystemDirectoryHandle) => {
         setOutputFolderHandle(handle);
+        setLastTaskFolderName(handle?.name ?? '');
         startConvertion(clearNodes(), outputConfig);
     }, [setOutputFolderHandle, startConvertion, clearNodes, outputConfig]);
 
@@ -81,17 +80,22 @@ export default function StartTaskButton(props: BoxProps) {
     }, [handleGet, fireOPFSDirGet, fireOpenDirPicker]);
 
     const startBtn = useCallback(() => {
-        if (notFirstTaskToRun) {
+        if (lastTastFolderName) {
             setNotifyPopperOpen(true);
             return;
         }
         start();
-    }, [start, notFirstTaskToRun]);
+    }, [start, lastTastFolderName]);
 
     const notifyConfirmClearAndContinueBtn = useCallback(() => {
         start();
         setNotifyPopperOpen(false);
     }, [start]);
+
+    const justStart = useCallback(() => {
+        startConvertion(clearNodes(), outputConfig);
+        setNotifyPopperOpen(false);
+    }, [setOutputFolderHandle, startConvertion, clearNodes, outputConfig]);
 
     return <Box {...props}>
 
@@ -106,7 +110,7 @@ export default function StartTaskButton(props: BoxProps) {
                         whiteSpace: 'nowrap'
                     }}
                 >
-                    {notFirstTaskToRun ? '开始下一组任务' :
+                    {!!lastTastFolderName ? '开始下一组任务' :
                         '选择输出目录并开始转换'
                     }
                 </Button>
@@ -136,10 +140,23 @@ export default function StartTaskButton(props: BoxProps) {
                     <Typography variant="body2" color="textSecondary" gutterBottom>
                         <strong>请确定文件已经被正确保存</strong>，然后，点击继续来从开始下一组任务。
                     </Typography>
+                    {!!lastTastFolderName &&
+                        <Typography variant="body2" color="textSecondary" gutterBottom>
+                            上一次的输出目录名称: {lastTastFolderName}
+                        </Typography>
+                    }
                 </Box>
-                <Button onClick={notifyConfirmClearAndContinueBtn}>
-                    {FS_Mode === 'publicFS' ? '选择输出目录并继续' : '继续'}
-                </Button>
+                <Box display="flex" gap={1} alignItems="center" justifyContent="end">
+                    {FS_Mode === 'publicFS' && <Button onClick={justStart}
+                        sx={{ textTransform: 'unset' }}
+                    >
+                        使用上一次的输出目录继续
+                    </Button>}
+
+                    <Button onClick={notifyConfirmClearAndContinueBtn}>
+                        {FS_Mode === 'publicFS' ? '选择输出目录并继续' : '继续'}
+                    </Button>
+                </Box>
             </Box>
         </Popover>
     </Box>
