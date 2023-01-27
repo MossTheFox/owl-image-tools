@@ -129,7 +129,7 @@ export const defaultOutputConfig: OutputConfig = {
 };
 
 const TIPS_DIALOG_FLAGS = [
-    'browserCompatibility', 'webkitOpenDirectory'
+    'browserCompatibility', 'webkitOpenDirectory', 'fileListTip', 'outputFileListTip'
 ] as const;
 
 // Site Config

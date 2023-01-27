@@ -1,5 +1,5 @@
 import { Box, Paper, Typography, Stack, PaperProps, LinearProgress, Button } from "@mui/material";
-import { useContext, useMemo } from "react";
+import { useCallback, useContext, useMemo } from "react";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../context/fileListContext";
 import { CONTROL_PANEL_HEIGHT } from "../../App";
 import { FileListDialogCallerContextProvider } from "../../context/fileListDialog/fileListDialogCallerContext";
@@ -9,6 +9,8 @@ import StartTaskButton from "./outputPanelComponents/StartTaskButton";
 import { Forward } from "@mui/icons-material";
 import { panelNavigationContext } from "../../context/panelNavigationContext";
 import { OutputFileListDialogCallerContextProvider } from "../../context/fileListDialog/outputFileListDialogCallerContext";
+import BottomTipDisplay from "../../components/styledComponents/BottomTipDisplay";
+import { appConfigContext } from "../../context/appConfigContext";
 
 export default function OutputPanel(props: PaperProps) {
 
@@ -24,6 +26,11 @@ export default function OutputPanel(props: PaperProps) {
 
     const { onScreenPanelCount, navigateTo } = useContext(panelNavigationContext);
 
+    const { siteConfig, setTipDisplay } = useContext(appConfigContext);
+
+    const tipConfirm = useCallback(() => {
+        setTipDisplay('outputFileListTip', false);
+    }, [setTipDisplay]);
 
     return <Paper {...props} sx={{
         ...props.sx,
@@ -33,7 +40,8 @@ export default function OutputPanel(props: PaperProps) {
         transition: 'background-color 0.25s',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'stretch'
+        justifyContent: 'stretch',
+        position: 'relative',
     }}>
         {/* Loading Indicator with ZIndex higher than content box */}
         <Box height={0} overflow="visible" zIndex={2} position="relative"
@@ -101,5 +109,19 @@ export default function OutputPanel(props: PaperProps) {
             </OutputFileListDialogCallerContextProvider>
 
         </Box>
+
+        <BottomTipDisplay onDismiss={tipConfirm}
+            hidden={outputStatistic.inputFiles.totalFiles === 0 || !siteConfig.tipDisplay['outputFileListTip']}
+        >
+            <Typography variant="body1" gutterBottom>
+                在文件列表的文件上，可以通过 <strong>鼠标右击</strong> 或 <strong>触摸长按</strong> 来对于单个 文件/文件夹 打开下载菜单。
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+                请留意，转换出错的文件会在批量保存时被跳过。请一定要保留好自己源文件的备份。
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+               <strong>开始新的转换任务之后，此列表将会被清空。</strong>确定文件已经保存完成之后，再开始下一组转换任务吧。
+            </Typography>
+        </BottomTipDisplay>
     </Paper>;
 }

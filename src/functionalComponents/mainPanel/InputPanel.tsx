@@ -1,5 +1,5 @@
 import { Box, Button, Paper, Typography, Stack, PaperProps } from "@mui/material";
-import { useContext, useMemo } from "react";
+import { useCallback, useContext, useMemo } from "react";
 import FileListPreview from "./fileListPreview/FileListPreview";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../context/fileListContext";
 import { CONTROL_PANEL_HEIGHT } from "../../App";
@@ -9,15 +9,23 @@ import { FileListDialogCallerContextProvider } from "../../context/fileListDialo
 import DialogLoadingIndicator from "../../ui/smallComponents/DialogLoadingIndicator";
 import { Forward } from "@mui/icons-material";
 import { panelNavigationContext } from "../../context/panelNavigationContext";
+import { appConfigContext } from "../../context/appConfigContext";
+import BottomTipDisplay from "../../components/styledComponents/BottomTipDisplay";
 
 export default function InputPanel(props: PaperProps) {
 
     const fileListContext = useContext(_fileListContext);
     const webkitFileListContext = useContext(_webkitFileListContext);
 
+    const { siteConfig, setTipDisplay } = useContext(appConfigContext);
+
     const processing = useMemo(() => !fileListContext.ready || !webkitFileListContext.ready, [fileListContext.ready, webkitFileListContext.ready]);
 
     const { onScreenPanelCount, navigateTo } = useContext(panelNavigationContext);
+
+    const tipConfirm = useCallback(() => {
+        setTipDisplay('fileListTip', false);
+    }, [setTipDisplay]);
 
     return <Paper {...props} sx={{
         ...props.sx,
@@ -27,7 +35,8 @@ export default function InputPanel(props: PaperProps) {
         transition: 'background-color 0.25s',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'stretch'
+        justifyContent: 'stretch',
+        position: 'relative'
     }}>
         {/* Loading Indicator with ZIndex higher than content box */}
         <DialogLoadingIndicator loading={processing} zIndex={2} position="relative" />
@@ -91,5 +100,18 @@ export default function InputPanel(props: PaperProps) {
             </FileListDialogCallerContextProvider>
 
         </Box>
+
+        {/* Tip Display */}
+        <BottomTipDisplay onDismiss={tipConfirm}
+            hidden={webkitFileListContext.statistic.totalFiles === 0 || !siteConfig.tipDisplay['fileListTip']}
+        >
+            <Typography variant="body1" gutterBottom>
+                在文件列表的文件上，<strong>鼠标右击</strong> 或 <strong>触摸长按</strong> 以显示更多操作。
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+                此操作同样适用于右侧输出面板上的文件列表。
+            </Typography>
+        </BottomTipDisplay>
+
     </Paper>;
 }

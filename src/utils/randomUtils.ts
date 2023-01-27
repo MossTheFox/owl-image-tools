@@ -47,6 +47,44 @@ export async function tryReadABlob(blob: Blob) {
     await whatever.cancel('Aborted');
 }
 
+function objectCheck<T>(unknown: unknown, expected: T) {
+    // bool, number, string, symbol, etc.
+    if (typeof expected !== 'object') {
+        if (typeof expected === typeof unknown) {
+            return unknown;
+        }
+        return expected;
+    }
+    // null
+    if (!expected || !unknown) {
+        return expected;
+    }
+    // Check array with basic types only
+    if (Array.isArray(expected)) {
+        const source = [...expected];
+        if (!Array.isArray(unknown)) return source;
+        // now...
+        for (let i = 0; i < Math.min(source.length, unknown.length); i++) {
+            source[i] = objectCheck(unknown[i], source[i]);
+        }
+        return source;
+    }
+    // Then it's Object time
+    if (typeof expected === 'object') {
+        const source = { ...expected };
+        if (typeof unknown !== 'object') {
+            return source;
+        }
+        for (const [key, val] of Object.entries(source)) {
+            if (key in unknown) {
+                // @ts-expect-error
+                source[key] = objectCheck(unknown[key], val)
+            }
+        }
+        return source;
+    }
+}
+
 /**
  * Validate object from localStorage, and return it.
  */
@@ -61,9 +99,9 @@ export function getFromLocalStorageAndValidate<T extends Object>(key: string, ob
         for (const [key, val] of Object.entries(json)) {
             // @ts-expect-error
             if (key in result && typeof result[key] === typeof json[key]) {
-                // no additional check. whatever.
+                // Additional check for the FIRST layer.
                 // @ts-expect-error
-                result[key] = json[key];
+                result[key] = objectCheck(val, result[key]);
             }
         }
         return result;

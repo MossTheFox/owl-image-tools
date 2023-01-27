@@ -100,20 +100,16 @@ export default function TopBar(props: BoxProps) {
 
 
         <Box display='flex' gap={1} justifyContent="center" alignItems="center" px={1}
-            {...FS_Mode !== 'noFS' ? ({
-                sx: {
-                    animation: '0.25s ease-in 6s forwards fade-out-and-remove',
-                },
-                onAnimationEnd: animationEnd
-            }) : ({})}
+            sx={{
+                animation: '0.25s ease-in 6s forwards fade-out-and-remove',
+            }}
+            onAnimationEnd={animationEnd}
         >
             {storageDisabled ? <>
                 <Chip color="error" label={"访问 Storage API 被拒绝"} size="small" />
             </> : <>
                 <Typography variant="body2" whiteSpace='nowrap'>FS Mode: </Typography>
-                {FS_Mode === 'noFS' && <Tooltip title={"批量文件转换受限"} arrow enterDelay={0} enterTouchDelay={0}>
-                    <Chip color="warning" label={"受限模式"} size="small" />
-                </Tooltip>}
+                {FS_Mode === 'noFS' && <Chip color="warning" label={"受限模式"} size="small" />}
                 {FS_Mode === 'privateFS' && <Chip color="info" label={"Private FS"} size="small" />}
                 {FS_Mode === 'publicFS' && <Chip color="success" label={"Full Support"} size="small" />}
             </>}

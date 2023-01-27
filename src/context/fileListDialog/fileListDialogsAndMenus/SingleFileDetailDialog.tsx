@@ -100,9 +100,7 @@ export default function SingleFileDetailDialog(props: DialogProps &
                     }}
                 >
                     <Typography variant="h6" fontWeight="bolder">文件信息</Typography>
-                    {smallScreen &&
-                        <IconButton color="primary" onClick={closeDialog} size="small"><Close /></IconButton>
-                    }
+                    <IconButton color="primary" onClick={closeDialog} size="small"><Close /></IconButton>
                 </DialogTitle>
                 <DialogContent sx={{ position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'stretch' }}>
 
