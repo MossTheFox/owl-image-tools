@@ -9,6 +9,7 @@ import { convertToGIF, convertToJPEG, convertToPNG, convertToWebp, isFormatAccep
 import { FS_Mode } from "../utils/browserCompability";
 import { isFileExists, renameFileForDuplication } from "../utils/FS";
 import { convertViaCanvas } from "../utils/converter/canvasConverter";
+import { clearCurrentActiveTempFolders } from "../utils/privateFS";
 
 /**
  * um.
@@ -192,6 +193,7 @@ interface OutputFileListContext {
 
     startConvertion: (nodes: TreeNode<WebkitFileNodeData>[], outputConfig: OutputConfig) => void,
 
+    clearAll: () => void,
 };
 
 ///////////// Some fn //////////////////////
@@ -264,6 +266,7 @@ export const outputFileListContext = createContext<OutputFileListContext>({
     loading: false,
     error: null,
     startConvertion(nodes) { throw new Error('Not init'); },
+    clearAll() { throw new Error('Not init'); },
 });
 
 export function OutputFileListContextProvider({ children }: { children: React.ReactNode }) {
@@ -284,6 +287,23 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
     const [currentOutputConfig, setCurrentOutputConfig] = useState(defaultOutputConfig);
     const [startTime, setStartTime] = useState(new Date());
     const [currentMapNodeIndex, setCurrentMapNodeIndex] = useState(-1);  // Current processing. -1 means stopped.
+
+    const clearAll = useCallback(() => {
+        setOutputTrees([]);
+        setNodeMap(new Map());
+        setOutputStatistic(defaultOutputStatistic);
+        setLoading(false);
+        setError(null);
+        setCurrentMapNodeIndex(-1);
+        if (FS_Mode === 'privateFS') {
+            clearCurrentActiveTempFolders().catch((err) => {
+                fireAlertSnackbar({
+                    severity: 'warning',
+                    message: '清理私有文件系统缓存目录时遇到问题。错误信息: ' + err?.message
+                })
+            });
+        }
+    }, []);
 
     /**
      * Main convet fn.
@@ -352,10 +372,10 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
             setCurrentMapNodeIndex(-1); // end it. May call a finish function here or something if needed
             setLoading(false);
             writeLine('转换任务已完成，耗时 ' + parseDateDelta(new Date(), startTime));
-            fireAlertSnackbar({
-                severity: 'success',
-                message: '任务已完成。'
-            });
+            // fireAlertSnackbar({
+            //     severity: 'success',
+            //     message: '任务已完成。'
+            // });
             return;
         }
         const curr = nodeArray[currentMapNodeIndex];
@@ -430,7 +450,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
 
 
 
-    }, [startTime, nodeArray, currentMapNodeIndex, writeLine, convertOne, fireAlertSnackbar]);
+    }, [startTime, nodeArray, currentMapNodeIndex, writeLine, convertOne, /* fireAlertSnackbar */]);
 
 
 
@@ -501,6 +521,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
         setOutputFolderHandle,
         setOutputTrees,
         startConvertion,
+        clearAll,
     }}>
         {children}
     </outputFileListContext.Provider>

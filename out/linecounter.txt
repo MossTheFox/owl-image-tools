@@ -101,3 +101,149 @@ tsconfig.json, code is 21, comment is 0, blank is 0.
 tsconfig.node.json, code is 9, comment is 0, blank is 0.
 vite.config.ts, code is 5, comment is 1, blank is 1.
 ===============================================================================
+===============================================================================
+EXTENSION NAME : linecounter
+EXTENSION VERSION : 0.2.7
+-------------------------------------------------------------------------------
+count time : 2023-01-27 23:29:18
+count workspace : c:\Users\Bird9\Videos\React\image-compression
+total files : 119
+total code lines : 12229
+total comment lines : 579
+total blank lines : 1437
+
+    statistics
+   |      extension|     total code|  total comment|    total blank|percent|
+   -------------------------------------------------------------------------
+   |          .json|           3771|              0|             45|     31|
+   |            .md|             36|              1|             16|   0.29|
+   |            .ts|            863|            165|            126|    7.1|
+   |           .tsx|           5424|            395|            920|     44|
+   |           .svg|              1|              0|              0| 0.0082|
+   |           .css|             32|              1|              5|   0.26|
+   |            .js|            611|              1|             15|    5.0|
+   |           .url|              2|              1|              0|  0.016|
+   |           .txt|            509|              1|             91|    4.2|
+   |               |             16|             11|              2|   0.13|
+   |          .html|            964|              3|            217|    7.9|
+   -------------------------------------------------------------------------
+.gitignore, code is 14, comment is 11, blank is 2.
+index.html, code is 23, comment is 1, blank is 3.
+package-lock.json, code is 3693, comment is 0, blank is 45.
+package.json, code is 36, comment is 0, blank is 0.
+public\vite.svg, code is 1, comment is 0, blank is 0.
+public\wasm\vips-loader.worker.js, code is 6, comment is 1, blank is 3.
+public\wasm\vips\.gitignore, code is 2, comment is 0, blank is 0.
+public\wasm\vips\vips-es6.js, code is 299, comment is 0, blank is 6.
+public\wasm\vips\vips-es6.worker.js, code is 1, comment is 0, blank is 0.
+public\wasm\vips\vips-jxl.wasm, it is a binary file.
+public\wasm\vips\vips.js, code is 304, comment is 0, blank is 6.
+public\wasm\vips\vips.wasm, it is a binary file.
+public\wasm\vips\vips.worker.js, code is 1, comment is 0, blank is 0.
+src\@types\custom.d.ts, code is 7, comment is 0, blank is 3.
+src\@types\i18next.d.ts, code is 6, comment is 0, blank is 1.
+src\@types\quickTypeSheet.d.ts, code is 8, comment is 1, blank is 1.
+src\App.tsx, code is 53, comment is 8, blank is 10.
+src\components\ImageFilePreviewBox.tsx, code is 68, comment is 2, blank is 10.
+src\components\styledComponents\BGTransitionBox.tsx, code is 10, comment is 5, blank is 1.
+src\components\styledComponents\BottomTipDisplay.tsx, code is 45, comment is 0, blank is 5.
+src\components\styledComponents\CheckboxWithTooltip.tsx, code is 29, comment is 0, blank is 4.
+src\components\styledComponents\HoverHelpPopup.tsx, code is 16, comment is 0, blank is 3.
+src\components\styledComponents\QuickDialog.tsx, code is 32, comment is 0, blank is 6.
+src\components\styledComponents\SliderWithInput.tsx, code is 80, comment is 1, blank is 5.
+src\components\styledComponents\TypographyWithTooltip.tsx, code is 13, comment is 0, blank is 1.
+src\constraints.ts, code is 12, comment is 1, blank is 2.
+src\context\appConfigContext.tsx, code is 205, comment is 33, blank is 53.
+src\context\fileListContext.tsx, code is 520, comment is 111, blank is 108.
+src\context\fileListDialog\fileListDialogCallerContext.tsx, code is 178, comment is 8, blank is 38.
+src\context\fileListDialog\fileListDialogsAndMenus\FileListStatisticDialog.tsx, code is 57, comment is 0, blank is 6.
+src\context\fileListDialog\fileListDialogsAndMenus\OutputFileCompareDialog.tsx, code is 201, comment is 2, blank is 27.
+src\context\fileListDialog\fileListDialogsAndMenus\OutputFolderSaveAsDialog.tsx, code is 117, comment is 5, blank is 19.
+src\context\fileListDialog\fileListDialogsAndMenus\OutputFolderSaveZipDialog.tsx, code is 99, comment is 5, blank is 18.
+src\context\fileListDialog\fileListDialogsAndMenus\SingleFileDetailDialog.tsx, code is 145, comment is 2, blank is 19.
+src\context\fileListDialog\outputFileListDialogCallerContext.tsx, code is 243, comment is 18, blank is 40.
+src\context\loggerContext.tsx, code is 59, comment is 1, blank is 11.
+src\context\outputFileListContext.tsx, code is 349, comment is 76, blank is 91.
+src\context\panelNavigationContext.tsx, code is 41, comment is 0, blank is 10.
+src\functionalComponents\dialogs\BrowserCompatibilityDetectionDialog.tsx, code is 127, comment is 4, blank is 15.
+src\functionalComponents\dialogs\InspectSiteDataDialog.tsx, code is 81, comment is 4, blank is 21.
+src\functionalComponents\mainPanel\ConfigPanel.tsx, code is 177, comment is 0, blank is 25.
+src\functionalComponents\mainPanel\configPanelComponents\BaseColorConfig.tsx, code is 150, comment is 2, blank is 24.
+src\functionalComponents\mainPanel\configPanelComponents\ConfigPanelAccordion.tsx, code is 42, comment is 0, blank is 5.
+src\functionalComponents\mainPanel\configPanelComponents\OutputConfigArea.tsx, code is 75, comment is 0, blank is 18.
+src\functionalComponents\mainPanel\configPanelComponents\perFormatConfigs\GIFConfig.tsx, code is 80, comment is 9, blank is 22.
+src\functionalComponents\mainPanel\configPanelComponents\perFormatConfigs\JPEGConfig.tsx, code is 28, comment is 0, blank is 7.
+src\functionalComponents\mainPanel\configPanelComponents\perFormatConfigs\PNGConfig.tsx, code is 108, comment is 1, blank is 16.
+src\functionalComponents\mainPanel\configPanelComponents\perFormatConfigs\WEBPConfig.tsx, code is 94, comment is 14, blank is 16.
+src\functionalComponents\mainPanel\fileListPreview\FileListPreview.tsx, code is 142, comment is 8, blank is 23.
+src\functionalComponents\mainPanel\fileListPreview\OutputFileListPreview.tsx, code is 157, comment is 8, blank is 16.
+src\functionalComponents\mainPanel\fileListPreview\outputTreeItems\OutputFileTreeItem.tsx, code is 164, comment is 7, blank is 20.
+src\functionalComponents\mainPanel\fileListPreview\outputTreeItems\OutputFolderTreeItem.tsx, code is 55, comment is 1, blank is 5.
+src\functionalComponents\mainPanel\fileListPreview\treeItems\FileTreeItem.tsx, code is 95, comment is 3, blank is 17.
+src\functionalComponents\mainPanel\fileListPreview\treeItems\FolderTreeItem.tsx, code is 50, comment is 1, blank is 6.
+src\functionalComponents\mainPanel\InputPanel.tsx, code is 98, comment is 0, blank is 19.
+src\functionalComponents\mainPanel\inputPanelComponents\ReadFromClipboardButton.tsx, code is 123, comment is 4, blank is 13.
+src\functionalComponents\mainPanel\inputPanelComponents\SelectLocalFileButtonRow.tsx, code is 109, comment is 3, blank is 15.
+src\functionalComponents\mainPanel\OutputPanel.tsx, code is 108, comment is 3, blank is 18.
+src\functionalComponents\mainPanel\outputPanelComponents\StartTaskButton.tsx, code is 132, comment is 3, blank is 22.
+src\functionalComponents\menus\AppConfigDrawerMenu.tsx, code is 153, comment is 4, blank is 18.
+src\functionalComponents\menus\LogHistoryDrawer.tsx, code is 42, comment is 0, blank is 6.
+src\functionalComponents\PanelNavigation.tsx, code is 202, comment is 16, blank is 27.
+src\functionalComponents\TopBar.tsx, code is 102, comment is 1, blank is 16.
+src\hooks\AsyncLoadingHandler.tsx, code is 72, comment is 12, blank is 11.
+src\hooks\useAsync.ts, code is 50, comment is 12, blank is 5.
+src\i18n\config.ts, code is 24, comment is 0, blank is 3.
+src\i18n\en.json, code is 6, comment is 0, blank is 0.
+src\i18n\zh-CN.json, code is 6, comment is 0, blank is 0.
+src\main.css, code is 14, comment is 0, blank is 2.
+src\main.tsx, code is 21, comment is 0, blank is 1.
+src\transitions.css, code is 18, comment is 1, blank is 3.
+src\ui\icons\ExternalLink.tsx, code is 8, comment is 0, blank is 2.
+src\ui\MainContainer.tsx, code is 12, comment is 7, blank is 2.
+src\ui\smallComponents\DialogLoadingIndicator.tsx, code is 14, comment is 0, blank is 2.
+src\ui\smallComponents\ErrorBox.tsx, code is 24, comment is 0, blank is 3.
+src\ui\theme.ts, code is 129, comment is 3, blank is 7.
+src\ui\WrappedThemeProvider.tsx, code is 19, comment is 3, blank is 4.
+src\utils\browserCompability.ts, code is 52, comment is 17, blank is 20.
+src\utils\converter\canvasConverter.ts, code is 69, comment is 5, blank is 13.
+src\utils\converter\libvipsConverter.ts, code is 187, comment is 48, blank is 25.
+src\utils\FS.ts, code is 33, comment is 30, blank is 9.
+src\utils\imageMIMEs.ts, code is 78, comment is 9, blank is 11.
+src\utils\privateFS.ts, code is 30, comment is 5, blank is 6.
+src\utils\randomUtils.ts, code is 137, comment is 24, blank is 14.
+src\utils\zipTools.ts, code is 30, comment is 8, blank is 5.
+src\vite-env.d.ts, code is 0, comment is 1, blank is 0.
+test\big (wasm brute mode).png, it is a binary file.
+test\big (wasm module output).png, it is a binary file.
+test\big (wasm module output... still, with -f 0).png, it is a binary file.
+test\big (with optipng default).png, it is a binary file.
+test\big (with optipng, max).png, it is a binary file.
+test\big - original.png, it is a binary file.
+test\big-brute.png, it is a binary file.
+test\big-f0.png, it is a binary file.
+test\big-new.png, it is a binary file.
+test\big_compressed.png, it is a binary file.
+test\big_compressed.test.png, it is a binary file.
+test\big_compressed_by_photoshop.png, it is a binary file.
+test\big_withWASM_old.png, it is a binary file.
+test\chicken.png, it is a binary file.
+test\command_line.png, it is a binary file.
+test\compressed_chicken.png, it is a binary file.
+test\compressed_cmd.png, it is a binary file.
+test\doc\authors.txt, code is 29, comment is 0, blank is 1.
+test\doc\history.txt, code is 262, comment is 0, blank is 28.
+test\doc\license.txt, code is 16, comment is 0, blank is 5.
+test\doc\optipng.man.html, code is 495, comment is 2, blank is 170.
+test\doc\optipng.man.pdf, it is a binary file.
+test\doc\optipng.man.txt, code is 198, comment is 1, blank is 56.
+test\doc\png_optimization.html, code is 446, comment is 0, blank is 44.
+test\doc\todo.txt, code is 4, comment is 0, blank is 1.
+test\optipng.exe, it is a binary file.
+test\OptiPNG.url, code is 2, comment is 1, blank is 0.
+test\pngcrush_1_8_11_w64.exe, it is a binary file.
+test\testttt.png, it is a binary file.
+TODO.md, code is 36, comment is 1, blank is 16.
+tsconfig.json, code is 21, comment is 0, blank is 0.
+tsconfig.node.json, code is 9, comment is 0, blank is 0.
+vite.config.ts, code is 11, comment is 1, blank is 1.
+===============================================================================

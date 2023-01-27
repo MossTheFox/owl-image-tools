@@ -22,6 +22,14 @@ export function parseDateDelta(dateA: Date, dateB: Date) {
     if (delta < 1000 * 60 * 60) return `${Math.floor(delta / (1000 * 60))} min, ${(delta % (1000 * 60) / 1000).toFixed(2)} s`;
 }
 
+export function parseDateStringThatCanBeUsedInFileName(date = new Date(), tillMS = true) {
+    return `${date.getFullYear()
+        }-${(date.getMonth() + 1).toString().padStart(2, '0')}-${(date.getDate()).toString().padStart(2, '0')
+        }_${date.getHours().toString().padStart(2, '0')
+        }_${date.getMinutes().toString().padStart(2, '0')
+        }_${date.getSeconds().toString().padStart(2, '0')}` + (tillMS ? date.getMilliseconds() : '')
+}
+
 /**
  * Won't validate the blob (file). If the file object is no longer accessible, no download will be fired and no error will occurr.
  */

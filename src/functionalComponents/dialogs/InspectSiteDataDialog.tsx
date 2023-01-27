@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import useAsync from "../../hooks/useAsync";
 import { FS_Mode, storageDisabled } from "../../utils/browserCompability";
 import { estimateStorageUsage, parseFileSizeString } from "../../utils/randomUtils";
+import { clearAllTempFolders } from "../../utils/privateFS";
 
 export default function InspectSiteDataDialog(props: DialogProps) {
 
@@ -40,7 +41,8 @@ export default function InspectSiteDataDialog(props: DialogProps) {
     const clearLocalStorage = useCallback(() => {
         localStorage.clear();
         setLocalStorageSize(0);
-    }, []);
+        fireFetch();
+    }, [fireFetch]);
 
     useEffect(() => {
         if (!props.open) return;
@@ -57,6 +59,25 @@ export default function InspectSiteDataDialog(props: DialogProps) {
             window.removeEventListener('storage', fn)
         }
     }, [props.open]);
+
+    const [opfsBtnDisabled, setOPFSBtnDisabled] = useState(false);
+
+    const asyncClearOPFS = useCallback(async () => {
+        setOPFSBtnDisabled(true);
+        setText('...');
+        await clearAllTempFolders();
+    }, []);
+
+    const onOPFSOK = useCallback(() => {
+        setOPFSBtnDisabled(false);
+        fireFetch();
+    }, [fireFetch]);
+
+    const onOPFSErr = useCallback((err: Error) => {
+        setText(`发生错误, 错误信息: ${err?.message}`);
+    }, []);
+
+    const fireOPFS = useAsync(asyncClearOPFS, onOPFSOK, onOPFSErr);
 
     return <Dialog maxWidth="sm" fullWidth {...props}>
         <DialogTitle fontWeight="bolder">
@@ -85,15 +106,20 @@ export default function InspectSiteDataDialog(props: DialogProps) {
                     </Button>
                 }
 
-                {/* {FS_Mode !== 'noFS' &&
-                    <Button variant="outlined" size="small" color="warning">
+                {FS_Mode !== 'noFS' &&
+                    <Button variant="outlined" size="small" color="warning"
+                        disabled={opfsBtnDisabled}
+                        onClick={fireOPFS}
+                    >
                         清除私有文件系统中的缓存
                     </Button>
-                } */}
+                }
 
-                <DialogContentText variant='body2' gutterBottom>
-                    其他可用的站点数据操作正在测试中。如有清理的需要，可以在浏览器设置中直接清除此站的的数据。
-                </DialogContentText>
+                {FS_Mode !== 'noFS' &&
+                    <DialogContentText variant='body2' gutterBottom>
+                        请小心，若当前或者其他窗口有在进行转换任务，如果有使用到私有文件系统作为缓存的话，进行清理可能会导致正在进行的任务出错。未保存的文件也将被清除。
+                    </DialogContentText>
+                }
             </Box>
 
 

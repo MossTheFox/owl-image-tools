@@ -98,20 +98,21 @@ export default function BrowserCompatibilityDetectionDialog() {
                 {/* Safari? */}
                 {isWebkit && <Box p={1} mb={1} bgcolor={(theme) => theme.palette.action.hover} borderRadius={1}>
                     <DialogContentText variant="h6" fontWeight='bolder' gutterBottom>
-                        无法确定 wasm-vips 是否可以正常运行
+                        (重要) 无法确定 wasm-vips 是否可以正常运行
                     </DialogContentText>
                     <DialogContentText gutterBottom>
                         Safari 在内的基于 JavaScriptCore 的浏览器环境对于 WebAssembly SIMD 的支持可能存在问题。
                     </DialogContentText>
                     <DialogContentText gutterBottom>
-                        截至此程序当前版本发布，较新的预览版浏览器似乎解决了此问题。请确保你的浏览器版本为最新，然后，在开始转换的时留意一下模块是否工作正常。
+                        截至此程序当前版本发布，较新的预览版浏览器已解决了此问题。请确保你的浏览器版本为最新，然后，在开始转换的时留意一下模块是否工作正常。
                     </DialogContentText>
                 </Box>}
 
                 {/* noFS */}
                 {FS_Mode === 'noFS' && <Box p={1} mb={1} bgcolor={(theme) => theme.palette.action.hover} borderRadius={1}>
                     <DialogContentText variant="h6" fontWeight='bolder' gutterBottom>不支持 File System API</DialogContentText>
-                    <DialogContentText gutterBottom><strong>这会影响图片的批量转换功能。</strong>单次或少量的文件转换操作不会受到影响。</DialogContentText>
+                    <DialogContentText gutterBottom><strong>这可能会影响图片的批量转换功能。</strong>单次或少量的文件转换操作不会受到影响。</DialogContentText>
+                    <DialogContentText gutterBottom>由于输出的文件会存储在内存中，大批量的文件操作可能会遇到问题。</DialogContentText>
                     {userOSAndBrowser.isIOS ? <>
                         <DialogContentText gutterBottom>对于 iOS 设备，请尝试使用 Safari 浏览器，且<strong>不要使用无痕浏览</strong>模式 (此模式下，无法使用必要的 Storage API 来暂存批量转换的任务)</DialogContentText>
                         <DialogContentText gutterBottom>此应用程序不会追踪你的数据，所有图片转换均在你的设备上完成，不会被上传到云端。请放心。</DialogContentText>
@@ -123,9 +124,10 @@ export default function BrowserCompatibilityDetectionDialog() {
                 </Box>}
                 {!clipboardSupport && <Box p={1} mb={1} bgcolor={(theme) => theme.palette.action.hover} borderRadius={1}>
                     <DialogContentText variant="h6" fontWeight='bolder' gutterBottom>不支持剪切板文件访问 API (Clipboard API)</DialogContentText>
-                    <DialogContentText gutterBottom><strong>快速读取和写入剪切板文件的操作将不可用。</strong>你会需要在粘贴和存储图片时进行一些额外的操作。</DialogContentText>
+                    <DialogContentText gutterBottom><strong>快速读取和写入剪切板文件的操作会受到影响。</strong></DialogContentText>
+                    <DialogContentText gutterBottom>当进行剪切板操作时，可能会需要额外的手动操作。</DialogContentText>
                 </Box>}
-                <DialogContentText gutterBottom>这些问题不会影响部分核心功能的使用。</DialogContentText>
+                <DialogContentText gutterBottom>这些问题不会影响核心功能的使用。</DialogContentText>
 
                 <FormControlLabel control={
                     <Checkbox checked={!siteConfig.tipDisplay['browserCompatibility']} onClick={toggleShowNextTime} />

@@ -1,5 +1,5 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogProps, DialogTitle } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, LinearProgress } from "@mui/material";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ErrorBox from "../../../ui/smallComponents/ErrorBox";
 import { getFileHandle, OutputTreeNode } from "../../outputFileListContext";
 
@@ -16,7 +16,9 @@ export default function OutputFolderSaveAsDialog(props: {
     const [err, setErr] = useState<Error | null>(null);
 
     const [logs, setLogs] = useState<string[]>([]);
+    /** number of files ↓ */
     const [progress, setProgress] = useState(0);
+    const [errorFileCount, setErrorFileCount] = useState(0);
 
     const handleClose = useCallback(() => {
         if (!loading) {
@@ -36,6 +38,7 @@ export default function OutputFolderSaveAsDialog(props: {
         }
         setOpen(true);
         setProgress(0);
+        setErrorFileCount(0);
         setLogs([]);
         setLoading(true);
         setErr(null);
@@ -59,6 +62,7 @@ export default function OutputFolderSaveAsDialog(props: {
                     setLogs((prev) => [...prev,
                     `跳过无效的文件: ${one.name}`
                     ]);
+                    setErrorFileCount((prev) => prev + 1);
                     continue;
                 }
 
@@ -100,10 +104,21 @@ export default function OutputFolderSaveAsDialog(props: {
         }
     }, [rootHandle, node]);
 
+    const progressBarProgress = useMemo(() => {
+        return 100 * progress / (node.kind === 'file' ? 1 : node.childrenCount);
+    }, [node, progress]);
+
 
     return <Dialog maxWidth="sm" fullWidth open={open} onClose={handleClose}>
+        <Box height={0} overflow="visible" sx={{
+            transition: 'opacity 0.25s 0.5s',
+            opacity: progressBarProgress >= 100 ? 0 : 1
+        }}>
+            <LinearProgress variant="determinate" value={progressBarProgress} />
+        </Box>
         <DialogTitle fontWeight="bolder">
             {loading ? '正在保存文件' : '文件存储完毕'} {`${progress} / ${node.kind === 'file' ? 1 : node.childrenCount}`}
+            {errorFileCount > 0 && ` (${errorFileCount} 个出错的文件被跳过)`}
         </DialogTitle>
         <DialogContent>
             {err && <Box pb={1}>

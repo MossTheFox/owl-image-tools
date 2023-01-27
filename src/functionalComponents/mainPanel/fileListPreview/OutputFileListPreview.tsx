@@ -1,7 +1,7 @@
 import { TreeView } from "@mui/lab";
-import { Typography, Box, ButtonGroup, Button, Link, Tooltip } from "@mui/material";
+import { Typography, Box, ButtonGroup, Button, Link, Tooltip, Menu, MenuItem, ListItem } from "@mui/material";
 import { ExpandMore, ChevronRight, List as ListIcon, ViewList } from "@mui/icons-material";
-import { useContext, useCallback, useState } from "react";
+import { useContext, useCallback, useState, useRef } from "react";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../../context/fileListContext";
 import BGTransitionBox from "../../../components/styledComponents/BGTransitionBox";
 import OutputFileTreeItem from "./outputTreeItems/OutputFileTreeItem";
@@ -49,8 +49,8 @@ function RenderTreeItem({
 export default function OutputFileListPreview() {
 
     const {
-        outputStatistic, loading, error,
-        nodeMap, outputTrees
+        outputStatistic, loading,
+        outputTrees, clearAll: clearOutputContext
     } = useContext(outputFileListContext);
     const { contextMenuActiveItem } = useContext(outputFileListDialogCallerContext);
 
@@ -59,6 +59,17 @@ export default function OutputFileListPreview() {
     const disablePreview = useCallback(() => setPreviewMode(false), []);
 
     const [detailDataDisplay, setDetailDataDisplay] = useState<OutputTreeItemDataDisplayMode>('sizeChange');
+
+    // Menu...
+    const menuAnchor = useRef<HTMLDivElement>(null);
+    const [open, setOpen] = useState(false);
+    const openMenu = useCallback(() => setOpen(true), []);
+    const closeMenu = useCallback(() => setOpen(false), []);
+
+    const clearAll = useCallback(() => {
+        clearOutputContext();
+        closeMenu();
+    }, [closeMenu, clearOutputContext]);
 
     return <>
         {/* Note: The root layer of file array CAN have duplicated filenames or directory names.
@@ -150,14 +161,37 @@ export default function OutputFileListPreview() {
         </BGTransitionBox>
 
         {outputStatistic.inputFiles.totalFiles > 0 && <Box mb={1}>
+
             <Box display='flex' justifyContent='space-between' alignItems='center' pb={1}>
-                <Typography variant="body1" fontWeight="bolder">
-                    文件输出
+                <Typography variant="body1" fontWeight="bolder" component="div"
+                    display='flex' gap={1} whiteSpace="nowrap" ref={menuAnchor}
+                >
+                    文件输出 <Link component="button" underline="hover" onClick={openMenu}
+                        hidden={loading}
+                    >选项</Link>
                 </Typography>
+
                 <Typography variant="body2" color="textSecondary">
                     {`共 ${outputStatistic.inputFiles.totalFiles} 个文件`}
                 </Typography>
+
+                <Menu open={open} onClose={closeMenu} anchorEl={menuAnchor.current}>
+                    <MenuItem dense onClick={clearAll}>
+                        <Typography variant="body2" color={(t) => t.palette.error.main} fontWeight="bolder">
+                            清空列表
+                        </Typography>
+                    </MenuItem>
+                    <ListItem dense>
+                        <Typography variant="body2" fontWeight="bolder" color="textSecondary">
+                            <small>
+                                请要确保你的文件已被正确保存。
+                            </small>
+                        </Typography>
+                    </ListItem>
+                </Menu>
+
             </Box>
+
             <TreeView defaultCollapseIcon={<ExpandMore />} defaultExpandIcon={<ChevronRight />}
                 selected={contextMenuActiveItem}
                 sx={{

@@ -25,9 +25,12 @@ function useAsync<T>(
         if (asyncFunc && fire) {
             let isActive = true;
             let abortController = new AbortController();
-            let timeout = setTimeout(() => {
-                abortController.abort();
-            }, abortSeconds * 1000);
+            let timeout = -1;
+            if (abortSeconds > 0) {
+                timeout = setTimeout(() => {
+                    abortController.abort();
+                }, abortSeconds * 1000);
+            }
             asyncFunc(abortController.signal).then((res) => {
                 import.meta.env.DEV && console.log(res, "resolved", isActive);
                 if (isActive && typeof onSuccess === "function") {

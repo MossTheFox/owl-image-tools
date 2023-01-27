@@ -12,6 +12,7 @@ import OutputFileCompareDialog from "./fileListDialogsAndMenus/OutputFileCompare
 import { fireFileDownload } from "../../utils/randomUtils";
 import { FS_Mode } from "../../utils/browserCompability";
 import OutputFolderSaveAsDialog from "./fileListDialogsAndMenus/OutputFolderSaveAsDialog";
+import OutputFolderSaveZipDialog from "./fileListDialogsAndMenus/OutputFolderSaveZipDialog";
 
 
 type OutputFileListDialogCallerContext = {
@@ -131,6 +132,18 @@ export function OutputFileListDialogCallerContextProvider({ children }: { childr
         });
     }, [contextMenuNodeHold]);
 
+    const [zipDownloadDialogOperation, setZipDownloadDialogOperation] = useState<{ nodes: OutputTreeNode[] } | null>(null)
+    const zipSaveOnEnd = useCallback(() => {
+        setZipDownloadDialogOperation(null);
+    }, []);
+
+    const contextMenuFolderDownloadZip = useCallback(() => {
+        if (!contextMenuNodeHold) return;
+        setContextMenuOpen(false);
+        setZipDownloadDialogOperation({
+            nodes: [contextMenuNodeHold]
+        });
+    }, [contextMenuNodeHold]);
 
 
 
@@ -145,6 +158,12 @@ export function OutputFileListDialogCallerContextProvider({ children }: { childr
                 open={previewDialogOpen}
                 onClose={closePreviewDialog}
 
+            />
+        )}
+
+        {zipDownloadDialogOperation && (
+            <OutputFolderSaveZipDialog nodes={zipDownloadDialogOperation.nodes}
+                onFinished={zipSaveOnEnd}
             />
         )}
 
@@ -181,7 +200,7 @@ export function OutputFileListDialogCallerContextProvider({ children }: { childr
                     </Typography>
                 </ListItem>,
                 ...contextMenuNodeHold.finished ? [
-                    <MenuItem key={3} onClick={undefined    /* TODO: */}>
+                    <MenuItem key={3} onClick={contextMenuFolderDownloadZip}>
                         <ListItemIcon><FolderZip color="primary" /></ListItemIcon>
                         <ListItemText>
                             <Typography color={(theme) => theme.palette.primary.main}>

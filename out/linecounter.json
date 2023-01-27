@@ -547,6 +547,810 @@
                     "filename": "vite.config.ts"
                 }
             ]
+        },
+        {
+            "version": "0.2.7",
+            "counttime": "2023-01-27 23:29:18",
+            "filesum": 119,
+            "codesum": 12229,
+            "commentsum": 579,
+            "blanksum": 1437,
+            "statistics": {
+                ".json": {
+                    "code": 3771,
+                    "comment": 0,
+                    "blank": 45
+                },
+                ".md": {
+                    "code": 36,
+                    "comment": 1,
+                    "blank": 16
+                },
+                ".ts": {
+                    "code": 863,
+                    "comment": 165,
+                    "blank": 126
+                },
+                ".tsx": {
+                    "code": 5424,
+                    "comment": 395,
+                    "blank": 920
+                },
+                ".svg": {
+                    "code": 1,
+                    "comment": 0,
+                    "blank": 0
+                },
+                ".css": {
+                    "code": 32,
+                    "comment": 1,
+                    "blank": 5
+                },
+                ".js": {
+                    "code": 611,
+                    "comment": 1,
+                    "blank": 15
+                },
+                ".url": {
+                    "code": 2,
+                    "comment": 1,
+                    "blank": 0
+                },
+                ".txt": {
+                    "code": 509,
+                    "comment": 1,
+                    "blank": 91
+                },
+                "": {
+                    "code": 16,
+                    "comment": 11,
+                    "blank": 2
+                },
+                ".html": {
+                    "code": 964,
+                    "comment": 3,
+                    "blank": 217
+                }
+            },
+            "filelist": [
+                {
+                    "blank": 2,
+                    "code": 14,
+                    "comment": 11,
+                    "filename": ".gitignore"
+                },
+                {
+                    "blank": 3,
+                    "code": 23,
+                    "comment": 1,
+                    "filename": "index.html"
+                },
+                {
+                    "blank": 45,
+                    "code": 3693,
+                    "comment": 0,
+                    "filename": "package-lock.json"
+                },
+                {
+                    "blank": 0,
+                    "code": 36,
+                    "comment": 0,
+                    "filename": "package.json"
+                },
+                {
+                    "blank": 0,
+                    "code": 1,
+                    "comment": 0,
+                    "filename": "public\\vite.svg"
+                },
+                {
+                    "blank": 3,
+                    "code": 6,
+                    "comment": 1,
+                    "filename": "public\\wasm\\vips-loader.worker.js"
+                },
+                {
+                    "blank": 0,
+                    "code": 2,
+                    "comment": 0,
+                    "filename": "public\\wasm\\vips\\.gitignore"
+                },
+                {
+                    "blank": 6,
+                    "code": 299,
+                    "comment": 0,
+                    "filename": "public\\wasm\\vips\\vips-es6.js"
+                },
+                {
+                    "blank": 0,
+                    "code": 1,
+                    "comment": 0,
+                    "filename": "public\\wasm\\vips\\vips-es6.worker.js"
+                },
+                {
+                    "filename": "public\\wasm\\vips\\vips-jxl.wasm",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 6,
+                    "code": 304,
+                    "comment": 0,
+                    "filename": "public\\wasm\\vips\\vips.js"
+                },
+                {
+                    "filename": "public\\wasm\\vips\\vips.wasm",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 0,
+                    "code": 1,
+                    "comment": 0,
+                    "filename": "public\\wasm\\vips\\vips.worker.js"
+                },
+                {
+                    "blank": 3,
+                    "code": 7,
+                    "comment": 0,
+                    "filename": "src\\@types\\custom.d.ts"
+                },
+                {
+                    "blank": 1,
+                    "code": 6,
+                    "comment": 0,
+                    "filename": "src\\@types\\i18next.d.ts"
+                },
+                {
+                    "blank": 1,
+                    "code": 8,
+                    "comment": 1,
+                    "filename": "src\\@types\\quickTypeSheet.d.ts"
+                },
+                {
+                    "blank": 10,
+                    "code": 53,
+                    "comment": 8,
+                    "filename": "src\\App.tsx"
+                },
+                {
+                    "blank": 10,
+                    "code": 68,
+                    "comment": 2,
+                    "filename": "src\\components\\ImageFilePreviewBox.tsx"
+                },
+                {
+                    "blank": 1,
+                    "code": 10,
+                    "comment": 5,
+                    "filename": "src\\components\\styledComponents\\BGTransitionBox.tsx"
+                },
+                {
+                    "blank": 5,
+                    "code": 45,
+                    "comment": 0,
+                    "filename": "src\\components\\styledComponents\\BottomTipDisplay.tsx"
+                },
+                {
+                    "blank": 4,
+                    "code": 29,
+                    "comment": 0,
+                    "filename": "src\\components\\styledComponents\\CheckboxWithTooltip.tsx"
+                },
+                {
+                    "blank": 3,
+                    "code": 16,
+                    "comment": 0,
+                    "filename": "src\\components\\styledComponents\\HoverHelpPopup.tsx"
+                },
+                {
+                    "blank": 6,
+                    "code": 32,
+                    "comment": 0,
+                    "filename": "src\\components\\styledComponents\\QuickDialog.tsx"
+                },
+                {
+                    "blank": 5,
+                    "code": 80,
+                    "comment": 1,
+                    "filename": "src\\components\\styledComponents\\SliderWithInput.tsx"
+                },
+                {
+                    "blank": 1,
+                    "code": 13,
+                    "comment": 0,
+                    "filename": "src\\components\\styledComponents\\TypographyWithTooltip.tsx"
+                },
+                {
+                    "blank": 2,
+                    "code": 12,
+                    "comment": 1,
+                    "filename": "src\\constraints.ts"
+                },
+                {
+                    "blank": 53,
+                    "code": 205,
+                    "comment": 33,
+                    "filename": "src\\context\\appConfigContext.tsx"
+                },
+                {
+                    "blank": 108,
+                    "code": 520,
+                    "comment": 111,
+                    "filename": "src\\context\\fileListContext.tsx"
+                },
+                {
+                    "blank": 38,
+                    "code": 178,
+                    "comment": 8,
+                    "filename": "src\\context\\fileListDialog\\fileListDialogCallerContext.tsx"
+                },
+                {
+                    "blank": 6,
+                    "code": 57,
+                    "comment": 0,
+                    "filename": "src\\context\\fileListDialog\\fileListDialogsAndMenus\\FileListStatisticDialog.tsx"
+                },
+                {
+                    "blank": 27,
+                    "code": 201,
+                    "comment": 2,
+                    "filename": "src\\context\\fileListDialog\\fileListDialogsAndMenus\\OutputFileCompareDialog.tsx"
+                },
+                {
+                    "blank": 19,
+                    "code": 117,
+                    "comment": 5,
+                    "filename": "src\\context\\fileListDialog\\fileListDialogsAndMenus\\OutputFolderSaveAsDialog.tsx"
+                },
+                {
+                    "blank": 18,
+                    "code": 99,
+                    "comment": 5,
+                    "filename": "src\\context\\fileListDialog\\fileListDialogsAndMenus\\OutputFolderSaveZipDialog.tsx"
+                },
+                {
+                    "blank": 19,
+                    "code": 145,
+                    "comment": 2,
+                    "filename": "src\\context\\fileListDialog\\fileListDialogsAndMenus\\SingleFileDetailDialog.tsx"
+                },
+                {
+                    "blank": 40,
+                    "code": 243,
+                    "comment": 18,
+                    "filename": "src\\context\\fileListDialog\\outputFileListDialogCallerContext.tsx"
+                },
+                {
+                    "blank": 11,
+                    "code": 59,
+                    "comment": 1,
+                    "filename": "src\\context\\loggerContext.tsx"
+                },
+                {
+                    "blank": 91,
+                    "code": 349,
+                    "comment": 76,
+                    "filename": "src\\context\\outputFileListContext.tsx"
+                },
+                {
+                    "blank": 10,
+                    "code": 41,
+                    "comment": 0,
+                    "filename": "src\\context\\panelNavigationContext.tsx"
+                },
+                {
+                    "blank": 15,
+                    "code": 127,
+                    "comment": 4,
+                    "filename": "src\\functionalComponents\\dialogs\\BrowserCompatibilityDetectionDialog.tsx"
+                },
+                {
+                    "blank": 21,
+                    "code": 81,
+                    "comment": 4,
+                    "filename": "src\\functionalComponents\\dialogs\\InspectSiteDataDialog.tsx"
+                },
+                {
+                    "blank": 25,
+                    "code": 177,
+                    "comment": 0,
+                    "filename": "src\\functionalComponents\\mainPanel\\ConfigPanel.tsx"
+                },
+                {
+                    "blank": 24,
+                    "code": 150,
+                    "comment": 2,
+                    "filename": "src\\functionalComponents\\mainPanel\\configPanelComponents\\BaseColorConfig.tsx"
+                },
+                {
+                    "blank": 5,
+                    "code": 42,
+                    "comment": 0,
+                    "filename": "src\\functionalComponents\\mainPanel\\configPanelComponents\\ConfigPanelAccordion.tsx"
+                },
+                {
+                    "blank": 18,
+                    "code": 75,
+                    "comment": 0,
+                    "filename": "src\\functionalComponents\\mainPanel\\configPanelComponents\\OutputConfigArea.tsx"
+                },
+                {
+                    "blank": 22,
+                    "code": 80,
+                    "comment": 9,
+                    "filename": "src\\functionalComponents\\mainPanel\\configPanelComponents\\perFormatConfigs\\GIFConfig.tsx"
+                },
+                {
+                    "blank": 7,
+                    "code": 28,
+                    "comment": 0,
+                    "filename": "src\\functionalComponents\\mainPanel\\configPanelComponents\\perFormatConfigs\\JPEGConfig.tsx"
+                },
+                {
+                    "blank": 16,
+                    "code": 108,
+                    "comment": 1,
+                    "filename": "src\\functionalComponents\\mainPanel\\configPanelComponents\\perFormatConfigs\\PNGConfig.tsx"
+                },
+                {
+                    "blank": 16,
+                    "code": 94,
+                    "comment": 14,
+                    "filename": "src\\functionalComponents\\mainPanel\\configPanelComponents\\perFormatConfigs\\WEBPConfig.tsx"
+                },
+                {
+                    "blank": 23,
+                    "code": 142,
+                    "comment": 8,
+                    "filename": "src\\functionalComponents\\mainPanel\\fileListPreview\\FileListPreview.tsx"
+                },
+                {
+                    "blank": 16,
+                    "code": 157,
+                    "comment": 8,
+                    "filename": "src\\functionalComponents\\mainPanel\\fileListPreview\\OutputFileListPreview.tsx"
+                },
+                {
+                    "blank": 20,
+                    "code": 164,
+                    "comment": 7,
+                    "filename": "src\\functionalComponents\\mainPanel\\fileListPreview\\outputTreeItems\\OutputFileTreeItem.tsx"
+                },
+                {
+                    "blank": 5,
+                    "code": 55,
+                    "comment": 1,
+                    "filename": "src\\functionalComponents\\mainPanel\\fileListPreview\\outputTreeItems\\OutputFolderTreeItem.tsx"
+                },
+                {
+                    "blank": 17,
+                    "code": 95,
+                    "comment": 3,
+                    "filename": "src\\functionalComponents\\mainPanel\\fileListPreview\\treeItems\\FileTreeItem.tsx"
+                },
+                {
+                    "blank": 6,
+                    "code": 50,
+                    "comment": 1,
+                    "filename": "src\\functionalComponents\\mainPanel\\fileListPreview\\treeItems\\FolderTreeItem.tsx"
+                },
+                {
+                    "blank": 19,
+                    "code": 98,
+                    "comment": 0,
+                    "filename": "src\\functionalComponents\\mainPanel\\InputPanel.tsx"
+                },
+                {
+                    "blank": 13,
+                    "code": 123,
+                    "comment": 4,
+                    "filename": "src\\functionalComponents\\mainPanel\\inputPanelComponents\\ReadFromClipboardButton.tsx"
+                },
+                {
+                    "blank": 15,
+                    "code": 109,
+                    "comment": 3,
+                    "filename": "src\\functionalComponents\\mainPanel\\inputPanelComponents\\SelectLocalFileButtonRow.tsx"
+                },
+                {
+                    "blank": 18,
+                    "code": 108,
+                    "comment": 3,
+                    "filename": "src\\functionalComponents\\mainPanel\\OutputPanel.tsx"
+                },
+                {
+                    "blank": 22,
+                    "code": 132,
+                    "comment": 3,
+                    "filename": "src\\functionalComponents\\mainPanel\\outputPanelComponents\\StartTaskButton.tsx"
+                },
+                {
+                    "blank": 18,
+                    "code": 153,
+                    "comment": 4,
+                    "filename": "src\\functionalComponents\\menus\\AppConfigDrawerMenu.tsx"
+                },
+                {
+                    "blank": 6,
+                    "code": 42,
+                    "comment": 0,
+                    "filename": "src\\functionalComponents\\menus\\LogHistoryDrawer.tsx"
+                },
+                {
+                    "blank": 27,
+                    "code": 202,
+                    "comment": 16,
+                    "filename": "src\\functionalComponents\\PanelNavigation.tsx"
+                },
+                {
+                    "blank": 16,
+                    "code": 102,
+                    "comment": 1,
+                    "filename": "src\\functionalComponents\\TopBar.tsx"
+                },
+                {
+                    "blank": 11,
+                    "code": 72,
+                    "comment": 12,
+                    "filename": "src\\hooks\\AsyncLoadingHandler.tsx"
+                },
+                {
+                    "blank": 5,
+                    "code": 50,
+                    "comment": 12,
+                    "filename": "src\\hooks\\useAsync.ts"
+                },
+                {
+                    "blank": 3,
+                    "code": 24,
+                    "comment": 0,
+                    "filename": "src\\i18n\\config.ts"
+                },
+                {
+                    "blank": 0,
+                    "code": 6,
+                    "comment": 0,
+                    "filename": "src\\i18n\\en.json"
+                },
+                {
+                    "blank": 0,
+                    "code": 6,
+                    "comment": 0,
+                    "filename": "src\\i18n\\zh-CN.json"
+                },
+                {
+                    "blank": 2,
+                    "code": 14,
+                    "comment": 0,
+                    "filename": "src\\main.css"
+                },
+                {
+                    "blank": 1,
+                    "code": 21,
+                    "comment": 0,
+                    "filename": "src\\main.tsx"
+                },
+                {
+                    "blank": 3,
+                    "code": 18,
+                    "comment": 1,
+                    "filename": "src\\transitions.css"
+                },
+                {
+                    "blank": 2,
+                    "code": 8,
+                    "comment": 0,
+                    "filename": "src\\ui\\icons\\ExternalLink.tsx"
+                },
+                {
+                    "blank": 2,
+                    "code": 12,
+                    "comment": 7,
+                    "filename": "src\\ui\\MainContainer.tsx"
+                },
+                {
+                    "blank": 2,
+                    "code": 14,
+                    "comment": 0,
+                    "filename": "src\\ui\\smallComponents\\DialogLoadingIndicator.tsx"
+                },
+                {
+                    "blank": 3,
+                    "code": 24,
+                    "comment": 0,
+                    "filename": "src\\ui\\smallComponents\\ErrorBox.tsx"
+                },
+                {
+                    "blank": 7,
+                    "code": 129,
+                    "comment": 3,
+                    "filename": "src\\ui\\theme.ts"
+                },
+                {
+                    "blank": 4,
+                    "code": 19,
+                    "comment": 3,
+                    "filename": "src\\ui\\WrappedThemeProvider.tsx"
+                },
+                {
+                    "blank": 20,
+                    "code": 52,
+                    "comment": 17,
+                    "filename": "src\\utils\\browserCompability.ts"
+                },
+                {
+                    "blank": 13,
+                    "code": 69,
+                    "comment": 5,
+                    "filename": "src\\utils\\converter\\canvasConverter.ts"
+                },
+                {
+                    "blank": 25,
+                    "code": 187,
+                    "comment": 48,
+                    "filename": "src\\utils\\converter\\libvipsConverter.ts"
+                },
+                {
+                    "blank": 9,
+                    "code": 33,
+                    "comment": 30,
+                    "filename": "src\\utils\\FS.ts"
+                },
+                {
+                    "blank": 11,
+                    "code": 78,
+                    "comment": 9,
+                    "filename": "src\\utils\\imageMIMEs.ts"
+                },
+                {
+                    "blank": 6,
+                    "code": 30,
+                    "comment": 5,
+                    "filename": "src\\utils\\privateFS.ts"
+                },
+                {
+                    "blank": 14,
+                    "code": 137,
+                    "comment": 24,
+                    "filename": "src\\utils\\randomUtils.ts"
+                },
+                {
+                    "blank": 5,
+                    "code": 30,
+                    "comment": 8,
+                    "filename": "src\\utils\\zipTools.ts"
+                },
+                {
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 1,
+                    "filename": "src\\vite-env.d.ts"
+                },
+                {
+                    "filename": "test\\big (wasm brute mode).png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "test\\big (wasm module output).png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "test\\big (wasm module output... still, with -f 0).png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "test\\big (with optipng default).png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "test\\big (with optipng, max).png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "test\\big - original.png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "test\\big-brute.png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "test\\big-f0.png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "test\\big-new.png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "test\\big_compressed.png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "test\\big_compressed.test.png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "test\\big_compressed_by_photoshop.png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "test\\big_withWASM_old.png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "test\\chicken.png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "test\\command_line.png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "test\\compressed_chicken.png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "test\\compressed_cmd.png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 1,
+                    "code": 29,
+                    "comment": 0,
+                    "filename": "test\\doc\\authors.txt"
+                },
+                {
+                    "blank": 28,
+                    "code": 262,
+                    "comment": 0,
+                    "filename": "test\\doc\\history.txt"
+                },
+                {
+                    "blank": 5,
+                    "code": 16,
+                    "comment": 0,
+                    "filename": "test\\doc\\license.txt"
+                },
+                {
+                    "blank": 170,
+                    "code": 495,
+                    "comment": 2,
+                    "filename": "test\\doc\\optipng.man.html"
+                },
+                {
+                    "filename": "test\\doc\\optipng.man.pdf",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 56,
+                    "code": 198,
+                    "comment": 1,
+                    "filename": "test\\doc\\optipng.man.txt"
+                },
+                {
+                    "blank": 44,
+                    "code": 446,
+                    "comment": 0,
+                    "filename": "test\\doc\\png_optimization.html"
+                },
+                {
+                    "blank": 1,
+                    "code": 4,
+                    "comment": 0,
+                    "filename": "test\\doc\\todo.txt"
+                },
+                {
+                    "filename": "test\\optipng.exe",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 0,
+                    "code": 2,
+                    "comment": 1,
+                    "filename": "test\\OptiPNG.url"
+                },
+                {
+                    "filename": "test\\pngcrush_1_8_11_w64.exe",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "filename": "test\\testttt.png",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 16,
+                    "code": 36,
+                    "comment": 1,
+                    "filename": "TODO.md"
+                },
+                {
+                    "blank": 0,
+                    "code": 21,
+                    "comment": 0,
+                    "filename": "tsconfig.json"
+                },
+                {
+                    "blank": 0,
+                    "code": 9,
+                    "comment": 0,
+                    "filename": "tsconfig.node.json"
+                },
+                {
+                    "blank": 1,
+                    "code": 11,
+                    "comment": 1,
+                    "filename": "vite.config.ts"
+                }
+            ]
         }
     ]
 }

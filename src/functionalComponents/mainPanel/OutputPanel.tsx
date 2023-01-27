@@ -120,7 +120,7 @@ export default function OutputPanel(props: PaperProps) {
                 请留意，转换出错的文件会在批量保存时被跳过。请一定要保留好自己源文件的备份。
             </Typography>
             <Typography variant="body1" gutterBottom>
-               <strong>开始新的转换任务之后，此列表将会被清空。</strong>确定文件已经保存完成之后，再开始下一组转换任务吧。
+               <strong>开始新的转换任务之后，此列表将会被清空。</strong>确定文件已经正确保存完成之后，再开始下一组转换任务吧。
             </Typography>
         </BottomTipDisplay>
     </Paper>;
