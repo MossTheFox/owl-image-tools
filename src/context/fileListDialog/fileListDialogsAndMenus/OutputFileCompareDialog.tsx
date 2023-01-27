@@ -4,6 +4,7 @@ import { useCallback, useState, useEffect, useMemo } from "react";
 import ImageFilePreviewBox from "../../../components/ImageFilePreviewBox";
 import { fireFileDownload, parseFileSizeString, tryReadABlob } from "../../../utils/randomUtils";
 import { OutputTreeNode } from "../../outputFileListContext";
+import { extToMime } from "../../../utils/imageMIMEs";
 
 const VIEW_MODE = ['output', 'original', 'compare'] as const;
 
@@ -176,7 +177,7 @@ export default function OutputFileCompareDialog(props: DialogProps &
                                     </DialogContentText>
                                 )}
                                 <DialogContentText component={"li"} whiteSpace="nowrap">
-                                    {`类型: ${node.file.type}`}
+                                    {`类型: ${node.file.type || extToMime(node.name)}`}
                                 </DialogContentText>
                                 <DialogContentText component={"li"} whiteSpace="nowrap">
                                     {`大小: ${parseFileSizeString(node.file.size, true)}`}
@@ -189,7 +190,7 @@ export default function OutputFileCompareDialog(props: DialogProps &
                                         {`源文件大小: ${parseFileSizeString(node.originalNode.data.file.size, true)}`}
                                     </DialogContentText>
                                     <DialogContentText component={"li"} whiteSpace="nowrap">
-                                        {`源文件类型: ${node.originalNode.data.file.type}`}
+                                        {`源文件类型: ${node.originalNode.data.file.type || extToMime(node.originalNode.data.file.name)}`}
                                     </DialogContentText>
                                     <DialogContentText component={"li"} whiteSpace="nowrap">
                                         {`源文件修改日期: ${new Date(node.originalNode.data.file.lastModified).toLocaleString()}`}

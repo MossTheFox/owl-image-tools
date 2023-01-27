@@ -1,8 +1,12 @@
 import { createContext, useState, useCallback, useEffect, useContext } from "react";
 import { randomUUIDv4 } from "../utils/randomUtils";
-import { ACCEPT_MIMEs, checkIsFilenameAccepted } from "../utils/imageMIMEs";
+import { ACCEPT_MIMEs, checkIsFilenameAccepted, extToMime } from "../utils/imageMIMEs";
 import useAsync from "../hooks/useAsync";
 import { loggerContext } from "./loggerContext";
+import { dragAndDropAPILimitDetector } from "../utils/browserCompability";
+import { appConfigContext } from "./appConfigContext";
+import QuickDialog from "../components/styledComponents/QuickDialog";
+import { Button } from "@mui/material";
 
 export class TreeNode<T> {
     data: T;
@@ -301,6 +305,9 @@ function iterateDirectoryEntry(
     return new Promise<void>(async (resolve, reject) => {
         const reader = entry.createReader();
         reader.readEntries(async (entries) => {
+            if (entries.length === 100) {
+                dragAndDropAPILimitDetector.detected = true;
+            }
             if (node.data.kind === 'file') return;
             node.children = [];
             node.data.childrenCount = 0;
@@ -427,6 +434,8 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
     const [error, setError] = useState<Error | null>(null);
 
     // const [allowDrop, setAllowDrop] = useState(true);
+    // Drag and Drop limit detection dialog
+    const [DaDDialogOPen, setDaDDialogOpen] = useState(false);
 
     // File List from input (webkitdirectory) element or clipboard
     const appendFileList = useCallback((fileList: FileList | File[], webkitDirectory = false) => {
@@ -587,6 +596,11 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
             setNodeMap((prev) => new Map([...prev, ...additionalMap]));
             setReady(true);
             setError(null);
+
+            // ANNNNNNND...
+            if (dragAndDropAPILimitDetector.detected) {
+                setDaDDialogOpen(true);
+            }
         }
 
     }, []);
@@ -602,8 +616,10 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
 
         for (const [_, node] of nodeMap.entries()) {
             if (node.data.kind === 'directory') continue;
+            // in case type is '' (firefox drag in)
+            const mime = node.data.file.type || extToMime(node.data.file.name)
             newStatistic.totalFiles++;
-            newStatistic.perFormatCount[node.data.file.type as typeof ACCEPT_MIMEs[number]]++;
+            newStatistic.perFormatCount[mime as typeof ACCEPT_MIMEs[number]]++;
         }
 
         setStatistic(newStatistic);
@@ -715,6 +731,15 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
         return inputFileTreeRoots;
     }, [inputFileTreeRoots]);
 
+
+    // Drag and drop notification dialog...
+    const { siteConfig, setTipDisplay } = useContext(appConfigContext);
+    const closeDialog = useCallback(() => setDaDDialogOpen(false), []);
+    const dontPopNextTime = useCallback(() => {
+        setTipDisplay('dragAndDropEntryLimit', false);
+        setDaDDialogOpen(false);
+    }, [setTipDisplay]);
+
     return <webkitFileListContext.Provider value={{
         inputFileTreeRoots,
         setInputFileTreeRoots,
@@ -729,6 +754,19 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
         // allowDrop,
         // setAllowDrop
     }}>
+        <QuickDialog open={DaDDialogOPen && siteConfig.tipDisplay['dragAndDropEntryLimit']}
+            onClose={closeDialog}
+            title="Drag and Drop 文件列表完整性问题"
+            actions={
+                <Button onClick={dontPopNextTime}>
+                    好的，不再提示
+                </Button>
+            }
+            content={'检测到潜在的文件列表完整性问题: \n'
+                + '你的浏览器可能限制了单个文件夹内的项目数量 (限制为 100)，超过此限制的文件在导入时会被跳过。\n'
+                + '可以尝试使用文件夹选择按钮，或者手动进行多次的导入。'
+            }
+        />
         {children}
     </webkitFileListContext.Provider>
 }

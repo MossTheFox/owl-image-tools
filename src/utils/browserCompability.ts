@@ -53,6 +53,8 @@ export const isWebkit = typeof navigator.standalone === 'boolean';
 
 export const isMacOriOS = /iPad|iPhone|iPod|Mac/.test(navigator.userAgent);
 
+export const isMobileBrowser = navigator.maxTouchPoints > 1;    // Not sure if this is good
+
 // File Formats Test (ok whatever)
 
 export const browserImageFormatSupport = {
@@ -87,3 +89,8 @@ export const browserImageFormatSupport = {
         import.meta.env.DEV && console.log(err);
     }
 })();
+
+// Drag and drop API 100 file in a directory Limit Record
+export const dragAndDropAPILimitDetector = {
+    detected: false
+};

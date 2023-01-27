@@ -1,7 +1,7 @@
 import { Box, Button, Typography, Grid, GridProps, Popover } from "@mui/material";
 import { useCallback, useRef, useContext, useMemo, useState } from "react";
 import { FolderOpen, Image as ImageIcon } from '@mui/icons-material';
-import { FS_Mode } from "../../../utils/browserCompability";
+import { FS_Mode, isMobileBrowser } from "../../../utils/browserCompability";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../../context/fileListContext";
 import useAsync from "../../../hooks/useAsync";
 import { appConfigContext, defaultSiteConfig } from "../../../context/appConfigContext";
@@ -117,6 +117,14 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
                                     请放心，你的文件不会离开此设备。
                                 </Typography>
                             </Box>
+                            {isMobileBrowser && <Box pt={1}>
+                                <Typography variant="body2" color="textSecondary" gutterBottom>
+                                    此外，<strong>移动端浏览器</strong>可能会不支持文件夹选择。
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary" gutterBottom>
+                                    如果设备支持，你可以尝试在文件管理器中，将文件夹<strong>拖拽进入此页面</strong>。
+                                </Typography>
+                            </Box>}
                             <Button onClick={openWebkitDirectoryPicker}>明白了，不再提示</Button>
                         </Box>
                     </Popover>

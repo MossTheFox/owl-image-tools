@@ -1,5 +1,5 @@
 import { createContext, useState, useCallback, useEffect, useContext, useMemo } from "react";
-import { ACCEPT_MIMEs, changeFileExt, checkIsFilenameAccepted, checkIsMimeSupported, getFileExt, mimeToExt } from "../utils/imageMIMEs";
+import { ACCEPT_MIMEs, changeFileExt, checkIsFilenameAccepted, checkIsMimeSupported, extToMime, getFileExt, mimeToExt } from "../utils/imageMIMEs";
 import useAsync from "../hooks/useAsync";
 import { loggerContext } from "./loggerContext";
 import { defaultFileListStatistic, FileListStatistic, getAllNodeInTree, TreeNode, WebkitFileNodeData } from "./fileListContext";
@@ -317,9 +317,12 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
 
         // TARGET ext
         const ext = getFileExt(node.name);
-        let originalFile: Blob = node.originalNode.data.file;
-
         const originalFileExt = getFileExt(node.originalNode.data.file.name);
+        // There is no guarantee that the file object comes with a parsed MIME. (Encountered in firefox drag and drop)
+        let originalFile: Blob = new Blob([node.originalNode.data.file], {
+            type: extToMime(originalFileExt)
+        });
+
         if (!isFormatAcceptedByVips(originalFileExt)) {
             writeLine(`文件 ${node.originalNode.data.file.name} 不受当前版本的 libvips 支持，将借助浏览器进行第一次转换。元数据和透明度信息会丢失。`);
             originalFile = await convertViaCanvas(originalFile, {
@@ -399,7 +402,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
             setOutputStatistic((prev) => {
                 if (curr.originalNode.data.kind !== 'file') return prev;
 
-                const type = curr.originalNode.data.file.type as typeof ACCEPT_MIMEs[number];
+                const type = (curr.originalNode.data.file.type || extToMime(curr.originalNode.data.file.name)) as typeof ACCEPT_MIMEs[number];
                 const newStat = {
                     ...prev,
                     converted: {
@@ -486,11 +489,15 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
                 if (node.originalNode.data.kind === 'file') {
                     // update state
                     statistic.inputFiles.totalFiles++;
-                    statistic.inputFiles.perFormatCount[node.originalNode.data.file.type as typeof ACCEPT_MIMEs[number]]++;
+                    statistic.inputFiles.perFormatCount[(
+                        node.originalNode.data.file.type || extToMime(node.originalNode.data.file.name)
+                    ) as typeof ACCEPT_MIMEs[number]]++;
 
                     // ☆ Append correct file format
                     node.name = changeFileExt(node.name,
-                        mimeToExt(config.outputFormats[node.originalNode.data.file.type as typeof ACCEPT_MIMEs[number]])
+                        mimeToExt(config.outputFormats[(
+                            node.originalNode.data.file.type || extToMime(node.originalNode.data.file.name)
+                        ) as typeof ACCEPT_MIMEs[number]])
                     );
                 }
 

@@ -3,6 +3,7 @@ import { Close, Download } from "@mui/icons-material";
 import { useCallback, useState, useEffect } from "react";
 import ImageFilePreviewBox from "../../../components/ImageFilePreviewBox";
 import { fireFileDownload, parseFileSizeString, tryReadABlob } from "../../../utils/randomUtils";
+import { extToMime } from "../../../utils/imageMIMEs";
 
 export default function SingleFileDetailDialog(props: DialogProps &
 {
@@ -136,7 +137,7 @@ export default function SingleFileDetailDialog(props: DialogProps &
                                 </DialogContentText>
                             )}
                             <DialogContentText component={"li"} whiteSpace="nowrap">
-                                {`类型: ${file.type}`}
+                                {`类型: ${file.type || extToMime(file.name)}`}
                             </DialogContentText>
                             <DialogContentText component={"li"} whiteSpace="nowrap">
                                 {`文件大小: ${parseFileSizeString(file.size, true)}`}

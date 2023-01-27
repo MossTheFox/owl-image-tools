@@ -71,7 +71,7 @@ export type OutputConfig = {
     /** 0 ~ 6, default 4 */
     WEBP_cpuEffortToRediceSize: number;
 
-    
+
     GIF_keepAlphaChannel: boolean;
 
     /** Progressive GIF, default false */
@@ -129,7 +129,9 @@ export const defaultOutputConfig: OutputConfig = {
 };
 
 const TIPS_DIALOG_FLAGS = [
-    'browserCompatibility', 'webkitOpenDirectory', 'fileListTip', 'outputFileListTip'
+    'browserCompatibility', 'webkitOpenDirectory',
+    'fileListTip', 'outputFileListTip',
+    'dragAndDropEntryLimit',
 ] as const;
 
 // Site Config

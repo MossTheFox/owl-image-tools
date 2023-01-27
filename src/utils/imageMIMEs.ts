@@ -76,7 +76,8 @@ export function mimeToExt(mime: string) {
 }
 
 /** Return empty string if no match */
-export function extToMime(ext: string) {
+export function extToMime(extOrFileName: string) {
+    const ext = extOrFileName.split('.').pop() || extOrFileName;
     if (ext in extMimeMatch) {
         return extMimeMatch[ext as keyof typeof extMimeMatch];
     }

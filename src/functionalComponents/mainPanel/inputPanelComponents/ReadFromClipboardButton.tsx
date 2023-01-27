@@ -4,7 +4,7 @@ import { useCallback, useContext, useState, useRef, useMemo } from "react";
 import { webkitFileListContext as _webkitFileListContext, fileListContext as _fileListContext } from "../../../context/fileListContext";
 import { clipboardSupport } from "../../../utils/browserCompability";
 import useAsync from "../../../hooks/useAsync";
-import { checkIsMimeSupported, mimeToExt } from "../../../utils/imageMIMEs";
+import { checkIsMimeSupported, extToMime, mimeToExt } from "../../../utils/imageMIMEs";
 import { loggerContext } from "../../../context/loggerContext";
 
 
@@ -94,7 +94,7 @@ export default function ReadFromClipboardButton(props: ButtonProps) {
         }
         const imageFiles: File[] = [];
         for (const file of data.files) {
-            if (checkIsMimeSupported(file.type)) {
+            if (checkIsMimeSupported(file.type || extToMime(file.name))) {
                 imageFiles.push(file);
             }
         }
