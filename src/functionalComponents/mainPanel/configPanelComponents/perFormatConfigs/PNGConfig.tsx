@@ -1,4 +1,4 @@
-import { Box, BoxProps, Collapse, ButtonGroup, Button } from "@mui/material";
+import { Box, BoxProps, Collapse, ButtonGroup, Button, FormHelperText } from "@mui/material";
 import { useContext } from "react";
 import CheckboxWithTooltop from "../../../../components/styledComponents/CheckboxWithTooltip";
 import SliderWithInput from "../../../../components/styledComponents/SliderWithInput";
@@ -118,6 +118,8 @@ export default function PNGConfig(props: BoxProps) {
 
             </Box>
         </Collapse>
-
+        <FormHelperText>
+            不支持导出 PNG8。
+        </FormHelperText>
     </Box >
 }

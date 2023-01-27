@@ -91,7 +91,6 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
     }, [contextMenuNodeHold, callPreviewDialog]);
 
     const deleteNode = useCallback(() => {
-        console.log("WARRR")
         if (!contextMenuNodeHold) return;
 
         webkitFileListContext.deleteNode(contextMenuNodeHold as TreeNode<WebkitFileNodeData>);

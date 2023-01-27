@@ -1,13 +1,13 @@
 import { TreeView } from "@mui/lab";
 import { Typography, Box, ButtonGroup, Button, Link, Tooltip } from "@mui/material";
 import { ExpandMore, ChevronRight, List as ListIcon, ViewList } from "@mui/icons-material";
-import { useContext, useMemo, useCallback, useState } from "react";
-import { fileListContext as _fileListContext, TreeNode, webkitFileListContext as _webkitFileListContext, WebkitFileNodeData } from "../../../context/fileListContext";
-import { fileListDialogCallerContext } from "../../../context/fileListDialog/fileListDialogCallerContext";
+import { useContext, useCallback, useState } from "react";
+import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../../context/fileListContext";
 import BGTransitionBox from "../../../components/styledComponents/BGTransitionBox";
 import OutputFileTreeItem from "./outputTreeItems/OutputFileTreeItem";
 import OutputFolderTreeItem from "./outputTreeItems/OutputFolderTreeItem";
 import { outputFileListContext, OutputTreeNode } from "../../../context/outputFileListContext";
+import { outputFileListDialogCallerContext } from "../../../context/fileListDialog/outputFileListDialogCallerContext";
 
 export type OutputTreeItemDataDisplayMode = 'size' | 'sizeChange';
 
@@ -29,7 +29,7 @@ function RenderTreeItem({
             <OutputFileTreeItem node={rootNode} dataDisplay={dataDisplay}
                 previewMode={previewMode} />
         ) : (
-            <OutputFolderTreeItem childrenCount={rootNode.childrenCount}
+            <OutputFolderTreeItem
                 node={rootNode}
             >
 
@@ -52,16 +52,13 @@ export default function OutputFileListPreview() {
         outputStatistic, loading, error,
         nodeMap, outputTrees
     } = useContext(outputFileListContext);
-    const { contextMenuActiveItem } = useContext(fileListDialogCallerContext);
+    const { contextMenuActiveItem } = useContext(outputFileListDialogCallerContext);
 
     const [previewMode, setPreviewMode] = useState(false);
     const enablePreview = useCallback(() => setPreviewMode(true), []);
     const disablePreview = useCallback(() => setPreviewMode(false), []);
 
     const [detailDataDisplay, setDetailDataDisplay] = useState<OutputTreeItemDataDisplayMode>('sizeChange');
-
-    const dialogCaller = useContext(fileListDialogCallerContext);
-
 
     return <>
         {/* Note: The root layer of file array CAN have duplicated filenames or directory names.
@@ -163,6 +160,12 @@ export default function OutputFileListPreview() {
             </Box>
             <TreeView defaultCollapseIcon={<ExpandMore />} defaultExpandIcon={<ChevronRight />}
                 selected={contextMenuActiveItem}
+                sx={{
+                    '& *': {
+                        userSelect: 'none',
+                        WebkitTouchCallout: 'none'
+                    }
+                }}
             >
                 {outputTrees.sort((a, b) => {
                     if (a.kind === 'directory' && b.kind === 'file') return -1;

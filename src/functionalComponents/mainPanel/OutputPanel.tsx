@@ -8,6 +8,7 @@ import OutputFileListPreview from "./fileListPreview/OutputFileListPreview";
 import StartTaskButton from "./outputPanelComponents/StartTaskButton";
 import { Forward } from "@mui/icons-material";
 import { panelNavigationContext } from "../../context/panelNavigationContext";
+import { OutputFileListDialogCallerContextProvider } from "../../context/fileListDialog/outputFileListDialogCallerContext";
 
 export default function OutputPanel(props: PaperProps) {
 
@@ -52,6 +53,7 @@ export default function OutputPanel(props: PaperProps) {
             <Box pt={2}>
                 <Typography variant="h5" fontWeight='bolder'
                     component='div' display='flex' alignItems='stretch' justifyContent='space-between'
+                    whiteSpace="nowrap"
                 >
                     <span>输出</span>
 
@@ -93,9 +95,9 @@ export default function OutputPanel(props: PaperProps) {
             overflow="auto"
         >
 
-            <FileListDialogCallerContextProvider>
+            <OutputFileListDialogCallerContextProvider>
                 <OutputFileListPreview />
-            </FileListDialogCallerContextProvider>
+            </OutputFileListDialogCallerContextProvider>
 
         </Box>
     </Paper>;

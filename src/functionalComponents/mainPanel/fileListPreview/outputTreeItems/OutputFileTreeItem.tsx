@@ -1,12 +1,12 @@
 import { TreeItem } from "@mui/lab";
 import { Typography, Box, PopoverPosition } from "@mui/material";
-import React, { useContext, useCallback, useState, useEffect, useMemo } from "react";
-import { fileListContext, fileListContext as _fileListContext, TreeNode, webkitFileListContext, webkitFileListContext as _webkitFileListContext } from "../../../../context/fileListContext";
+import React, { useContext, useCallback, useState, useEffect } from "react";
+import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../../../context/fileListContext";
 import { parseFileSizeString } from "../../../../utils/randomUtils";
 import ImageFilePreviewBox from "../../../../components/ImageFilePreviewBox";
-import { fileListDialogCallerContext } from "../../../../context/fileListDialog/fileListDialogCallerContext";
-import { outputFileListContext, OutputTreeNode } from "../../../../context/outputFileListContext";
+import { OutputTreeNode } from "../../../../context/outputFileListContext";
 import { OutputTreeItemDataDisplayMode } from "../OutputFileListPreview";
+import { outputFileListDialogCallerContext } from "../../../../context/fileListDialog/outputFileListDialogCallerContext";
 
 
 export default function OutputFileTreeItem({
@@ -19,9 +19,9 @@ export default function OutputFileTreeItem({
     dataDisplay: OutputTreeItemDataDisplayMode;
 }) {
 
-    const caller = useContext(fileListDialogCallerContext);
-
-    const outputContext = useContext(outputFileListContext);
+    const { callFileListItemContextMenu,
+        callNodePreviewDialog
+    } = useContext(outputFileListDialogCallerContext);
 
     /** Rerender cannot detect the node change (since it's the same object)
      * so here is an update on every rerender.
@@ -42,14 +42,13 @@ export default function OutputFileTreeItem({
 
     const callPreviewDialog = useCallback(() => {
         if (node.kind !== 'file' || !node.file) return;
-        // TODO: outputFileListContext
-
-    }, [node, caller.callFilePreviewDialog]);
+        callNodePreviewDialog(node);
+    }, [node, callNodePreviewDialog]);
 
     const callContextMenu = useCallback((anchorPosition: PopoverPosition) => {
         if (!node) return;
-        // TODO: outputFilelistContext
-    }, [node, caller.callFileListItemContextMenu]);
+        callFileListItemContextMenu(anchorPosition, node);
+    }, [node, callFileListItemContextMenu]);
 
     const onRightClick = useCallback((e: React.MouseEvent) => {
         e.preventDefault();

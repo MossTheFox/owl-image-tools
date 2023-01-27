@@ -53,6 +53,7 @@ export default function ConfigPanel(props: PaperProps) {
             <Box pt={2}>
                 <Typography variant="h5" fontWeight='bolder'
                     component='div' display='flex' alignItems='stretch' justifyContent='space-between'
+                    whiteSpace="nowrap"
                 >
                     <span>输出设置</span>
 

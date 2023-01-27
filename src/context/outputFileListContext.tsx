@@ -15,7 +15,20 @@ import { convertViaCanvas } from "../utils/converter/canvasConverter";
  */
 export class OutputTreeNode {
 
-    flatChildrenFilesOnly: OutputTreeNode[] | null = null;
+    _flatChildrenFilesOnly: OutputTreeNode[] | null = null;
+
+    get flatChildrenFilesOnly() {
+        if (this._flatChildrenFilesOnly) {
+            return this._flatChildrenFilesOnly;
+        }
+        // 👇 should calculate children
+        if (this instanceof OutputTreeNode && !this._flatChildrenFilesOnly) {
+            this._flatChildrenFilesOnly = getAllNodeInTree<OutputTreeNode>(this).filter((v) => v.kind === 'file');
+        }
+        return this._flatChildrenFilesOnly || [];
+    }
+
+
     children: OutputTreeNode[] = [];
     parent: OutputTreeNode | null = null;
     nodeId: string;
@@ -51,11 +64,6 @@ export class OutputTreeNode {
         if (this.originalNode.data.kind === 'file') {
             return this._convertProgress;
         }
-        // 👇 should calculate children
-        if (this instanceof OutputTreeNode && !this.flatChildrenFilesOnly) {
-            this.flatChildrenFilesOnly = getAllNodeInTree<OutputTreeNode>(this).filter((v) => v.kind === 'file');
-        }
-        if (!this.flatChildrenFilesOnly) return 0;
 
         return this.flatChildrenFilesOnly.reduce((prev, curr) => {
             return prev + (curr.finished ? 1 : 0)
@@ -64,8 +72,16 @@ export class OutputTreeNode {
     }
 
     set convertProgress(progress: number) {
+        progress = Math.abs(progress);
         this._convertProgress = progress > 1 ? progress % 1 : progress;
     }
+
+    /** Folder Only */
+    get errorChildrenCount() {
+        return this.flatChildrenFilesOnly.filter((v) => v.error).length;
+    }
+
+
 
     constructor(originalNode: TreeNode<WebkitFileNodeData>, parent: OutputTreeNode | null = null) {
         this.parent = parent
@@ -175,6 +191,66 @@ interface OutputFileListContext {
 
 };
 
+///////////// Some fn //////////////////////
+
+async function doConvertion(blob: Blob, targetExt: string, config: OutputConfig) {
+    const C = config;
+    let resultBuffer: Blob;
+    switch (targetExt) {
+        case 'jpg':
+            resultBuffer = await convertToJPEG(blob, {
+                quality: C.JPEG_quality,
+                stripMetaData: !C.keepMetaData,  // !
+                defaultBackground: C.imageBaseColor,
+                interlace: C.JPEG_interlace,
+            });
+            break;
+        case 'png':
+            resultBuffer = await convertToPNG(blob, {
+                Q: C.PNG_quantisationQuality,
+                bitdepth: C.PNG_bitDepth,
+                compression: C.PNG_compressionLevel,
+                defaultBackground: C.imageBaseColor,
+                dither: C.PNG_dither,
+                interlace: C.PNG_interlace,
+                keepAlphaChannel: !C.PNG_removeAlphaChannel,    // !
+                stripMetaData: !C.keepMetaData                  // !
+            });
+            break;
+        case 'gif':
+            resultBuffer = await convertToGIF(blob, {
+                "interframe-maxerror": C.GIF_interframeMaxError,
+                "interpalette-maxerror": C.GIF_interpaletteMaxError,
+                bitdepth: C.GIF_bitdepth,
+                defaultBackground: C.imageBaseColor,
+                dither: C.GIF_dither,
+                effort: 7,
+                // interlace: C.GIF_interlace,
+                keepAlphaChannel: C.GIF_keepAlphaChannel,
+                stripMetaData: !C.keepMetaData                  // !
+            });
+            break;
+        case 'webp':
+            resultBuffer = await convertToWebp(blob, {
+                alphaQuality: C.WEBP_alphaQuality,
+                defaultBackground: C.imageBaseColor,
+                keepAlphaChannel: C.WEBP_keepAlphaChannel,
+                lossless: C.WEBP_lossless,
+                lossyCompressionPreset: C.WEBP_lossyCompressionPreset,
+                quality: C.WEBP_quality,
+                smartSubsample: false, // TO BE TESTED
+                stripMetaData: !C.keepMetaData                  // !
+            });
+            break;
+
+        default:
+            throw new Error('Unknown target format: ' + targetExt);
+    }
+    return resultBuffer;
+}
+
+/////////////// END   //////////////////////
+
 export const outputFileListContext = createContext<OutputFileListContext>({
     outputFolderHandle: undefined,
     setOutputFolderHandle: () => { throw new Error('Not init'); },
@@ -206,6 +282,9 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
     const [startTime, setStartTime] = useState(new Date());
     const [currentMapNodeIndex, setCurrentMapNodeIndex] = useState(-1);  // Current processing. -1 means stopped.
 
+    /**
+     * Main convet fn.
+     */
     const convertOne = useCallback(async (node: OutputTreeNode) => {
         if (node.kind !== 'file' || node.originalNode.data.kind !== 'file') {
             return;
@@ -228,57 +307,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
 
         writeLine(`开始处理文件: ${node.originalNode.data.file.name}, 目标类型: ${ext}`);
 
-        let resultBuffer: Blob;
-        switch (ext) {
-            case 'jpg':
-                resultBuffer = await convertToJPEG(originalFile, {
-                    quality: C.JPEG_quality,
-                    stripMetaData: !C.keepMetaData,  // !
-                    defaultBackground: C.imageBaseColor,
-                    interlace: C.JPEG_interlace,
-                });
-                break;
-            case 'png':
-                resultBuffer = await convertToPNG(originalFile, {
-                    Q: C.PNG_quantisationQuality,
-                    bitdepth: C.PNG_bitDepth,
-                    compression: C.PNG_compressionLevel,
-                    defaultBackground: C.imageBaseColor,
-                    dither: C.PNG_dither,
-                    interlace: C.PNG_interlace,
-                    keepAlphaChannel: !C.PNG_removeAlphaChannel,    // !
-                    stripMetaData: !C.keepMetaData                  // !
-                });
-                break;
-            case 'gif':
-                resultBuffer = await convertToGIF(originalFile, {
-                    "interframe-maxerror": C.GIF_interframeMaxError,
-                    "interpalette-maxerror": C.GIF_interpaletteMaxError,
-                    bitdepth: C.GIF_bitdepth,
-                    defaultBackground: C.imageBaseColor,
-                    dither: C.GIF_dither,
-                    effort: 7,
-                    // interlace: C.GIF_interlace,
-                    keepAlphaChannel: C.GIF_keepAlphaChannel,
-                    stripMetaData: !C.keepMetaData                  // !
-                });
-                break;
-            case 'webp':
-                resultBuffer = await convertToWebp(originalFile, {
-                    alphaQuality: C.WEBP_alphaQuality,
-                    defaultBackground: C.imageBaseColor,
-                    keepAlphaChannel: C.WEBP_keepAlphaChannel,
-                    lossless: C.WEBP_lossless,
-                    lossyCompressionPreset: C.WEBP_lossyCompressionPreset,
-                    quality: C.WEBP_quality,
-                    smartSubsample: false, // TO BE TESTED
-                    stripMetaData: !C.keepMetaData                  // !
-                });
-                break;
-
-            default:
-                throw new Error('Unknown target format: ' + ext);
-        }
+        let resultBuffer = await doConvertion(originalFile, ext, C);
 
         if (FS_Mode !== 'noFS' && outputFolderHandle) {
             // Write to FS
@@ -299,6 +328,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
             );
         }
 
+        // Update state here
         node.file = new File([resultBuffer], node.name, {
             type: resultBuffer.type
         });

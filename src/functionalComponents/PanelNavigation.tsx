@@ -100,6 +100,10 @@ export default function PanelNavigation(props: BoxProps) {
         setFocused((prev) => [prev[0]]);
     }, [screenSizePad, screenSizeDesktop, setFocused]);
 
+    useEffect(() => {
+        console.log(focused);
+    }, [focused]);
+
     const navigateTo = useCallback((target: Panels) => {
         if (onScreenPanelCount === 3) {
             setFocused([...navOrder]);
@@ -116,7 +120,10 @@ export default function PanelNavigation(props: BoxProps) {
 
     useEffect(() => {
         registerFunction(navigateTo);
-    }, [navigateTo, registerFunction]);
+        return () => {
+            unregisterFunction();
+        }
+    }, [navigateTo, registerFunction, unregisterFunction]);
 
     // Width for each panel
     const widthProp = useMemo(() => {

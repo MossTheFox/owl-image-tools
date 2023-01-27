@@ -8,11 +8,9 @@ import { OutputTreeNode } from "../../../../context/outputFileListContext";
 
 export default function OutputFolderTreeItem({
     node,
-    childrenCount,
     children,
 }: {
     node: OutputTreeNode;
-    childrenCount: number;
     children: React.ReactNode;
 }) {
     const caller = useContext(fileListDialogCallerContext);
@@ -55,7 +53,7 @@ export default function OutputFolderTreeItem({
                     {node.name}
                 </Typography>
                 <Typography variant="body1" color="textSecondary" whiteSpace='nowrap' ml='1px'>
-                    {childrenCount}
+                    {node.childrenCount}{node.errorChildrenCount > 0 ? ` (${node.errorChildrenCount} 错误)` : ''}
                 </Typography>
             </Box>
         }>

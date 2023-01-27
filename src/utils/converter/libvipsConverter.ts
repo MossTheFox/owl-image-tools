@@ -161,7 +161,7 @@ export async function convertToPNG(file: Blob, config = {
     // try read the blob
 
     let img = vips.Image.newFromBuffer(await blobToUint8Array(file));
-    if (!config.keepAlphaChannel) {
+    if (!config.keepAlphaChannel && img.hasAlpha()) {
         const flattened = img.flatten({
             background: await parseBackground(config.defaultBackground),
         });
@@ -197,7 +197,7 @@ export async function convertToWebp(file: Blob, config = {
     }
     const props = isMultiframePic(file.type) ? 'n=-1' : '';
     let img = vips.Image.newFromBuffer(await blobToUint8Array(file), props);
-    if (!config.keepAlphaChannel) {
+    if (!config.keepAlphaChannel && img.hasAlpha()) {
         const flattened = img.flatten({
             background: await parseBackground(config.defaultBackground),
         });
@@ -207,9 +207,6 @@ export async function convertToWebp(file: Blob, config = {
     const result = img.writeToBuffer('.webp', {
         Q: config.quality,
         strip: config.stripMetaData,
-        ...config.keepAlphaChannel ? {} : {
-            background: await parseBackground(config.defaultBackground)
-        },
         lossless: config.lossless,
         preset: config.lossyCompressionPreset,
         'smart-subsample': config.smartSubsample,
@@ -237,7 +234,7 @@ export async function convertToGIF(file: Blob, config = {
     }
     const props = isMultiframePic(file.type) ? 'n=-1' : '';
     let img = vips.Image.newFromBuffer(await blobToUint8Array(file), props);
-    if (!config.keepAlphaChannel) {
+    if (!config.keepAlphaChannel && img.hasAlpha()) {
         const flattened = img.flatten({
             background: await parseBackground(config.defaultBackground),
         });
@@ -247,9 +244,6 @@ export async function convertToGIF(file: Blob, config = {
     const result = img.writeToBuffer('.gif', {
         bitdepth: config.bitdepth,
         strip: config.stripMetaData,
-        ...config.keepAlphaChannel ? {} : {
-            background: await parseBackground(config.defaultBackground)
-        },
         effort: config.effort,
         // interlace: config.interlace,
         dither: config.dither,
