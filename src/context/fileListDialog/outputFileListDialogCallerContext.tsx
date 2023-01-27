@@ -1,5 +1,5 @@
 import { Box, Typography, Menu, MenuItem, ListItem, ListItemButton, ListItemIcon, ListItemText, PopoverPosition } from "@mui/material";
-import { Info, Delete, Download } from "@mui/icons-material";
+import { Info, Delete, Download, FolderZip } from "@mui/icons-material";
 import { createContext, useCallback, useState, useMemo, useEffect, useContext } from "react";
 import ImageFilePreviewBox from "../../components/ImageFilePreviewBox";
 import { ACCEPT_MIMEs } from "../../utils/imageMIMEs";
@@ -10,6 +10,8 @@ import { fileListContext as _fileListContext, webkitFileListContext as _webkitFi
 import { outputFileListContext, OutputTreeNode } from "../outputFileListContext";
 import OutputFileCompareDialog from "./fileListDialogsAndMenus/OutputFileCompareDialog";
 import { fireFileDownload } from "../../utils/randomUtils";
+import { FS_Mode } from "../../utils/browserCompability";
+import OutputFolderSaveAsDialog from "./fileListDialogsAndMenus/OutputFolderSaveAsDialog";
 
 
 type OutputFileListDialogCallerContext = {
@@ -101,7 +103,35 @@ export function OutputFileListDialogCallerContextProvider({ children }: { childr
     const contextMenuActiveItem = useMemo(() => {
         if (contextMenuOpen && contextMenuNodeHold) return contextMenuNodeHold.nodeId;
         return '';
-    }, [contextMenuOpen, contextMenuNodeHold])
+    }, [contextMenuOpen, contextMenuNodeHold]);
+
+    const [folderSaveDialogOperation, setFolderSaveDialogOperation] = useState<{
+        handle: FileSystemDirectoryHandle,
+        node: OutputTreeNode
+    } | null>(null);
+
+    const folderSaveOnEnd = useCallback(() => {
+        setFolderSaveDialogOperation(null);
+    }, []);
+
+    const contextMenuFolderSaveToLocal = useCallback(() => {
+        if (!contextMenuNodeHold) return;
+        setContextMenuOpen(false);
+        // async. whatever, not gonna care about the mem leak then. Probably won't happen.
+        window.showDirectoryPicker({
+            id: 'image-save-to',
+            mode: 'readwrite'
+        }).then((handle) => {
+            setFolderSaveDialogOperation({
+                handle,
+                node: contextMenuNodeHold
+            })
+        }).catch((err) => {
+            import.meta.env.DEV && console.log(err);
+        });
+    }, [contextMenuNodeHold]);
+
+
 
 
     return <outputFileListDialogCallerContext.Provider value={{
@@ -118,6 +148,12 @@ export function OutputFileListDialogCallerContextProvider({ children }: { childr
             />
         )}
 
+        {folderSaveDialogOperation &&
+            <OutputFolderSaveAsDialog rootHandle={folderSaveDialogOperation.handle}
+                onFinished={folderSaveOnEnd}
+                node={folderSaveDialogOperation.node} />
+        }
+
 
         <Menu open={contextMenuOpen} onClose={closeMenu}
             anchorReference="anchorPosition"
@@ -133,17 +169,43 @@ export function OutputFileListDialogCallerContextProvider({ children }: { childr
                         {`文件夹: ${contextMenuNodeHold.name}`}
                     </Typography>
                 </ListItem>,
-                <ListItem key={2} >
-                    <ListItemText sx={{ whiteSpace: 'pre-wrap' }}>
-                        {`子项目数: ${contextMenuNodeHold.childrenCount}`
+                <ListItem key={2} dense>
+                    <Typography variant="body2" color="textSecondary" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {`文件数量: ${contextMenuNodeHold.childrenCount}`
                             +
                             (contextMenuNodeHold.errorChildrenCount > 0 ?
-                                `\n 有 ${contextMenuNodeHold.errorChildrenCount} 个子项发生错误。`
+                                `\n有 ${contextMenuNodeHold.errorChildrenCount} 个子项发生错误。`
                                 : ''
                             )
                         }
-                    </ListItemText>
-                </ListItem>
+                    </Typography>
+                </ListItem>,
+                ...contextMenuNodeHold.finished ? [
+                    <MenuItem key={3} onClick={undefined    /* TODO: */}>
+                        <ListItemIcon><FolderZip color="primary" /></ListItemIcon>
+                        <ListItemText>
+                            <Typography color={(theme) => theme.palette.primary.main}>
+                                打包下载
+                            </Typography>
+                        </ListItemText>
+                    </MenuItem>,
+                    ...FS_Mode === 'publicFS' ? [
+                        <MenuItem key={'publicFS'} onClick={contextMenuFolderSaveToLocal}>
+                            <ListItemIcon><Download color="primary" /></ListItemIcon>
+                            <ListItemText>
+                                <Typography color={(theme) => theme.palette.primary.main}>
+                                    保存到本地
+                                </Typography>
+                            </ListItemText>
+                        </MenuItem>
+                    ] : []
+                ] : [
+                    <ListItem key={3} dense>
+                        <Typography variant="body2" color="textSecondary" sx={{ whiteSpace: 'pre-wrap' }}>
+                            {`进度: ${(contextMenuNodeHold.convertProgress * 100).toFixed(0)}%`}
+                        </Typography>
+                    </ListItem>
+                ]
             ]}
             {/* For File Node */}
             {contextMenuNodeHold && contextMenuNodeHold.kind === 'file' && [

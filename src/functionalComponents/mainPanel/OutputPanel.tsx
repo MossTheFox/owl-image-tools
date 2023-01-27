@@ -70,6 +70,7 @@ export default function OutputPanel(props: PaperProps) {
                     startIcon={<Forward sx={{ transform: 'scaleX(-1)' }} />}
                     onClick={() => navigateTo('config')}
                     disableElevation
+                    disabled={onScreenPanelCount === 1 ? false : true}
                     sx={{ whiteSpace: 'nowrap', py: 0 }}
                 >
                     输出设置

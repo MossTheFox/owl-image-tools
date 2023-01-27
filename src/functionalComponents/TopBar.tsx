@@ -87,7 +87,7 @@ export default function TopBar(props: BoxProps) {
                 flexGrow={1}
             >
                 {/* Log Info Output Here */}
-                <Box flexGrow={1} overflow='hidden' pr={1}>
+                <Box flexGrow={1} overflow='hidden' px={1}>
                     <Typography variant="body2" whiteSpace='nowrap' textAlign='left'>
                         {line}
                     </Typography>

@@ -57,6 +57,7 @@ export default function InputPanel(props: PaperProps) {
                     endIcon={<Forward />}
                     onClick={() => navigateTo('config')}
                     disableElevation
+                    disabled={onScreenPanelCount === 1 ? false : true}
                     sx={{ whiteSpace: 'nowrap', py: 0 }}
                 >
                     输出设置

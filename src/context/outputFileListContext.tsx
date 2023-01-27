@@ -15,13 +15,12 @@ import { convertViaCanvas } from "../utils/converter/canvasConverter";
  */
 export class OutputTreeNode {
 
-    _flatChildrenFilesOnly: OutputTreeNode[] | null = null;
+    private _flatChildrenFilesOnly: OutputTreeNode[] | null = null;
 
     get flatChildrenFilesOnly() {
         if (this._flatChildrenFilesOnly) {
             return this._flatChildrenFilesOnly;
         }
-        // 👇 should calculate children
         if (this instanceof OutputTreeNode && !this._flatChildrenFilesOnly) {
             this._flatChildrenFilesOnly = getAllNodeInTree<OutputTreeNode>(this).filter((v) => v.kind === 'file');
         }
@@ -109,12 +108,16 @@ export const defaultOutputStatistic: OutputStatistic = {
 
 /**
  * iterate to the top level, and create directories all the way to this file.
+ * 
+ * The node should be a file node.
+ * 
+ * @param nodeRoot Specify the top level of parent that can be iterated back upon.
  */
-async function getFileHandle(node: OutputTreeNode, root: FileSystemDirectoryHandle, overrideFile = false) {
+export async function getFileHandle(node: OutputTreeNode, root: FileSystemDirectoryHandle, nodeRoot?: OutputTreeNode) {
 
     const path = [node];
     let _it = node;
-    while (_it.parent) {
+    while (_it.parent && _it.parent !== nodeRoot && _it !== nodeRoot) {
         path.push(_it.parent);
         _it = _it.parent;
     }
@@ -311,7 +314,10 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
 
         if (FS_Mode !== 'noFS' && outputFolderHandle) {
             // Write to FS
+            // Here will do the rename actions in case there's file of the same name
             const fileHandle = await getFileHandle(node, outputFolderHandle);
+
+            // rename the node itself
             node.name = fileHandle.name;
             const writable = await fileHandle.createWritable({
                 keepExistingData: false

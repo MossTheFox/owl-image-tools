@@ -73,6 +73,7 @@ export default function ConfigPanel(props: PaperProps) {
                     {(!focused.includes('input') || onScreenPanelCount === 1) && <Button variant='outlined' size="small"
                         startIcon={<Forward sx={{ transform: 'scaleX(-1)' }} />}
                         onClick={() => navigateTo('input')}
+                        disabled={onScreenPanelCount === 3}
                         sx={{ whiteSpace: 'nowrap', py: 0 }}
                     >
                         导入文件
@@ -82,6 +83,7 @@ export default function ConfigPanel(props: PaperProps) {
                             disableElevation
                             endIcon={<Forward />}
                             onClick={() => navigateTo('output')}
+                            disabled={onScreenPanelCount === 3}
                             sx={{ whiteSpace: 'nowrap', py: 0 }}
                         >
                             开始任务

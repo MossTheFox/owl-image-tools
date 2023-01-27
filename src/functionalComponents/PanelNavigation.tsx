@@ -60,10 +60,7 @@ function PanelBox({ left, width, sx, name, disabled, children }: {
 }
 
 
-// TODO: trackpad, ctrl wheel, touch screen
-
 export default function PanelNavigation(props: BoxProps) {
-
     // Context
     const {
         registerFunction,
@@ -100,10 +97,6 @@ export default function PanelNavigation(props: BoxProps) {
         setFocused((prev) => [prev[0]]);
     }, [screenSizePad, screenSizeDesktop, setFocused]);
 
-    useEffect(() => {
-        console.log(focused);
-    }, [focused]);
-
     const navigateTo = useCallback((target: Panels) => {
         if (onScreenPanelCount === 3) {
             setFocused([...navOrder]);
@@ -127,10 +120,10 @@ export default function PanelNavigation(props: BoxProps) {
 
     // Width for each panel
     const widthProp = useMemo(() => {
-        if (screenSizePad) return '50%';
-        if (screenSizeDesktop) return '33.33333%';
+        if (onScreenPanelCount === 2) return '50%';
+        if (onScreenPanelCount === 3) return '33.33333%';
         return '100%';
-    }, [screenSizePad, screenSizeDesktop]);
+    }, [onScreenPanelCount]);
 
     // Filter (CSS filter: brightness) for each panel
     const filterProp = useMemo(() => {
@@ -191,6 +184,16 @@ export default function PanelNavigation(props: BoxProps) {
             'output': leftPositionAnchorsMD[2]
         };
     }, [focused]);
+
+    // DEBUG
+    // There is an issue when a dialog is open and the in-screen panels count is 2, 
+    // stay active at the last (right) 2 panels, then shrink to small screen. Closing the dialog will then cause the visible dialog
+    // to be a disabled one. In dev tool untick and tick the 'left' CSS property will just bring it back to normal.
+    // Seems like browser not rendering the correct CSS due to the dialog?
+    // How is it gonna be fixed??
+    useEffect(() => {
+        import.meta.env.DEV && console.log(focused, containerLeft);
+    }, [focused, containerLeft]);
 
     return <Box position="relative"
         overflow="visible"

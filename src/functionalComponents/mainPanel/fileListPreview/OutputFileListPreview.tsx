@@ -107,7 +107,7 @@ export default function OutputFileListPreview() {
                     )}
                 </Box>
                 {!previewMode &&
-                    <Box display="flex" alignItems='baseline' gap={0.5} mr={0.5}
+                    <Box display="flex" alignItems='baseline' gap={0.5} mr={1}
                         sx={{
                             '& > *': {
                                 whiteSpace: 'nowrap'
@@ -152,7 +152,7 @@ export default function OutputFileListPreview() {
         {outputStatistic.inputFiles.totalFiles > 0 && <Box mb={1}>
             <Box display='flex' justifyContent='space-between' alignItems='center' pb={1}>
                 <Typography variant="body1" fontWeight="bolder">
-                    图像输出
+                    文件输出
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
                     {`共 ${outputStatistic.inputFiles.totalFiles} 个文件`}

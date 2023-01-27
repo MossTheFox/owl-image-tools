@@ -16,7 +16,7 @@ export const panelNavigationContext = createContext<PanelNavigationContext>({
     navigateTo(panelName) { },
     registerFunction(navigateTo) { },
     unregisterFunction() { },
-    onScreenPanelCount: 3,
+    onScreenPanelCount: 1,
     focused: ['input', 'config', 'output'],
     setFocused() { },
     setOnScreenPanelCount() { },
@@ -34,8 +34,8 @@ export function PanelNavigationContextProvider({ children }: { children: React.R
     const unregisterFunction = useCallback(() => setRegisteredFn({ fn: () => { } }), []);
 
 
-    const [onScreenPanelCount, setOnScreenPanelCount] = useState(3);
-    const [focused, setFocused] = useState<Panels[]>(['input', 'config', 'output']);
+    const [onScreenPanelCount, setOnScreenPanelCount] = useState(1);
+    const [focused, setFocused] = useState<Panels[]>(['input']);
 
     return <panelNavigationContext.Provider value={{
         navigateTo: registeredFn.fn,

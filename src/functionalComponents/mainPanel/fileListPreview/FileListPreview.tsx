@@ -1,7 +1,7 @@
 import { TreeView } from "@mui/lab";
-import { Typography, Box, ButtonGroup, Button, Link, Tooltip } from "@mui/material";
+import { Typography, Box, ButtonGroup, Button, Link, Tooltip, Menu, MenuItem } from "@mui/material";
 import { ExpandMore, ChevronRight, List as ListIcon, ViewList } from "@mui/icons-material";
-import { useContext, useMemo, useCallback, useState } from "react";
+import { useContext, useMemo, useCallback, useState, useRef } from "react";
 import { fileListContext as _fileListContext, TreeNode, webkitFileListContext as _webkitFileListContext, WebkitFileNodeData } from "../../../context/fileListContext";
 import { fileListDialogCallerContext } from "../../../context/fileListDialog/fileListDialogCallerContext";
 import FileTreeItem from "./treeItems/FileTreeItem";
@@ -61,6 +61,15 @@ export default function FileListPreview() {
         ]);
     }, [dialogCaller.callFileListStatisticDialog, webkitFileListContext.statistic]);
 
+    const menuAnchor = useRef<HTMLDivElement>(null);
+    const [open, setOpen] = useState(false);
+    const openMenu = useCallback(() => setOpen(true), []);
+    const closeMenu = useCallback(() => setOpen(false), []);
+
+    const clearAll = useCallback(() => {
+        webkitFileListContext.clearNodes();
+        closeMenu();
+    }, [closeMenu, webkitFileListContext.clearNodes]);
 
     return <>
         {/* Note: The root layer of file array CAN have duplicated filenames or directory names.
@@ -125,12 +134,24 @@ export default function FileListPreview() {
 
         {webkitFileListContext.inputFileTreeRoots.length > 0 && <Box mb={1}>
             <Box display='flex' justifyContent='space-between' alignItems='center' pb={1}>
-                <Typography variant="body1" fontWeight="bolder">
-                    文件列表 (只读)
+                <Typography variant="body1" fontWeight="bolder" component="div"
+                    display='flex' gap={1} whiteSpace="nowrap" ref={menuAnchor}
+                >
+                    文件列表 <Link component="button" underline="hover" onClick={openMenu}>选项</Link>
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
                     {`共 ${webkitFileListContext.statistic.totalFiles} 个文件`}
                 </Typography>
+
+                <Menu open={open} onClose={closeMenu} anchorEl={menuAnchor.current}>
+                    <MenuItem dense onClick={clearAll}>
+                        <Typography variant="body2" color={(t) => t.palette.error.main} fontWeight="bolder">
+                            清空文件
+                        </Typography>
+                    </MenuItem>
+                </Menu>
+
+
             </Box>
             <TreeView defaultCollapseIcon={<ExpandMore />} defaultExpandIcon={<ChevronRight />}
                 selected={contextMenuActiveItem}
