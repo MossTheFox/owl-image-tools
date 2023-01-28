@@ -1,4 +1,4 @@
-import { Box, BoxProps, Collapse, ButtonGroup, Button } from "@mui/material";
+import { Box, BoxProps } from "@mui/material";
 import { useContext } from "react";
 import CheckboxWithTooltop from "../../../../components/styledComponents/CheckboxWithTooltip";
 import SliderWithInput from "../../../../components/styledComponents/SliderWithInput";

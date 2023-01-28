@@ -39,7 +39,7 @@ function initVips() {
                         reject(new Error(what));
                     },
                 });
-                console.log(`${vips.version(0)}.${vips.version(1)}.${vips.version(2)}`);
+                // console.log(`${vips.version(0)}.${vips.version(1)}.${vips.version(2)}`);
             }
             resolve(vips);
         } catch (err) {

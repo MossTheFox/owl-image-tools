@@ -1,6 +1,5 @@
 import { createContext, useState, useCallback, useEffect, useContext, useMemo } from "react";
-import { ACCEPT_MIMEs, changeFileExt, checkIsFilenameAccepted, checkIsMimeSupported, extToMime, getFileExt, mimeToExt } from "../utils/imageMIMEs";
-import useAsync from "../hooks/useAsync";
+import { ACCEPT_MIMEs, changeFileExt, extToMime, getFileExt, mimeToExt } from "../utils/imageMIMEs";
 import { loggerContext } from "./loggerContext";
 import { defaultFileListStatistic, FileListStatistic, getAllNodeInTree, TreeNode, WebkitFileNodeData } from "./fileListContext";
 import { defaultOutputConfig, OutputConfig } from "./appConfigContext";

@@ -1,4 +1,4 @@
-import { Download, Folder, FolderZip, PlayArrow } from "@mui/icons-material";
+import { Download, Folder, PlayArrow } from "@mui/icons-material";
 import { Box, BoxProps, Button, Collapse, Popover, Typography } from "@mui/material";
 import { useCallback, useContext, useRef, useState, useMemo } from "react";
 import { appConfigContext } from "../../../context/appConfigContext";

@@ -4,7 +4,7 @@ import { FolderOpen, Image as ImageIcon } from '@mui/icons-material';
 import { FS_Mode, isMobileBrowser } from "../../../utils/browserCompability";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../../context/fileListContext";
 import useAsync from "../../../hooks/useAsync";
-import { appConfigContext, defaultSiteConfig } from "../../../context/appConfigContext";
+import { appConfigContext } from "../../../context/appConfigContext";
 
 export default function SelectLocalFileButtonRow(props: GridProps) {
     const fileListContext = useContext(_fileListContext);

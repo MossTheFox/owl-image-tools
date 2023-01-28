@@ -1,4 +1,4 @@
-import { createContext, useState, useCallback, useMemo } from "react";
+import { createContext, useState, useCallback } from "react";
 import { Snackbar, Alert, AlertTitle } from "@mui/material";
 
 type LogHistory = {

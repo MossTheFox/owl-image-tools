@@ -1,11 +1,7 @@
 import { Box, Typography, Menu, MenuItem, ListItem, ListItemButton, ListItemIcon, ListItemText, PopoverPosition } from "@mui/material";
-import { Info, Delete, Download, FolderZip } from "@mui/icons-material";
+import { Info, Download, FolderZip } from "@mui/icons-material";
 import { createContext, useCallback, useState, useMemo, useEffect, useContext } from "react";
 import ImageFilePreviewBox from "../../components/ImageFilePreviewBox";
-import { ACCEPT_MIMEs } from "../../utils/imageMIMEs";
-import { FileListStatistic, WebkitFileNodeData, TreeNode, defaultFileListStatistic } from "../fileListContext";
-import SingleFileDetailDialog from "./fileListDialogsAndMenus/SingleFileDetailDialog";
-import FileListStatisticDialog from "./fileListDialogsAndMenus/FileListStatisticDialog";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../context/fileListContext";
 import { outputFileListContext, OutputTreeNode } from "../outputFileListContext";
 import OutputFileCompareDialog from "./fileListDialogsAndMenus/OutputFileCompareDialog";

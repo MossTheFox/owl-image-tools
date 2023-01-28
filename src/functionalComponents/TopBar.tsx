@@ -1,7 +1,6 @@
-import { Box, Typography, Chip, Tooltip, ButtonBase, BoxProps } from "@mui/material";
+import { Box, Typography, Chip, ButtonBase, BoxProps } from "@mui/material";
 import { Settings } from "@mui/icons-material";
 import { useContext, useCallback, useState } from "react";
-import { t } from "i18next";
 import { FS_Mode, storageDisabled } from "../utils/browserCompability";
 import { loggerContext } from "../context/loggerContext";
 import { TOP_BAR_HEIGHT } from "../App";

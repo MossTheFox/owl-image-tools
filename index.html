@@ -47,7 +47,7 @@
   </noscript>
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
-  <!-- um, whatever. -->
+
   <script src="/wasm/vips/vips.js"></script>
 
   <script>
@@ -61,10 +61,10 @@
               const newWorker = reg.installing;
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed') {
+                  // Force update on found.
                   newWorker.postMessage({
                     type: "SKIP_WAITING"
                   });
-                  // 强制直接更新
                 }
               });
             });

@@ -1,8 +1,7 @@
-import { Box, BoxProps, Button, ButtonGroup, Collapse, Slider, TextField, Typography } from "@mui/material";
+import { Box, BoxProps, Button, ButtonGroup, Collapse, Typography } from "@mui/material";
 import { useContext, useMemo } from "react";
 import CheckboxWithTooltop from "../../../../components/styledComponents/CheckboxWithTooltip";
 import SliderWithInput from "../../../../components/styledComponents/SliderWithInput";
-import TypographyWithTooltip from "../../../../components/styledComponents/TypographyWithTooltip";
 import { appConfigContext } from "../../../../context/appConfigContext";
 
 export default function WEBPConfig(props: BoxProps) {

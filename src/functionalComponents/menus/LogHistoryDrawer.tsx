@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { SwipeableDrawer, SwipeableDrawerProps, Box, Typography, Divider, IconButton, Link } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import { loggerContext } from "../../context/loggerContext";

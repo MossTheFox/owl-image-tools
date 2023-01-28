@@ -1,4 +1,4 @@
-import { Box, BoxProps, ButtonBase, Checkbox, FormControlLabel, FormHelperText, Link, Menu, MenuItem, Typography } from "@mui/material";
+import { Box, BoxProps, Link, Menu, MenuItem, Typography } from "@mui/material";
 import { useCallback, useContext, useRef, useState } from "react";
 import CheckboxWithTooltop from "../../../components/styledComponents/CheckboxWithTooltip";
 import { appConfigContext } from "../../../context/appConfigContext";

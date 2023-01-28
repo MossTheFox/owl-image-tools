@@ -1,12 +1,13 @@
 import { SwipeableDrawer, SwipeableDrawerProps, Box, Typography, List, ListItem, ListItemButton, ListItemText, ListItemIcon, ListSubheader, IconButton, Divider, Switch, Collapse, Button } from "@mui/material";
-import { Close, DarkMode, LightMode } from '@mui/icons-material';
-import { VERSION_TEXT, VERSION_TEXT_SECONDARY } from "../../constraints";
+import { Close, DarkMode, GitHub, LightMode } from '@mui/icons-material';
+import { GITHUB_REPO_URL, VERSION_TEXT, VERSION_TEXT_SECONDARY } from "../../constraints";
 import { FS_Mode } from "../../utils/browserCompability";
 import { useCallback, useContext, useState } from "react";
 import { appConfigContext, defaultSiteConfig } from "../../context/appConfigContext";
 import BGTransitionBox from "../../components/styledComponents/BGTransitionBox";
 import QuickDialog, { QuickDialogData } from "../../components/styledComponents/QuickDialog";
 import InspectSiteDataDialog from "../dialogs/InspectSiteDataDialog";
+import ExternalLink from "../../ui/icons/ExternalLink";
 
 export default function AppConfigDrawerMenu(props: SwipeableDrawerProps) {
 
@@ -167,6 +168,17 @@ export default function AppConfigDrawerMenu(props: SwipeableDrawerProps) {
                 <ListItem>
                     <ListItemText primary={VERSION_TEXT} secondary={VERSION_TEXT_SECONDARY} />
                 </ListItem>
+
+                <ListItemButton LinkComponent='a' href={GITHUB_REPO_URL} target="_blank">
+                    <ListItemIcon>
+                        <GitHub />
+                    </ListItemIcon>
+                    <ListItemText primary={<>
+                        GitHub repository <ExternalLink fontSize="small" />
+                    </>
+                    } />
+                </ListItemButton>
+
             </List>
 
         </BGTransitionBox>

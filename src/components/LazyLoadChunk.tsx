@@ -1,4 +1,4 @@
-import { CSSProperties, forwardRef, useEffect, useMemo, useRef, useState } from "react"
+import { CSSProperties, useEffect, useMemo, useRef, useState } from "react"
 import { checkRectOverlap } from "../utils/randomUtils";
 
 // This thing is supposed to be useful in many places

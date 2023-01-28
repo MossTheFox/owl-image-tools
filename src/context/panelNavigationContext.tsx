@@ -1,4 +1,3 @@
-import { Theme, useMediaQuery } from "@mui/material";
 import React, { createContext, useState, useCallback, useMemo } from "react";
 import { Panels } from "../functionalComponents/PanelNavigation";
 
