@@ -94,6 +94,7 @@ export default function OutputFileTreeItem({
                 position="relative"
                 zIndex={0}
                 overflow="hidden"
+                height={previewMode ? '3rem' : '1.5rem'}
             >
                 {/* Progress Bar BG Box */}
                 <Box position="absolute" width='100%' height={0} left={0} top={0} zIndex={-1}>

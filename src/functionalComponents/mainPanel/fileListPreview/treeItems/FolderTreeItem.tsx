@@ -2,7 +2,7 @@ import { TreeItem } from "@mui/lab";
 import { Typography, Box } from "@mui/material";
 import { FolderOpen } from "@mui/icons-material";
 import { useContext, useCallback } from "react";
-import { fileListContext, fileListContext as _fileListContext, webkitFileListContext, webkitFileListContext as _webkitFileListContext } from "../../../../context/fileListContext";
+import { fileListContext as _fileListContext, webkitFileListContext } from "../../../../context/fileListContext";
 import { fileListDialogCallerContext } from "../../../../context/fileListDialog/fileListDialogCallerContext";
 
 export default function FolderTreeItem({
@@ -40,7 +40,7 @@ export default function FolderTreeItem({
         }}
 
         label={
-            <Box display={'flex'} justifyContent={'space-between'}>
+            <Box display={'flex'} justifyContent={'space-between'} height="1.5em">
                 <Box component={FolderOpen} color='inherit' mr={1} />
                 <Typography variant="body1" fontWeight='bolder' whiteSpace='nowrap' flexGrow={1}
                     overflow='hidden'

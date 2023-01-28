@@ -174,4 +174,28 @@ export async function estimateStorageUsage(): Promise<
     }
 }
 
-/** Check for persis (TODO: um) */
+
+// um
+
+/** return val ∈ [min, max] */
+export function numBetween(val: number, min: number, max: number) {
+    return val >= min && val <= max;
+}
+
+/**
+ * x, y, w, h:
+ * 
+ * (x, y) - left top point
+ * 
+ * w - width
+ * 
+ * h - height
+ */
+export function checkRectOverlap(ax: number, ay: number, aw: number, ah: number,
+    bx: number, by: number, bw: number, bh: number
+) {
+    const x_direction = numBetween(ax, bx, bx + bw) || numBetween(bx, ax, ax + aw);
+    const y_direction = numBetween(ay, by, by + bh) || numBetween(by + bh, ay, ay + ah);
+
+    return x_direction && y_direction;
+}

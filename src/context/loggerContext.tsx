@@ -10,7 +10,8 @@ type LoggerContext = {
     writeLine: (str: string) => void,
     line: string,
     history: LogHistory,
-    fireAlertSnackbar: (data: MuiAlertState, autoHideDuration?: number) => void
+    fireAlertSnackbar: (data: MuiAlertState, autoHideDuration?: number) => void,
+    clear: () => void,
 };
 
 export const loggerContext = createContext<LoggerContext>({
@@ -18,6 +19,7 @@ export const loggerContext = createContext<LoggerContext>({
     line: '',
     history: [],
     fireAlertSnackbar() { },
+    clear() { },
 });
 
 
@@ -49,11 +51,16 @@ export function LoggerContextProvider({ children }: { children: React.ReactNode 
         setSnackOpen(true);
     }, []);
 
+    const clear = useCallback(() => {
+        setHistory([]);
+    }, []);
+
     return <loggerContext.Provider value={{
         history,
         line,
         writeLine,
-        fireAlertSnackbar
+        fireAlertSnackbar,
+        clear
     }}>
         {children}
         <Snackbar open={snackOpen} onClose={closeSnack} autoHideDuration={snackAutohideDuration}

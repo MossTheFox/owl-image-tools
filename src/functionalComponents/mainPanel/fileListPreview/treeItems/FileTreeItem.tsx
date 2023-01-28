@@ -1,7 +1,7 @@
 import { TreeItem } from "@mui/lab";
 import { Typography, Box, PopoverPosition } from "@mui/material";
 import React, { useContext, useCallback, useState, useEffect } from "react";
-import { fileListContext, fileListContext as _fileListContext, webkitFileListContext, webkitFileListContext as _webkitFileListContext } from "../../../../context/fileListContext";
+import { fileListContext as _fileListContext, webkitFileListContext } from "../../../../context/fileListContext";
 import { parseFileSizeString } from "../../../../utils/randomUtils";
 import ImageFilePreviewBox from "../../../../components/ImageFilePreviewBox";
 import { fileListDialogCallerContext } from "../../../../context/fileListDialog/fileListDialogCallerContext";
@@ -75,7 +75,9 @@ export default function FileTreeItem({
         }}
 
         label={
-            <Box display={'flex'} justifyContent={'space-between'} alignItems="center">
+            <Box display={'flex'} justifyContent={'space-between'} alignItems="center"
+                height={previewMode ? "3em" : "1.5em"}
+            >
                 {previewMode && <ImageFilePreviewBox file={file}
                     height="3rem"
                     width="3rem"

@@ -8,6 +8,7 @@ import OutputFileTreeItem from "./outputTreeItems/OutputFileTreeItem";
 import OutputFolderTreeItem from "./outputTreeItems/OutputFolderTreeItem";
 import { outputFileListContext, OutputTreeNode } from "../../../context/outputFileListContext";
 import { outputFileListDialogCallerContext } from "../../../context/fileListDialog/outputFileListDialogCallerContext";
+import LazyLoadChunk from "../../../components/LazyLoadChunk";
 
 export type OutputTreeItemDataDisplayMode = 'size' | 'sizeChange';
 
@@ -24,6 +25,38 @@ function RenderTreeItem({
     dataDisplay: OutputTreeItemDataDisplayMode;
 }) {
 
+    const [folderChildren, fileChildren] = (() => {
+        if (rootNode.kind === 'file') {
+            return [[], []];
+        }
+        // folder
+        return [
+            rootNode.children.filter((v) => v.kind === 'directory'),
+            rootNode.children.filter((v) => v.kind === 'file'),
+        ];
+    })();
+
+    const FolderChildrenChunks = (() => {
+        // 30 in a row
+        const result: (typeof folderChildren)[] = [];
+
+        for (let i = 0; i < folderChildren.length; i += 30) {
+            result.push(folderChildren.slice(i, i + 30));
+        }
+        return result;
+    })();
+
+    const fileChildrenChunks = (() => {
+        // 30 in a row
+        const result: (typeof fileChildren)[] = [];
+
+        for (let i = 0; i < fileChildren.length; i += 30) {
+            result.push(fileChildren.slice(i, i + 30));
+        }
+        return result;
+    })();
+
+
     return <>
         {rootNode.kind === 'file' ? (
             <OutputFileTreeItem node={rootNode} dataDisplay={dataDisplay}
@@ -33,13 +66,35 @@ function RenderTreeItem({
                 node={rootNode}
             >
 
-                {rootNode.children.sort((a, b) => {
-                    if (a.kind === 'directory' && b.kind === 'file') return -1;
-                    if (a.kind === 'file' && b.kind === 'directory') return 1;
-                    return 0;
-                }).map((v, i) => (
-                    <RenderTreeItem key={i} rootNode={v} previewMode={previewMode} dataDisplay={dataDisplay} />
-                ))}
+                {/* Do the lazy load for File and Folder Items */}
+
+                {FolderChildrenChunks.map((v, i) =>
+                    <LazyLoadChunk key={i}
+                        unitCount={v.length}
+                        unitHeight={'1.5em'}
+                    >
+                        {
+                            v.map((v, i) =>
+                                <RenderTreeItem key={i} rootNode={v} previewMode={previewMode} dataDisplay={dataDisplay} />
+                            )
+                        }
+                    </LazyLoadChunk>
+                )}
+
+                {fileChildrenChunks.map((v, i) =>
+                    <LazyLoadChunk key={i}
+                        unitCount={v.length}
+                        unitHeight={previewMode ? '3em' : '1.5em'}
+                    >
+                        {
+                            v.map((v, i) =>
+                                v.kind === 'file' &&
+                                <OutputFileTreeItem key={i} node={v} dataDisplay={dataDisplay}
+                                    previewMode={previewMode} />
+                            )
+                        }
+                    </LazyLoadChunk>
+                )}
             </OutputFolderTreeItem>
         )}
 
