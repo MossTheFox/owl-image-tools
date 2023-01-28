@@ -9,7 +9,7 @@ import { convertToGIF, convertToJPEG, convertToPNG, convertToWebp, isFormatAccep
 import { FS_Mode } from "../utils/browserCompability";
 import { isFileExists, renameFileForDuplication } from "../utils/FS";
 import { convertViaCanvas } from "../utils/converter/canvasConverter";
-import { clearCurrentActiveTempFolders } from "../utils/privateFS";
+import { clearCurrentActiveTempFolders, parseTempFolderDirectory, readOPFSFile, writeOPFSFile } from "../utils/privateFS";
 
 /**
  * um.
@@ -336,24 +336,65 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
         let resultBuffer = await doConvertion(originalFile, ext, C);
 
         if (FS_Mode !== 'noFS' && outputFolderHandle) {
-            // Write to FS
-            // Here will do the rename actions in case there's file of the same name
-            const fileHandle = await getFileHandle(node, outputFolderHandle);
 
-            // rename the node itself
-            node.name = fileHandle.name;
-            const writable = await fileHandle.createWritable({
-                keepExistingData: false
-            });
-            await writable.write(resultBuffer);
-            await writable.close();
+            // Here is the thing: Buffer from file object can stay away from memory.
+            // To avoid filling things in mem, the node.file should be loaded from a saved local file.
 
-            resultBuffer = await fileHandle.getFile();
+            if (FS_Mode === 'publicFS') {
+                // Write to FS
+                // Here will do the rename actions in case there's file of the same name
+                const fileHandle = await getFileHandle(node, outputFolderHandle);
+
+                // rename the node itself
+                node.name = fileHandle.name;
+
+                // Note: Webkit (Private FS) doesn't support `createWritable`.
+
+                const writable = await fileHandle.createWritable({
+                    keepExistingData: false
+                });
+                await writable.write(resultBuffer);
+                await writable.close();
+
+                resultBuffer = await fileHandle.getFile();
+            }
+
+            // So here is for OPFS implementation
+            // ref: https://webkit.org/blog/12257/the-file-system-access-api-with-origin-private-file-system/
+            if (FS_Mode === 'privateFS') {
+                // NOT TESTED SINCE SAFARI CANNOT RUN WASM-VIPS PROPERLY due to a (aleady fixed in preview build) issue
+
+                // type: FileSystemSyncAccessHandle
+                // need a worker to do this.
+
+                // Error will be handled outside this fn so it will be ok
+
+                const path: string[] = [];
+
+                let it: typeof node | null = node;
+                // ugh
+                while (it) {
+                    path.unshift(it.name);
+                    it = it.parent;
+                }
+
+                // there is some temp path when writing to Private FS. so watch out.
+                path.unshift(...parseTempFolderDirectory(outputFolderHandle).split('/'));
+                console.log(path);
+                node.name = await writeOPFSFile(path.join('/'), resultBuffer);
+
+                path[path.length - 1] = node.name;
+
+                const localFileHandle = await readOPFSFile(path.join('/'));
+
+                resultBuffer = await localFileHandle.getFile();
+
+            }
 
             writeLine((FS_Mode === 'publicFS' ?
                 `已保存文件: ` :
                 `已在临时存储中保存文件: `)
-                + `${fileHandle.name} (${parseFileSizeString(node.originalNode.data.file.size)} → ${parseFileSizeString(resultBuffer.size)})`
+                + `${node.name} (${parseFileSizeString(node.originalNode.data.file.size)} → ${parseFileSizeString(resultBuffer.size)})`
             );
         }
 

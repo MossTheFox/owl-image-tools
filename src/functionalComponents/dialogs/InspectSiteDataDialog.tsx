@@ -30,17 +30,20 @@ export default function InspectSiteDataDialog(props: DialogProps) {
 
     const fireFetch = useAsync(estimateStorageUsage, onResolved);
 
+
+    const [localStorageSize, setLocalStorageSize] = useState(storageDisabled ? 0 : localStorage.length)
+
     useEffect(() => {
         if (props.open) {
             fireFetch();
         }
-    }, [props.open])
-
-    const [localStorageSize, setLocalStorageSize] = useState(storageDisabled ? 0 : localStorage.length)
+        setLocalStorageSize(storageDisabled ? 0 : localStorage.length);
+    }, [props.open]);
 
     const clearLocalStorage = useCallback(() => {
         localStorage.clear();
         setLocalStorageSize(0);
+        setText('...');
         fireFetch();
     }, [fireFetch]);
 
@@ -65,7 +68,7 @@ export default function InspectSiteDataDialog(props: DialogProps) {
     const asyncClearOPFS = useCallback(async () => {
         setOPFSBtnDisabled(true);
         setText('...');
-        await clearAllTempFolders();
+        await clearAllTempFolders(true);
     }, []);
 
     const onOPFSOK = useCallback(() => {
@@ -117,7 +120,12 @@ export default function InspectSiteDataDialog(props: DialogProps) {
             <DialogContentText variant='body2' gutterBottom>
                 一些浏览器可能会将浏览器本身的缓存行为也计入存储占用量中。这些内容会需要你在浏览器设置中进行清除。
             </DialogContentText>
-
+            <DialogContentText variant='body2' gutterBottom>
+                此数据来源于 <code>navigator.storage.estimate()</code>。
+            </DialogContentText>
+            <DialogContentText variant='body2' gutterBottom>
+                要查看详细信息，请打开浏览器的开发者工具。一些未知问题可能导致这个数据不是很正常，此应用程序<strong>主动</strong>存储的所有信息 (除了 Service Worker 本身) 都可以在下方被清除。
+            </DialogContentText>
             <Divider />
             <Box display='flex' flexDirection="column" gap={1} pt={1}>
 
@@ -147,20 +155,22 @@ export default function InspectSiteDataDialog(props: DialogProps) {
                 </>
                 }
 
-                {FS_Mode !== 'noFS' &&
+                {FS_Mode !== 'noFS' && <>
                     <Button variant="outlined" size="small" color="warning"
                         disabled={opfsBtnDisabled}
                         onClick={fireOPFS}
                     >
-                        清除私有文件系统中的缓存
+                        清空私有文件系统 (用于输出缓存)
                     </Button>
-                }
-
-                {FS_Mode !== 'noFS' &&
                     <DialogContentText variant='body2' gutterBottom>
                         请小心，若当前或者其他窗口有在进行转换任务，如果有使用到私有文件系统作为缓存的话，进行清理可能会导致正在进行的任务出错。未保存的文件也将被清除。
                     </DialogContentText>
+                    <DialogContentText variant='body2' gutterBottom>
+                        如果要查看私有文件系统的内容，可以在浏览器控制台调用 <code>await window.__OPFS_DEBUG()</code>。
+                    </DialogContentText>
+                </>
                 }
+
             </Box>
 
 

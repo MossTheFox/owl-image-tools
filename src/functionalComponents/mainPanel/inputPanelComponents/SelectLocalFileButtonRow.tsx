@@ -60,12 +60,14 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
         const files = e.currentTarget.files;
         if (!files || !files.length) return;
         webkitFileListContext.appendFileList(files);
+        e.target.value = '';    // ← if don't do so, picking the same file again won't fire onChange
     }, [webkitFileListContext.appendFileList]);
 
     const handleWebkitDirectoryInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.currentTarget.files;
         if (!files || !files.length) return;
         webkitFileListContext.appendFileList(files, true);
+        e.target.value = '';    // ← if don't do so, picking the same file again won't fire onChange
     }, [webkitFileListContext.appendFileList])
 
     return <Grid container {...props}>

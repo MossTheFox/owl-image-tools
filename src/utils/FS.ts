@@ -50,7 +50,6 @@ export async function isFileExists(filename: string, dirHandle: FileSystemDirect
         }
     }
     return existed;
-
 }
 
 export function renameFileForDuplication(filename: string) {

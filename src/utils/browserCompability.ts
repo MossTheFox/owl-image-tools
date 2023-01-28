@@ -26,6 +26,8 @@ function compabilityTest() {
 export const compatibilityTestResult = compabilityTest();
 
 export const FS_Mode = (() => {
+    // DEBUG
+    // return 'privateFS';
     if (compatibilityTestResult.publicFS) return 'publicFS';
     if (compatibilityTestResult.privateFS) return 'privateFS';
     return 'noFS';
