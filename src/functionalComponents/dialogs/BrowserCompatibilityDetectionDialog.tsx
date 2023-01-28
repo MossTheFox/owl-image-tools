@@ -25,7 +25,10 @@ export default function BrowserCompatibilityDetectionDialog() {
     const [open, setOpen] = useState(
         (siteConfig.tipDisplay['browserCompatibility'] || severity === 'error') &&
         (!compatibilityTestResult.WASM || !compatibilityTestResult.webWorker
-            || FS_Mode === 'noFS' || storageDisabled || !clipboardSupport)
+            || FS_Mode === 'noFS' || storageDisabled || !clipboardSupport
+            // Current Safari might have some issues so here is an additional action
+            || isWebkit
+        )
     );
 
     const userOSAndBrowser = useMemo(() => {

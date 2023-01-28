@@ -23,9 +23,8 @@ export default function OutputFolderSaveAsDialog(props: {
     const handleClose = useCallback(() => {
         if (!loading) {
             setOpen(false);
-            onFinished();
         }
-    }, [onFinished, loading]);
+    }, [loading]);
 
     const handleAbort = useCallback(() => {
         onFinished();
@@ -73,17 +72,29 @@ export default function OutputFolderSaveAsDialog(props: {
                 const writable = await handle.createWritable({
                     keepExistingData: false
                 });
-                await writable.write(one.file);
-                await writable.close();
 
-                if (unmounted) {
-                    return;
+                try {
+                    await writable.write(one.file);
+                    await writable.close();
+                    if (unmounted) {
+                        return;
+                    }
+
+                    setLogs((prev) => [...prev,
+                    `已保存文件: ${handle.name}`
+                    ]);
+                    setProgress((prev) => prev + 1);
+                } catch (err) {
+                    if (unmounted) {
+                        return;
+                    }
+                    setProgress((prev) => prev + 1);
+                    setLogs((prev) => [...prev,
+                    `无法读取文件: ${one.name}, 错误信息: ${err}`
+                    ]);
+                    setErrorFileCount((prev) => prev + 1);
+                    continue;
                 }
-
-                setLogs((prev) => [...prev,
-                `已保存文件: ${handle.name}`
-                ]);
-                setProgress((prev) => prev + 1);
             }
         }
 
@@ -109,7 +120,11 @@ export default function OutputFolderSaveAsDialog(props: {
     }, [node, progress]);
 
 
-    return <Dialog maxWidth="sm" fullWidth open={open} onClose={handleClose}>
+    return <Dialog maxWidth="sm" fullWidth open={open} onClose={handleClose}
+        TransitionProps={{
+            onExited: onFinished
+        }}
+    >
         <Box height={0} overflow="visible" sx={{
             transition: 'opacity 0.25s 0.5s',
             opacity: progressBarProgress >= 100 ? 0 : 1
@@ -117,7 +132,7 @@ export default function OutputFolderSaveAsDialog(props: {
             <LinearProgress variant="determinate" value={progressBarProgress} />
         </Box>
         <DialogTitle fontWeight="bolder">
-            {loading ? '正在保存文件' : '文件存储完毕'} {`${progress} / ${node.kind === 'file' ? 1 : node.childrenCount}`}
+            {loading ? '正在保存文件' : err ? '发生错误' : '文件存储完毕'} {`${progress} / ${node.kind === 'file' ? 1 : node.childrenCount}`}
             {errorFileCount > 0 && ` (${errorFileCount} 个出错的文件被跳过)`}
         </DialogTitle>
         <DialogContent>

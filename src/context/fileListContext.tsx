@@ -680,8 +680,6 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
         const allNodesToDelete = getAllNodeInTree(node);
         const deleteCount = allNodesToDelete.filter((v) => v.data.kind === 'file').length;
 
-        console.log(allNodesToDelete, deleteCount);
-
         // ok check this:
         // "It is expected that setState updaters will run twice in strict mode in development."
         // @see https://github.com/facebook/react/issues/12856

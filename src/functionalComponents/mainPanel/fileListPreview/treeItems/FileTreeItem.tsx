@@ -6,6 +6,7 @@ import { parseFileSizeString } from "../../../../utils/randomUtils";
 import ImageFilePreviewBox from "../../../../components/ImageFilePreviewBox";
 import { fileListDialogCallerContext } from "../../../../context/fileListDialog/fileListDialogCallerContext";
 
+// TODO: handle Safari long touch event..... (it don't open context menu)
 
 export default function FileTreeItem({
     nodeId,

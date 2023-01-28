@@ -1,5 +1,5 @@
 import { Box, Typography, Menu, MenuItem, ListItem, ListItemButton, ListItemIcon, ListItemText, PopoverPosition } from "@mui/material";
-import { Info, Delete } from "@mui/icons-material";
+import { Info, Delete, Download } from "@mui/icons-material";
 import { createContext, useCallback, useState, useMemo, useEffect, useContext } from "react";
 import ImageFilePreviewBox from "../../components/ImageFilePreviewBox";
 import { ACCEPT_MIMEs } from "../../utils/imageMIMEs";
@@ -7,6 +7,7 @@ import { FileListStatistic, WebkitFileNodeData, TreeNode, defaultFileListStatist
 import SingleFileDetailDialog from "./fileListDialogsAndMenus/SingleFileDetailDialog";
 import FileListStatisticDialog from "./fileListDialogsAndMenus/FileListStatisticDialog";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../context/fileListContext";
+import { fireFileDownload } from "../../utils/randomUtils";
 
 type FileNode = TreeNode<WebkitFileNodeData>;
 
@@ -70,7 +71,6 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
     }, []);
 
     // Context Menu //
-    const fileListContext = useContext(_fileListContext);
     const webkitFileListContext = useContext(_webkitFileListContext);
 
     const [contextMenuNodeHold, setContextMenuNodeHold] = useState<FileNode>();
@@ -89,6 +89,11 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
         callPreviewDialog(contextMenuNodeHold.data.file, contextMenuNodeHold);
 
     }, [contextMenuNodeHold, callPreviewDialog]);
+
+    const downloadOne = useCallback(() => {
+        if (!contextMenuNodeHold || contextMenuNodeHold.data.kind !== 'file') return;
+        fireFileDownload(contextMenuNodeHold.data.file, contextMenuNodeHold.data.file.name);
+    }, [contextMenuNodeHold]);
 
     const deleteNode = useCallback(() => {
         if (!contextMenuNodeHold) return;
@@ -205,7 +210,13 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
                     <ListItemIcon><Info /></ListItemIcon>
                     <ListItemText>详情</ListItemText>
                 </MenuItem>,
-                <MenuItem key={3} onClick={deleteNode} >
+                <MenuItem key={3}
+                    onClick={downloadOne}
+                >
+                    <ListItemIcon><Download color="primary" /></ListItemIcon>
+                    <ListItemText sx={{ color: (t) => t.palette.primary.main }}>下载</ListItemText>
+                </MenuItem>,
+                <MenuItem key={4} onClick={deleteNode} >
                     <ListItemIcon><Delete color="error" /></ListItemIcon>
                     <ListItemText>
                         <Typography color={(theme) => theme.palette.error.main}>

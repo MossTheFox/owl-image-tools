@@ -155,8 +155,12 @@ export default function FileListPreview() {
             </Box>
             <TreeView defaultCollapseIcon={<ExpandMore />} defaultExpandIcon={<ChevronRight />}
                 selected={contextMenuActiveItem}
-                onNodeToggle={(e, nodeIds) => {
-
+                sx={{
+                    '& *': {
+                        userSelect: 'none',
+                        WebkitTouchCallout: 'none',
+                        WebkitUserSelect: 'none',
+                    }
                 }}
             >
                 {webkitFileListContext.inputFileTreeRoots.sort((a, b) => {

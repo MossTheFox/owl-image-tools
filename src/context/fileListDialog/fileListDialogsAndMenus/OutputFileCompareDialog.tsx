@@ -11,6 +11,7 @@ const VIEW_MODE = ['output', 'original', 'compare'] as const;
 export default function OutputFileCompareDialog(props: DialogProps &
 {
     node: OutputTreeNode,
+    cleanupFn: () => void,
 }
 ) {
 
@@ -22,6 +23,7 @@ export default function OutputFileCompareDialog(props: DialogProps &
 
     const {
         node,
+        cleanupFn,
         ...dialogProps
     } = props;
 
@@ -58,6 +60,11 @@ export default function OutputFileCompareDialog(props: DialogProps &
                 if (!unmounted) {
                     setCanDownload(true);
                 }
+            } catch (err) {
+                import.meta.env.DEV && console.log(err);
+            }
+            try {
+                if (!node.file || node.originalNode.data.kind !== 'file') return;
                 await tryReadABlob(node.originalNode.data.file);
                 if (!unmounted) {
                     setCanDownloadOriginal(true);
@@ -110,7 +117,11 @@ export default function OutputFileCompareDialog(props: DialogProps &
 
     return <>
         {!!node.file &&
-            <Dialog fullWidth maxWidth="md" fullScreen={smallScreen} {...dialogProps}>
+            <Dialog fullWidth maxWidth="md" fullScreen={smallScreen} {...dialogProps}
+                TransitionProps={{
+                    onExited: cleanupFn
+                }}
+            >
                 <DialogTitle fontWeight="bolder" component="div"
                     sx={{
                         display: 'flex',
@@ -153,9 +164,9 @@ export default function OutputFileCompareDialog(props: DialogProps &
 
                     {/* Detail */}
                     <Box flexShrink={0} sx={{ overflowX: 'auto' }}>
-                        {!pending && !canDownload &&
+                        {!pending && (!canDownload || !canDownloadOriginal) &&
                             <DialogContentText gutterBottom fontWeight="bolder">
-                                无法读取文件。原始文件可能已被修改、移动或删除。
+                                无法读取文件。目标文件可能已被修改、移动或删除。
                             </DialogContentText>
                         }
 
@@ -209,7 +220,7 @@ export default function OutputFileCompareDialog(props: DialogProps &
                         >
                             {pending && '正在确认'}
                             {!pending && canDownload && '下载输出文件'}
-                            {!pending && !canDownload && '无法读取输出的文件'}
+                            {!pending && !canDownload && '无法读取输出文件'}
                         </Button>
 
                         <Button startIcon={<Download />} onClick={downloadOriginalFile}

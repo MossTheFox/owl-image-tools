@@ -3,18 +3,45 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#548142">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#292726">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="/image/icon-192.png">
+  <link rel="apple-touch-icon" href="/image/icon-512.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <meta name="description"
     content="Convert or optimize your image files in your browser. All processed on your local machine. Secure and open-sourced." />
-  <title>Owl Image Tools | mxowl.com toolkit</title>
+
+  <style>
+    /* This helps reduce the loading flash on dark mode. */
+    body {
+      background-color: #292726;
+      color: #fff;
+    }
+
+    @media (prefers-color-scheme: light) {
+      body {
+        background-color: #548142;
+        color: #000;
+      }
+    }
+  </style>
+
+  <title>Owl Image Tools | mxowl.com toolbox</title>
 </head>
 
 <body>
   <noscript>
-    <div style="display: flex; align-items: center; justify-content: center; width: 100%; padding: 1rem 0.5rem;">
+    <div
+      style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 1rem 0.5rem;">
       <p>
-        JavaScript is required to run this app. Check your browser settings.
+        JavaScript is required to run this app. Please check your browser settings.
+      </p>
+      <p>
+        🦉
       </p>
     </div>
   </noscript>
@@ -22,6 +49,38 @@
   <script type="module" src="/src/main.tsx"></script>
   <!-- um, whatever. -->
   <script src="/wasm/vips/vips.js"></script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', async () => {
+        try {
+          const reg = await navigator.serviceWorker.register('/sw.js');
+          if (reg) {
+            // listen for update
+            reg.addEventListener('updatefound', (e) => {
+              const newWorker = reg.installing;
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed') {
+                  newWorker.postMessage({
+                    type: "SKIP_WAITING"
+                  });
+                  // 强制直接更新
+                }
+              });
+            });
+            // one update already installed
+            if (reg.waiting) {
+              reg.waiting.postMessage({
+                type: "SKIP_WAITING"
+              });
+            }
+          }
+        } catch (err) {
+          console.log('Error from service worker: ', err);
+        }
+      });
+    }
+  </script>
 </body>
 
 </html>

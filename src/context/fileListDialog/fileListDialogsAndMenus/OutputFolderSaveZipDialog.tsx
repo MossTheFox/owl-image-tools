@@ -33,9 +33,8 @@ export default function OutputFolderSaveZipDialog(props: {
     const handleClose = useCallback(() => {
         if (!loading) {
             setOpen(false);
-            onFinished();
         }
-    }, [onFinished, loading]);
+    }, [loading]);
 
     // For some wtf reason JSZip doesn't allow abort.
 
@@ -73,7 +72,11 @@ export default function OutputFolderSaveZipDialog(props: {
     }, [nodes]);
 
 
-    return <Dialog maxWidth="sm" fullWidth open={open} onClose={handleClose}>
+    return <Dialog maxWidth="sm" fullWidth open={open} onClose={handleClose}
+        TransitionProps={{
+            onExited: onFinished
+        }}
+    >
         <Box height={0} overflow="visible" sx={{
             transition: 'opacity 0.25s 0.5s',
             opacity: progress >= 100 ? 0 : 1
@@ -81,7 +84,9 @@ export default function OutputFolderSaveZipDialog(props: {
             <LinearProgress variant="determinate" value={progress} />
         </Box>
         <DialogTitle fontWeight="bolder">
-            {loading ? '正在生成压缩包文件' : '压缩完毕'} {progress < 100 ?
+            {loading ? '正在生成压缩包文件' : (
+                err ? '发生错误' : '压缩完毕'
+            )} {progress < 100 ?
                 <Typography component="span" fontFamily="var(--font-monospace)">
                     {`${progress.toFixed(2)}%`}
                 </Typography>
@@ -115,7 +120,7 @@ export default function OutputFolderSaveZipDialog(props: {
 
         <DialogActions>
             <Button onClick={handleClose} disabled={loading}>
-                {loading ? '终止' : '完成'}
+                {loading ? '终止' : (err ? '取消' : '完成')}
             </Button>
         </DialogActions>
     </Dialog>

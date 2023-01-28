@@ -197,7 +197,8 @@ export default function OutputFileListPreview() {
                 sx={{
                     '& *': {
                         userSelect: 'none',
-                        WebkitTouchCallout: 'none'
+                        WebkitTouchCallout: 'none',
+                        WebkitUserSelect: 'none',
                     }
                 }}
             >

@@ -13,13 +13,15 @@ export function parseFileSizeString(size: number, detailed = false) {
     if (size < 1024 * 1024) return `${(size / 1024).toFixed(2)} KB` + detail;
     if (size < 1024 * 1024 * 1024) return `${(size / 1024 / 1024).toFixed(2)} MB` + detail;
     if (size < 1024 * 1024 * 1024 * 1024) return `${(size / 1024 / 1024 / 1024).toFixed(2)} GB` + detail;
+    return `${(size / 1024 / 1024 / 1024 / 1024).toFixed(2)} TB` + detail;
 }
 
-export function parseDateDelta(dateA: Date, dateB: Date) {
+export function parseDateDelta(dateA: Date, dateB: Date = new Date()) {
     const delta = Math.abs(dateA.getTime() - dateB.getTime());
     if (delta < 1000) return `${delta} ms`;
     if (delta < 1000 * 60) return `${(delta / 1000).toFixed(2)} s`;
     if (delta < 1000 * 60 * 60) return `${Math.floor(delta / (1000 * 60))} min, ${(delta % (1000 * 60) / 1000).toFixed(2)} s`;
+    return `${Math.floor(delta / (1000 * 60 * 60))} h, ${(delta % (1000 * 60 * 60) / (1000 * 60)).toFixed(2)} min, ${(delta % (1000 * 60) / 1000).toFixed(2)} s`;
 }
 
 export function parseDateStringThatCanBeUsedInFileName(date = new Date(), tillMS = true) {

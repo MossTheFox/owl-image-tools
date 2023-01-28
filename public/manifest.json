@@ -1,0 +1,37 @@
+{
+    "short_name": "Image Tools",
+    "name": "Owl Image Tools",
+    "icons": [
+        {
+            "src": "/image/icon-192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "/image/icon-512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ],
+    "id": "owl-image-tools",
+    "start_url": "/",
+    "background_color": "#548142",
+    "display": "standalone",
+    "scope": "/",
+    "theme_color": "#548142",
+    "description": "Simple image processing tool that runs in the browser.",
+    "screenshots": [
+        {
+            "src": "/image/screenshot1.png",
+            "type": "image/png",
+            "sizes": "1368x1524",
+            "form_factor": "wide"
+        },
+        {
+            "src": "/image/screenshot2.png",
+            "type": "image/png",
+            "sizes": "828x1792",
+            "form_factor": "narrow"
+        }
+    ]
+}

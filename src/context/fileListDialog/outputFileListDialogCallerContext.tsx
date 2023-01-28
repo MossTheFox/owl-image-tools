@@ -47,6 +47,13 @@ export function OutputFileListDialogCallerContextProvider({ children }: { childr
         setPreviewDialogOpen(true);
     }, []);
 
+    /** Clean up fn, call by transition exited */
+    const previewDialogCleanUp = useCallback(() => {
+        if (!previewDialogOpen) {
+            setPreviewNode(null);
+        }
+    }, [previewDialogOpen]);
+
     // Context Menu //
     const { } = useContext(outputFileListContext);
 
@@ -111,6 +118,7 @@ export function OutputFileListDialogCallerContextProvider({ children }: { childr
         node: OutputTreeNode
     } | null>(null);
 
+    /** Clean up fn, call by transition exited */
     const folderSaveOnEnd = useCallback(() => {
         setFolderSaveDialogOperation(null);
     }, []);
@@ -133,6 +141,8 @@ export function OutputFileListDialogCallerContextProvider({ children }: { childr
     }, [contextMenuNodeHold]);
 
     const [zipDownloadDialogOperation, setZipDownloadDialogOperation] = useState<{ nodes: OutputTreeNode[] } | null>(null)
+
+    /** Clean up fn, call by transition exited */
     const zipSaveOnEnd = useCallback(() => {
         setZipDownloadDialogOperation(null);
     }, []);
@@ -157,7 +167,7 @@ export function OutputFileListDialogCallerContextProvider({ children }: { childr
                 node={previewNode}
                 open={previewDialogOpen}
                 onClose={closePreviewDialog}
-
+                cleanupFn={previewDialogCleanUp}
             />
         )}
 
