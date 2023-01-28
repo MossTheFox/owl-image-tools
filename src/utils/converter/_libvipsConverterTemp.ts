@@ -1,6 +1,12 @@
+/*
+    This file is the archive of original libvipsConverter.ts, where the tasks runs at the main thread.
+
+    Functions in `vips-loader.worker.js` will now do the tasks and watch for RuntimeError(s).
+
+*/
+
 import type Vips from "wasm-vips";
 import { TinyColor } from "@ctrl/tinycolor";
-
 
 /** the comments (JSDoc) of the lib is way too detailed so here I'll just write nothing.
  * 
@@ -41,9 +47,49 @@ let vips: (typeof Vips) | null = null;
     Text rendering support:        no
 */
 
-// Note: err.name === 'RuntimeError' when things like OOM occuurred.
+function initVips() {
+    return new Promise<typeof Vips>(async (resolve, reject) => {
+        // firefox doesn't supprot dynamic module import in workers (https://bugzil.la/1540913)
+        // so the createModule function will be initialized in the script tag
+        const VipsCreateModule = typeof globalThis.Vips === 'undefined' ? null : globalThis.Vips;
+        if (!VipsCreateModule) {
+            reject(new Error('Module Not Loaded', {
+                cause: 'moduleNotFound'
+            }));
+            return;
+        }
 
-//////////////////////// UTILs /////////////////////////////
+        try {
+
+            if (!vips) {
+                vips = await VipsCreateModule({
+                    // local file ** important **
+                    mainScriptUrlOrBlob: '/wasm/vips/vips.js',
+                    dynamicLibraries: ["/wasm/vips/vips-jxl.wasm"], // To fix an issue for parsing URLs when running in workers 
+                    locateFile(url, scriptDirectory) {
+                        return `/wasm/vips/${url}`;
+                    },
+                    print(str) {
+                        import.meta.env.DEV && console.log(str);
+                    },
+                    printErr(str) {
+                        import.meta.env.DEV && console.warn(str);
+                    },
+                    onAbort(what) {
+                        reject(new Error(what));
+                    },
+                    
+                });
+                import.meta.env.DEV && console.log(`${vips.version(0)}.${vips.version(1)}.${vips.version(2)}`);
+            }
+            resolve(vips);
+        } catch (err) {
+            reject(err);
+        }
+    });
+};
+
+///////////////////////////////////////////////////////////
 
 export const VIPS_ACTION_ERROR_CAUSES = [
     'ImageFileUnreadable',
@@ -54,8 +100,12 @@ export type ConvertWithVipsCause = typeof VIPS_ACTION_ERROR_CAUSES[number];
 
 const errorBuilder = (message: string, cause: ConvertWithVipsCause) => new Error(message, { cause });
 
-export function parseBackground(hex: string) {
+export async function parseBackground(hex: string) {
+    if (!vips) {
+        vips = await initVips();
+    }
     const color = new TinyColor(hex);
+
     return [color.r, color.g, color.b];
 }
 
@@ -81,107 +131,26 @@ const isMultiframePic = (type: string) => {
 
 //////////////////////////////////////////////////////////////
 
-////////////////// For the webworker /////////////////////////
-
-let worker: Worker | null = null;
-
-function fireVipsWorkerTask(
-    uint8Array: Uint8Array,
-    loadStrProps: string,
-    writeFormatString: string,
-    writeOptions: {},
-    flatten: boolean = false,
-    defaultBackgroundVector = [255, 255, 255]
-) {
-    return new Promise<Uint8Array>((resolve, reject) => {
-        try {
-            // INIT
-            if (!worker) {
-                worker = new Worker('/wasm/vips-loader.worker.js');
-            }
-
-            // The callback functions will be override everytime
-            // Parallel tasks not sure if stable, so it's not implemented.
-
-            // Here begins
-            worker.onerror = async (e) => {
-                import.meta.env.DEV && console.log(e);
-
-                reject(e.error);
-                worker?.terminate();
-                // restart on error.
-                await restartVipsWorker();
-            };
-
-            worker.onmessage = async (e) => {
-
-                import.meta.env.DEV && console.log(e);
-
-                const data = e.data as {
-                    code: 'ok' | 'error',
-                    message: string,
-                    data: Uint8Array | Error
-                };
-
-                // Handle Errors
-                if (data.code === 'error' && data.message) {
-
-                    reject(data.data as Error);
-                    if (data.data instanceof Error && (
-                        data.data.name === 'RuntimeError'   // wait this seems not right
-                        || data.data.message.startsWith('Aborted')
-                    )) {
-                        await restartVipsWorker();
-                    }
-                    return;
-                }
-
-                // Resolve here
-                if (data.code === 'ok' && data.data instanceof Uint8Array) {
-                    resolve(data.data);
-                    return;
-                }
-            };
-
-            // CALL
-            worker.postMessage({
-                type: 'run',
-                args: [...arguments]
-            });
-
-
-        } catch (err) {
-            reject(err);
-        }
-
-    });
-}
-
-export async function restartVipsWorker() {
-    if (worker) {
-        worker.terminate();
-    }
-    worker = new Worker('/wasm/vips-loader.worker.js');
-}
-
-//////////////////////////////////////////////////////////////
-
-//////////////////// Exported Fns ////////////////////////////
-
 export async function convertToJPEG(file: Blob, config = {
     quality: 75,
     interlace: false,
     stripMetaData: false,
     defaultBackground: "#ffffff"
 }) {
+    if (!vips) {
+        vips = await initVips();
+    }
+
     // try read the blob
-    const result = await fireVipsWorkerTask(await blobToUint8Array(file),
-        '', '.jpg', {
+
+    const img = vips.Image.newFromBuffer(await blobToUint8Array(file));
+    const result = img.writeToBuffer('.jpg', {
         Q: config.quality,
         strip: config.stripMetaData,
-        background: parseBackground(config.defaultBackground),
+        background: await parseBackground(config.defaultBackground),
         interlace: config.interlace,
     });
+    img.delete();
     return new Blob([result], {
         type: 'image/jpeg',
     });
@@ -198,15 +167,29 @@ export async function convertToPNG(file: Blob, config = {
     keepAlphaChannel: true,
     defaultBackground: "#ffffff"
 }) {
+    if (!vips) {
+        vips = await initVips();
+    }
 
-    const result = await fireVipsWorkerTask(await blobToUint8Array(file), '', '.png', {
+    // try read the blob
+
+    let img = vips.Image.newFromBuffer(await blobToUint8Array(file));
+    if (!config.keepAlphaChannel && img.hasAlpha()) {
+        const flattened = img.flatten({
+            background: await parseBackground(config.defaultBackground),
+        });
+        img.delete();
+        img = flattened;
+    }
+    const result = img.writeToBuffer('.png', {
         compression: config.compression,
         strip: config.stripMetaData,
         interlace: config.interlace,
         dither: config.dither,
         ...config.bitdepth !== 0 ? { bitdepth: config.bitdepth } : {},
         Q: config.Q
-    }, !config.keepAlphaChannel, parseBackground(config.defaultBackground));
+    });
+    img.delete();
     return new Blob([result], {
         type: 'image/png',
     });
@@ -222,18 +205,27 @@ export async function convertToWebp(file: Blob, config = {
     keepAlphaChannel: true,
     defaultBackground: "#ffffff",
 }) {
-
+    if (!vips) {
+        vips = await initVips();
+    }
     const props = isMultiframePic(file.type) ? 'n=-1' : '';
-
-    const result = await fireVipsWorkerTask(await blobToUint8Array(file), props, '.webp', {
+    let img = vips.Image.newFromBuffer(await blobToUint8Array(file), props);
+    if (!config.keepAlphaChannel && img.hasAlpha()) {
+        const flattened = img.flatten({
+            background: await parseBackground(config.defaultBackground),
+        });
+        img.delete();
+        img = flattened;
+    }
+    const result = img.writeToBuffer('.webp', {
         Q: config.quality,
         strip: config.stripMetaData,
         lossless: config.lossless,
         preset: config.lossyCompressionPreset,
         'smart-subsample': config.smartSubsample,
         'alpha-q': config.alphaQuality,
-    }, !config.keepAlphaChannel, parseBackground(config.defaultBackground));
-
+    });
+    img.delete();
     return new Blob([result], {
         type: 'image/webp',
     });
@@ -250,8 +242,19 @@ export async function convertToGIF(file: Blob, config = {
     keepAlphaChannel: true,
     defaultBackground: "#ffffff",
 }) {
+    if (!vips) {
+        vips = await initVips();
+    }
     const props = isMultiframePic(file.type) ? 'n=-1' : '';
-    const result = await fireVipsWorkerTask(await blobToUint8Array(file), props, '.gif', {
+    let img = vips.Image.newFromBuffer(await blobToUint8Array(file), props);
+    if (!config.keepAlphaChannel && img.hasAlpha()) {
+        const flattened = img.flatten({
+            background: await parseBackground(config.defaultBackground),
+        });
+        img.delete();
+        img = flattened;
+    }
+    const result = img.writeToBuffer('.gif', {
         bitdepth: config.bitdepth,
         strip: config.stripMetaData,
         effort: config.effort,
@@ -259,8 +262,50 @@ export async function convertToGIF(file: Blob, config = {
         dither: config.dither,
         'interframe-maxerror': config["interframe-maxerror"],
         'interpalette-maxerror': config["interpalette-maxerror"],
-    }, !config.keepAlphaChannel, parseBackground(config.defaultBackground));
+    });
+    img.delete();
     return new Blob([result], {
         type: 'image/gif',
     });
+}
+
+// window.__DEBUG = convertToJPEG;
+
+
+//// For Web workers. functions will not be called here. 
+//// These are for coding with typescript.
+//// The fn is ugly
+
+/**
+ * 
+ * @param uint8Array Input file buffer.
+ * @param loadStrProps Passed for `newFromBuffer` when creating a Vips Image.
+ * @param writeFormatString Passed to `writeToBuffer` for specifying output format.
+ * @param writeOptions Passed as second param for `writeToBuffer`.
+ * @param flatten Do the flatten if has alpha channel.
+ * @param defaultBackgroundVector If do the flatten or losing alpha channel data, the background.
+ * @returns Uint8Array for output file buffer.
+ */
+export async function vipsCall(
+    uint8Array: Uint8Array,
+    loadStrProps: string,
+    writeFormatString: string,
+    writeOptions: {},
+    flatten: boolean = false,
+    defaultBackgroundVector = [255, 255, 255]
+) {
+    if (!vips) {
+        vips = await initVips();
+    }
+    let img = vips.Image.newFromBuffer(uint8Array, loadStrProps);
+    if (flatten && img.hasAlpha()) {
+        const flattened = img.flatten({
+            background: defaultBackgroundVector
+        });
+        img.delete();
+        img = flattened;
+    }
+    const result = img.writeToBuffer(writeFormatString, writeOptions);
+    img.delete();
+    return result;
 }

@@ -28,6 +28,10 @@ export async function createZipInMemory(fileTree: OutputTreeNode[], onUpdate?: (
         }
         if (node.kind === 'directory') {
             for (const child of node.flatChildrenFilesOnly) {
+                if (!child.file) {
+                    // Skip empty
+                    continue;
+                }
                 const path = getPathFromNode(child);
                 zip.file(path, child.file);
             }

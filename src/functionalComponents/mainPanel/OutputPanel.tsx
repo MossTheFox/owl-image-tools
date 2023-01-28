@@ -1,8 +1,7 @@
-import { Box, Paper, Typography, Stack, PaperProps, LinearProgress, Button } from "@mui/material";
-import { useCallback, useContext, useMemo } from "react";
+import { Box, Paper, Typography, PaperProps, LinearProgress, Button, Link, Menu, MenuItem } from "@mui/material";
+import { useCallback, useContext, useMemo, useRef, useState } from "react";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../context/fileListContext";
 import { CONTROL_PANEL_HEIGHT } from "../../App";
-import { FileListDialogCallerContextProvider } from "../../context/fileListDialog/fileListDialogCallerContext";
 import { outputFileListContext as _outputFileListContext } from "../../context/outputFileListContext";
 import OutputFileListPreview from "./fileListPreview/OutputFileListPreview";
 import StartTaskButton from "./outputPanelComponents/StartTaskButton";
@@ -11,11 +10,13 @@ import { panelNavigationContext } from "../../context/panelNavigationContext";
 import { OutputFileListDialogCallerContextProvider } from "../../context/fileListDialog/outputFileListDialogCallerContext";
 import BottomTipDisplay from "../../components/styledComponents/BottomTipDisplay";
 import { appConfigContext } from "../../context/appConfigContext";
+import { loggerContext } from "../../context/loggerContext";
+import { restartVipsWorker } from "../../utils/converter/libvipsConverter";
 
 export default function OutputPanel(props: PaperProps) {
 
     const {
-        outputTrees, nodeMap, setOutputFolderHandle, // TODO
+        terminateTask,
         loading, outputStatistic
     } = useContext(_outputFileListContext);
 
@@ -28,9 +29,39 @@ export default function OutputPanel(props: PaperProps) {
 
     const { siteConfig, setTipDisplay } = useContext(appConfigContext);
 
+    const { fireAlertSnackbar } = useContext(loggerContext);
+
     const tipConfirm = useCallback(() => {
         setTipDisplay('outputFileListTip', false);
     }, [setTipDisplay]);
+
+    // Menu
+
+    const [menuOpen, setMenuOpen] = useState(false);
+    const menuAnchorEl = useRef<HTMLDivElement>(null);
+
+    const closeMenu = useCallback(() => setMenuOpen(false), []);
+    const openMenu = useCallback(() => setMenuOpen(true), []);
+
+    const menuResetVipsWorker = useCallback(() => {
+        closeMenu();
+        restartVipsWorker().then(() => {
+            fireAlertSnackbar({
+                severity: 'success',
+                message: '已重置运行 wasm-vips 的 Worker。'
+            });
+        }).catch((err) => {
+            fireAlertSnackbar({
+                severity: 'error',
+                message: '发生错误。错误信息：' + err
+            });
+        });
+    }, [closeMenu, fireAlertSnackbar]);
+
+    const menuTerminateTask = useCallback(() => {
+        closeMenu();
+        terminateTask();
+    }, [closeMenu, terminateTask]);
 
     return <Paper {...props} sx={{
         ...props.sx,
@@ -60,10 +91,23 @@ export default function OutputPanel(props: PaperProps) {
         >
             <Box pt={2}>
                 <Typography variant="h5" fontWeight='bolder'
-                    component='div' display='flex' alignItems='stretch' justifyContent='space-between'
+                    component='div' display='flex' alignItems='baseline' justifyContent='space-between'
                     whiteSpace="nowrap"
                 >
                     <span>输出</span>
+
+                    <Box display="flex"
+                        alignItems="baseline"
+                        justifyContent="end"
+                        px={1}
+                        ref={menuAnchorEl}
+                    >
+                        <Link component="button" variant="body2" underline="hover"
+                            onClick={openMenu}
+                        >
+                            选项
+                        </Link>
+                    </Box>
 
                 </Typography>
             </Box>
@@ -90,15 +134,46 @@ export default function OutputPanel(props: PaperProps) {
             borderBottom={1}
             borderColor="divider"
         >
-            <Stack spacing={1} py={1}>
-
-                {/* <Typography variant="body2" color="primary" gutterBottom>
-                    进度
-                </Typography> */}
-
+            <Box py={1}>
                 <StartTaskButton />
-            </Stack>
+            </Box>
         </Box>
+
+        {/* Menu */}
+
+        <Menu anchorEl={menuAnchorEl.current} open={menuOpen} onClose={closeMenu}>
+
+            {loading &&
+                <MenuItem dense onClick={menuTerminateTask}>
+                    <Box display='flex' flexDirection='column'>
+                        <Typography variant="body1" color={(t) => t.palette.error.main} fontWeight="bolder"
+                            gutterBottom
+                        >
+                            终止任务
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                            任务终止后，你会需要重新导入文件来继续任务。
+                        </Typography>
+                    </Box>
+                </MenuItem>
+            }
+
+            <MenuItem dense disabled={loading} onClick={menuResetVipsWorker}>
+                <Box display='flex' flexDirection='column'>
+                    <Typography variant="body1" color={(t) => t.palette.error.main} fontWeight="bolder"
+                        gutterBottom
+                    >
+                        重启处理程序
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" gutterBottom>
+                        重新启动运行 wasm-vips 的 Web Worker。
+                    </Typography>
+                </Box>
+            </MenuItem>
+
+        </Menu>
+
+        {/* End */}
 
         <Box px={2} mt={1} pb={2} position='relative' flexGrow={1}
             overflow="auto"
@@ -120,7 +195,7 @@ export default function OutputPanel(props: PaperProps) {
                 请留意，转换出错的文件会在批量保存时被跳过。请一定要保留好自己源文件的备份。
             </Typography>
             <Typography variant="body1" gutterBottom>
-               <strong>开始新的转换任务之后，此列表将会被清空。</strong>确定文件已经正确保存完成之后，再开始下一组转换任务吧。
+                <strong>开始新的转换任务之后，此列表将会被清空。</strong>确定文件已经正确保存完成之后，再开始下一组转换任务吧。
             </Typography>
         </BottomTipDisplay>
     </Paper>;

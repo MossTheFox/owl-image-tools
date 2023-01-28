@@ -194,6 +194,8 @@ interface OutputFileListContext {
     startConvertion: (nodes: TreeNode<WebkitFileNodeData>[], outputConfig: OutputConfig) => void,
 
     clearAll: () => void,
+
+    terminateTask: () => void,
 };
 
 ///////////// Some fn //////////////////////
@@ -267,6 +269,7 @@ export const outputFileListContext = createContext<OutputFileListContext>({
     error: null,
     startConvertion(nodes) { throw new Error('Not init'); },
     clearAll() { throw new Error('Not init'); },
+    terminateTask() { throw new Error('Not init'); },
 });
 
 export function OutputFileListContextProvider({ children }: { children: React.ReactNode }) {
@@ -398,13 +401,19 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
             );
         }
 
-        // Update state here
+        // Update state here? 
+        // no
+        /*
         node.file = new File([resultBuffer], node.name, {
             type: resultBuffer.type
         });
         node.error = null;
         node.finished = true;
         node.convertProgress = 1;
+        */
+        return new File([resultBuffer], node.name, {
+            type: resultBuffer.type
+        });
 
     }, [currentOutputConfig, outputFolderHandle, writeLine]);
 
@@ -459,15 +468,19 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
             });
         };
 
-        convertOne(curr).then(() => {
+        convertOne(curr).then((file) => {
             if (stateChanged) return;
+            if (!file) return;
             // let the treeview to rerender
             setNodeMap((prev) => new Map([...prev]));
 
-            // record in the node and update curr index
+            // update the node HERE
+            curr.file = file;
             curr.error = null;
             curr.finished = true;
             curr.convertProgress = 1;
+
+            // and update task index
             setCurrentMapNodeIndex((prev) => prev + 1);
 
             updateStatusFn();
@@ -558,6 +571,12 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
     }, [writeLine]);
 
 
+    const terminateTask = useCallback(() => {
+        setCurrentMapNodeIndex(-1);
+        setLoading(false);
+        setError(null);
+    }, []);
+
 
     return <outputFileListContext.Provider value={{
         error,
@@ -570,6 +589,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
         setOutputTrees,
         startConvertion,
         clearAll,
+        terminateTask,
     }}>
         {children}
     </outputFileListContext.Provider>

@@ -106,6 +106,29 @@ export default function InspectSiteDataDialog(props: DialogProps) {
 
     const fireCacheClear = useAsync(asyncClearCacheStorage, onCacheClearOK, onCacheClearError);
 
+    const [removeSWBtnDisabled, setRemoveSWBtnDisabled] = useState(false);
+
+    const asyncRemoveSW = useCallback(async () => {
+        setText('...');
+        setRemoveSWBtnDisabled(true);
+        const all = await navigator.serviceWorker.getRegistrations();
+        for (const sw of all) {
+            await sw.unregister();
+        }
+    }, []);
+
+    const onRemoveSWOK = useCallback(() => {
+        setRemoveSWBtnDisabled(false);
+        fireFetch();
+    }, [fireFetch]);
+
+    const onRemoveSWErr = useCallback((err: Error) => {
+        setRemoveSWBtnDisabled(false);
+        setText(`发生错误, 错误信息: ${err?.message}`);
+    }, []);
+
+    const fireRemoveSW = useAsync(asyncRemoveSW, onRemoveSWOK, onRemoveSWErr);
+
     return <Dialog maxWidth="sm" fullWidth {...props}>
         <DialogTitle fontWeight="bolder">
             站点数据管理
@@ -118,13 +141,16 @@ export default function InspectSiteDataDialog(props: DialogProps) {
                 {text}
             </DialogContentText>
             <DialogContentText variant='body2' gutterBottom>
-                一些浏览器可能会将浏览器本身的缓存行为也计入存储占用量中。这些内容会需要你在浏览器设置中进行清除。
-            </DialogContentText>
-            <DialogContentText variant='body2' gutterBottom>
                 此数据来源于 <code>navigator.storage.estimate()</code>。
             </DialogContentText>
             <DialogContentText variant='body2' gutterBottom>
-                要查看详细信息，请打开浏览器的开发者工具。一些未知问题可能导致这个数据不是很正常，此应用程序<strong>主动</strong>存储的所有信息 (除了 Service Worker 本身) 都可以在下方被清除。
+                一些浏览器可能会将浏览器本身的缓存行为也计入存储占用量中。这些内容会需要你在浏览器设置中进行清除。
+            </DialogContentText>
+            <DialogContentText variant='body2' gutterBottom>
+                要查看详细信息，请打开浏览器的开发者工具。一些未知问题可能导致这个数据不是很正常，此应用程序<strong>主动</strong>存储的所有信息都可以在下方被清除。
+            </DialogContentText>
+            <DialogContentText variant='body2' gutterBottom>
+                对于这里的所有操作，你的本地文件不会受到任何影响。
             </DialogContentText>
             <Divider />
             <Box display='flex' flexDirection="column" gap={1} pt={1}>
@@ -151,6 +177,16 @@ export default function InspectSiteDataDialog(props: DialogProps) {
                     </Button>
                     <DialogContentText variant='body2' gutterBottom>
                         Service Worker 提供的缓存可以给予网页应用离线运行的能力。清除后，下一次进入页面将会需要重新下载程序所需要的数据。
+                    </DialogContentText>
+
+                    <Button variant="outlined" size="small" color="warning"
+                        disabled={removeSWBtnDisabled}
+                        onClick={fireRemoveSW}
+                    >
+                        移除 Service Worker
+                    </Button>
+                    <DialogContentText variant='body2' gutterBottom>
+                        将取消注册所有运行中的 Service Worker。如果要这么做，建议同步进行一下上方的缓存清除。
                     </DialogContentText>
                 </>
                 }
