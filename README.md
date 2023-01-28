@@ -12,7 +12,7 @@ A simple image conversion tool that runs in your browser, powered by [wasm-vibs]
 
 **IMPORTANT NOTES for browser compatibility**
 
-The latest stable version of Safari (current iOS 16.3) is still not supported yet due to its missing the WebAssembly SIMD support (which is fixed in a preview version). Wasm-vips will fail to initialize.
+The latest stable version of Safari (currently iOS 16.3) is still not supported yet due to its missing the WebAssembly SIMD support (which has been fixed in a preview version). Wasm-vips will fail to initialize.
 
 Recommended: latest version of Google Chrome or Microsoft Edge.
 
@@ -43,6 +43,7 @@ The code base is a bit messy and needs some optimization. Do it later (I guess).
         - <sub>Chromium-based browsers may limit the maximun entries to 100 for each directory. You'll see a notification if the app detected this;</sub>
     - Select files or folders;
 - Compare output files if needed;
+- Detailed help text for the options;
 - Site storage can be managed in the top-left settings menu;
     - Clear the Cache Storage used by Service Worker;
     - Clear cache inside Origin Private File System;
