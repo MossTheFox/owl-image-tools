@@ -42,6 +42,8 @@ export const storageDisabled = (() => {
 
 export const clipboardSupport = (!!navigator.clipboard?.read && typeof ClipboardItem !== 'undefined') as boolean;
 
+export const serviceWorkerSupport = 'serviceWorker' in navigator;
+
 /**
  * (Safari) Can use this to detect some feature limitations of Safari:
  * - Canvass JPEG output quality param is not supported

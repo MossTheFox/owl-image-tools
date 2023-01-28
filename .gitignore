@@ -25,3 +25,7 @@ dist-ssr
 *.sw?
 
 test
+
+# Service Woker generated with workbox
+sw.js*
+public/workbox-*

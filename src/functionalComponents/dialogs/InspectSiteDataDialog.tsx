@@ -1,7 +1,7 @@
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogProps, DialogTitle, Divider } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import useAsync from "../../hooks/useAsync";
-import { FS_Mode, storageDisabled } from "../../utils/browserCompability";
+import { FS_Mode, serviceWorkerSupport, storageDisabled } from "../../utils/browserCompability";
 import { estimateStorageUsage, parseFileSizeString } from "../../utils/randomUtils";
 import { clearAllTempFolders } from "../../utils/privateFS";
 
@@ -75,9 +75,33 @@ export default function InspectSiteDataDialog(props: DialogProps) {
 
     const onOPFSErr = useCallback((err: Error) => {
         setText(`发生错误, 错误信息: ${err?.message}`);
+        setOPFSBtnDisabled(false);
     }, []);
 
     const fireOPFS = useAsync(asyncClearOPFS, onOPFSOK, onOPFSErr);
+
+    const [cacheBtnDisabled, setCacheBtnDisabled] = useState(false);
+
+    const asyncClearCacheStorage = useCallback(async () => {
+        setText('...');
+        setCacheBtnDisabled(true);
+        const keys = await caches.keys();
+        for (const key of keys) {
+            await caches.delete(key);
+        }
+    }, []);
+
+    const onCacheClearOK = useCallback(() => {
+        setCacheBtnDisabled(false);
+        fireFetch();
+    }, [fireFetch]);
+
+    const onCacheClearError = useCallback((err: Error) => {
+        setCacheBtnDisabled(false);
+        setText(`发生错误, 错误信息: ${err?.message}`);
+    }, []);
+
+    const fireCacheClear = useAsync(asyncClearCacheStorage, onCacheClearOK, onCacheClearError);
 
     return <Dialog maxWidth="sm" fullWidth {...props}>
         <DialogTitle fontWeight="bolder">
@@ -91,19 +115,36 @@ export default function InspectSiteDataDialog(props: DialogProps) {
                 {text}
             </DialogContentText>
             <DialogContentText variant='body2' gutterBottom>
-                一些浏览器可能会将静态文件缓存也计入存储占用量中。这些内容会需要你在浏览器设置中进行清除。
+                一些浏览器可能会将浏览器本身的缓存行为也计入存储占用量中。这些内容会需要你在浏览器设置中进行清除。
             </DialogContentText>
 
             <Divider />
             <Box display='flex' flexDirection="column" gap={1} pt={1}>
 
-                {!storageDisabled &&
+                {!storageDisabled && <>
                     <Button variant="outlined" size="small" color="warning"
-                        disabled={localStorage.length === 0}
+                        disabled={localStorageSize === 0}
                         onClick={clearLocalStorage}
                     >
-                        {localStorage.length > 0 ? '清除存储的设置信息' : '没有保存的设置信息'}
+                        {localStorageSize > 0 ? '清除存储的设置信息' : '没有保存的设置信息'}
                     </Button>
+                    <DialogContentText variant='body2' gutterBottom>
+                        设置信息包含偏好设置和输出设置。清除设置不会立即重置当前页面正在使用的设置项。要立即应用，可以手动刷新页面。
+                    </DialogContentText>
+                </>
+                }
+
+                {serviceWorkerSupport && <>
+                    <Button variant="outlined" size="small" color="warning"
+                        disabled={cacheBtnDisabled}
+                        onClick={fireCacheClear}
+                    >
+                        清除 Service Worker 缓存的静态文件
+                    </Button>
+                    <DialogContentText variant='body2' gutterBottom>
+                        Service Worker 提供的缓存可以给予网页应用离线运行的能力。清除后，下一次进入页面将会需要重新下载程序所需要的数据。
+                    </DialogContentText>
+                </>
                 }
 
                 {FS_Mode !== 'noFS' &&
