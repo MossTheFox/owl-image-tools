@@ -43,7 +43,7 @@ export default function BottomTipDisplay(props: BoxProps & {
             <Button variant="contained" color="info" onClick={onClosed} disableElevation
                 aria-hidden={hidden}
             >
-                {buttonText ?? '明白了，不再提示'}
+                {buttonText ?? '好的，不再提示'}
             </Button>
         </Box>
     </Box>

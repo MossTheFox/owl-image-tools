@@ -127,7 +127,7 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
                                     如果设备支持，你可以尝试在文件管理器中，将文件夹<strong>拖拽进入此页面</strong>。
                                 </Typography>
                             </Box>}
-                            <Button onClick={openWebkitDirectoryPicker}>明白了，不再提示</Button>
+                            <Button onClick={openWebkitDirectoryPicker}>好的，不再提示</Button>
                         </Box>
                     </Popover>
                 </>

@@ -1,7 +1,9 @@
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Box, Checkbox, FormControlLabel } from "@mui/material";
-import { useCallback, useState, useMemo, useContext } from "react";
+import { useCallback, useState, useMemo, useContext, useEffect } from "react";
+import { simd } from "wasm-feature-detect";
 import { appConfigContext } from "../../context/appConfigContext";
-import { clipboardSupport, compatibilityTestResult, FS_Mode, isMacOriOS, isWebkit, storageDisabled } from "../../utils/browserCompability";
+import useAsync from "../../hooks/useAsync";
+import { clipboardSupport, compatibilityTestResult, FS_Mode, isMacOriOS, isWebkit, storageDisabled, isMobileBrowser } from "../../utils/browserCompability";
 
 /** Automatically open once on startup.
  * 
@@ -25,10 +27,7 @@ export default function BrowserCompatibilityDetectionDialog() {
     const [open, setOpen] = useState(
         (siteConfig.tipDisplay['browserCompatibility'] || severity === 'error') &&
         (!compatibilityTestResult.WASM || !compatibilityTestResult.webWorker
-            || FS_Mode === 'noFS' || storageDisabled || !clipboardSupport
-            // Current Safari might have some issues so here is an additional action
-            || isWebkit
-        )
+            || FS_Mode === 'noFS' || storageDisabled || !clipboardSupport)
     );
 
     const userOSAndBrowser = useMemo(() => {
@@ -44,6 +43,32 @@ export default function BrowserCompatibilityDetectionDialog() {
             setOpen(false);
         }
     }, [severity]);
+
+    // async check WASM SIMD Support
+
+    const [shouldFireTip, _setShouldFireTip] = useState(siteConfig.tipDisplay.browserCompatibility);
+
+    const [simdSupport, setSIMDSupport] = useState(true);
+    const asyncCheckSIMDSupport = useCallback(async () => {
+        return await simd();
+    }, []);
+
+    const simdCheckOnFinished = useCallback((result: boolean) => {
+        if (!result) {
+            setSIMDSupport(false);
+            if (shouldFireTip) {
+                setOpen(true);
+            }
+        }
+    }, [shouldFireTip]);
+
+    const fireSIMDCheck = useAsync(asyncCheckSIMDSupport, simdCheckOnFinished);
+
+    useEffect(() => {
+        fireSIMDCheck();
+    }, []);
+
+
 
     return <Dialog open={open} onClose={handleClose}>
         <DialogTitle fontWeight='bolder'>浏览器兼容性提示</DialogTitle>
@@ -98,17 +123,22 @@ export default function BrowserCompatibilityDetectionDialog() {
             </>) : (<>
                 <DialogContentText gutterBottom>当前浏览器存在以下兼容性问题：</DialogContentText>
 
-                {/* Safari? */}
-                {isWebkit && <Box p={1} mb={1} bgcolor={(theme) => theme.palette.action.hover} borderRadius={1}>
+                {/* SIMD Support */}
+                {!simdSupport && <Box p={1} mb={1} bgcolor={(theme) => theme.palette.action.hover} borderRadius={1}>
                     <DialogContentText variant="h6" fontWeight='bolder' gutterBottom>
-                        (重要) 无法确定 wasm-vips 是否可以正常运行
+                        (重要) 图像处理引擎 wasm-vips 无法正常运行
                     </DialogContentText>
                     <DialogContentText gutterBottom>
-                        Safari 在内的基于 JavaScriptCore 的浏览器环境对于 WebAssembly SIMD 的支持可能存在问题。
+                        当前浏览器对于 WebAssembly SIMD 的支持存在问题。
                     </DialogContentText>
-                    <DialogContentText gutterBottom>
-                        截至此程序当前版本发布，较新的预览版浏览器已解决了此问题。请确保你的浏览器版本为最新，然后，在开始转换的时留意一下模块是否工作正常。
-                    </DialogContentText>
+                    {(isMobileBrowser && isWebkit) ?
+                        <DialogContentText gutterBottom>
+                            对于 Safari 浏览器，截至此程序当前版本发布时，此问题仅在 Safari 预览版本中得到解决。请在桌面设备中从 Chorme 或 Firefox 浏览器来使用此应用吧。
+                        </DialogContentText> :
+                        <DialogContentText gutterBottom>
+                            请尝试在 Google Chorme、Microsoft Edge 或 Firefox 浏览器来使用此应用吧。
+                        </DialogContentText>
+                    }
                 </Box>}
 
                 {/* noFS */}
@@ -130,7 +160,7 @@ export default function BrowserCompatibilityDetectionDialog() {
                     <DialogContentText gutterBottom><strong>快速读取和写入剪切板文件的操作会受到影响。</strong></DialogContentText>
                     <DialogContentText gutterBottom>当进行剪切板操作时，可能会需要额外的手动操作。</DialogContentText>
                 </Box>}
-                <DialogContentText gutterBottom>这些问题不会影响核心功能的使用。</DialogContentText>
+                {simdSupport && <DialogContentText gutterBottom>这些问题不会影响核心功能的使用。</DialogContentText>}
 
                 <FormControlLabel control={
                     <Checkbox checked={!siteConfig.tipDisplay['browserCompatibility']} onClick={toggleShowNextTime} />
