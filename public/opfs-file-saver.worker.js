@@ -1,10 +1,14 @@
 // @ts-check
 /*
-    For saving files to OPFS on webkit browsers.
+    For saving files to OPFS.
     ref: https://webkit.org/blog/12257/the-file-system-access-api-with-origin-private-file-system/
 
     > To write a file, you can use the synchronous write() method of FileSystemSyncAccessHandle. 
     > In the current implementation, this is the only way to write a file in WebKit.
+
+    Note: From Chrome 109+ on Android devices, OPFS is now supported. 
+    
+    Firefox had also added support for this in Nightly version. (Desktop)
 
 */
 
@@ -25,10 +29,10 @@ function postBackMessage(code, message, data) {
 self.addEventListener('message', async (e) => {
     try {
         /**
-         * @type {{ type: 'saveFile', path: string, file: Blob, debug?: boolean }}
+         * @type {{ type: 'saveFile', path: string, file: Blob, debug?: boolean, override?: boolean }}
          */
         const data = e.data;
-        if (data && data.type === 'saveFile' && data.path && data.file instanceof Blob) {
+        if (data && data.type === 'saveFile' && typeof data.path === 'string' && data.file instanceof Blob) {
 
             if (data.debug) {
                 console.log('Request: ', data);
@@ -41,7 +45,7 @@ self.addEventListener('message', async (e) => {
 
             let fileName = dirs.pop() || 'nah.';
 
-            // now iterate to there.
+            // now iterate to the target directory.
 
             let handle = root;
             for (const dir of dirs) {
@@ -50,13 +54,15 @@ self.addEventListener('message', async (e) => {
                 });
             }
 
-            // Check for same name
-            let deadloop = 1000;
-            while (await isFileExists(fileName, handle)) {
-                fileName = renameFileForDuplication(fileName);
-                deadloop--;
-                if (deadloop < 0) {
-                    throw new Error('Error when rename saved file: Too many retry times.');
+            // Check for duplicated file name if not doing override.
+            if (!data.override) {
+                let deadloop = 1000;
+                while (await isFileExists(fileName, handle)) {
+                    fileName = renameFileForDuplication(fileName);
+                    deadloop--;
+                    if (deadloop < 0) {
+                        throw new Error('Error when rename saved file: Too many retry times.');
+                    }
                 }
             }
             const fileHandle = await handle.getFileHandle(fileName, {
@@ -64,7 +70,8 @@ self.addEventListener('message', async (e) => {
             });
 
             // Prepare the buffer and handle.
-            const buffer = new Uint8Array(await data.file.arrayBuffer());   // here needs to ensure the buffer is readable
+            // need to ensure the buffer is readable
+            const buffer = new Uint8Array(await data.file.arrayBuffer());
 
             /**
              * @type {FileSystemSyncAccessHandle}
