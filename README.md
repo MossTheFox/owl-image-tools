@@ -16,12 +16,11 @@ The latest stable version of Safari (currently iOS 16.3) is still not supported 
 
 Recommended: latest version of Google Chrome or Microsoft Edge.
 
-<sub>Firefox will be ok, but it doesn't provide support for File System Access API (as well as Origin Private File System). The output files will have to be put in the memory.</sub>
+<sub>Firefox is also ok. Runs without public file system access though.</sub>
 
 ## Intro
 
-
-A experimental Web App built with React. No back-end.
+A experimental Web App built with React. No back-end. No analysis scripts. A pure client-side app.
 
 (The screenshots are not the latest version, but the look is mostly the same)
 
@@ -36,28 +35,32 @@ The code base is a bit messy and needs some optimization. Do it later (I guess).
 
 ## Features
 
-- Runs in the browser, with PWA and Service Worker caching support (runs offline)
+- Runs in the browser, with PWA and Service Worker caching support (runs offline);
 - Many convenient ways of importing files:
     - From Clipboard;
     - Drag and drop (file or folder);
         - <sub>Chromium-based browsers may limit the maximun entries to 100 for each directory. You'll see a notification if the app detected this;</sub>
-    - Select files or folders;
-- Compare output files if needed;
+    - Select files or directories (Desktop browsers only);
+- Preview and compare output files if needed;
 - Detailed help text for the options;
-- Site storage can be managed in the top-left settings menu;
-    - Clear the Cache Storage used by Service Worker;
-    - Clear cache inside Origin Private File System;
-- Won't crash the page with large amount of images to process, if the browser supports File System Access API (or Origin Private File System <sub>that has an adaptation specially made for Safari but sadly the app cannot run on it for now :( </sub>)
-- Zip the output folders and download them (with the lovely APIs from [JSZip](https://stuk.github.io/jszip/))
-- File list won't be laggy even with thousands of files
-    - Make sure to use a browser that support Public File System Access (Chrome for example) in case the app run into trouble before converting finished 
-        - <sub>(since with the API support, files are written in your local directory immediately when one is finished. For browsers that doesn't support Public FS, you'll only be able to download manually on finished)</sub>
+- Won't crash the page with large amount of images to process, if the browser supports File System Access API (or OPFS);
+- Zip the output folders and download them (with [JSZip](https://stuk.github.io/jszip/));
+- File list won't be laggy even with thousands of files.
+
+## Notes
+
+- It's recommended to use a browser that support Public File System Access (Chrome for example) in case the app runs into trouble before converting finished;
+    - <sub>(since with the API support, files are written in your local directory immediately when one is finished. For browsers that doesn't support Public FS, you'll only be able to download manually on finished)</sub>
+- For privateFS mode (browsers that only support OPFS), the files inside OPFS won't be deleted automatically if the app is closed with the output file list non-empty. You can clear them in the storage management dialog in the config menu.
+    - This behavior may change in the future version.
+    - In privateFS mode, app may not work as expected if OPFS is full.
 
 ## Build
 
 It's a React project created with [Vite](https://vitejs.dev/). Not much eslint plugins was installed for a quicker development step (...and a lower code quality. I know.)
 
 ```sh
+npm install         # Install dependences
 npm run dev         # Start Dev Server
 npm run build       # Build
 ```
@@ -78,4 +81,4 @@ workbox generateSW workbox-config.cjs
 
 ## License
 
-MIT.
+MIT
