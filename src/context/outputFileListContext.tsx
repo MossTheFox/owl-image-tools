@@ -205,8 +205,8 @@ async function doConvertion(blob: Blob, targetExt: string, config: OutputConfig)
     switch (targetExt) {
         case 'jpg':
             resultBuffer = await convertToJPEG(blob, {
-                quality: C.JPEG_quality,
-                stripMetaData: !C.keepMetaData,  // !
+                Q: C.JPEG_quality,
+                strip: !C.keepMetaData,  // !
                 defaultBackground: C.imageBaseColor,
                 interlace: C.JPEG_interlace,
             });
@@ -219,8 +219,8 @@ async function doConvertion(blob: Blob, targetExt: string, config: OutputConfig)
                 defaultBackground: C.imageBaseColor,
                 dither: C.PNG_dither,
                 interlace: C.PNG_interlace,
-                keepAlphaChannel: !C.PNG_removeAlphaChannel,    // !
-                stripMetaData: !C.keepMetaData                  // !
+                flatten: C.PNG_removeAlphaChannel,
+                strip: !C.keepMetaData                  // !
             });
             break;
         case 'gif':
@@ -232,20 +232,20 @@ async function doConvertion(blob: Blob, targetExt: string, config: OutputConfig)
                 dither: C.GIF_dither,
                 effort: 7,
                 // interlace: C.GIF_interlace,
-                keepAlphaChannel: C.GIF_keepAlphaChannel,
-                stripMetaData: !C.keepMetaData                  // !
+                flatten: !C.GIF_keepAlphaChannel,       // !
+                strip: !C.keepMetaData                  // !
             });
             break;
         case 'webp':
             resultBuffer = await convertToWebp(blob, {
-                alphaQuality: C.WEBP_alphaQuality,
+                Q: C.WEBP_quality,
+                "alpha-q": C.WEBP_alphaQuality,
                 defaultBackground: C.imageBaseColor,
-                keepAlphaChannel: C.WEBP_keepAlphaChannel,
+                flatten: !C.WEBP_keepAlphaChannel,      // !
                 lossless: C.WEBP_lossless,
-                lossyCompressionPreset: C.WEBP_lossyCompressionPreset,
-                quality: C.WEBP_quality,
-                smartSubsample: false, // TO BE TESTED
-                stripMetaData: !C.keepMetaData                  // !
+                preset: C.WEBP_lossyCompressionPreset,
+                "smart-subsample": false,               // TO BE TESTED
+                strip: !C.keepMetaData                  // !
             });
             break;
 

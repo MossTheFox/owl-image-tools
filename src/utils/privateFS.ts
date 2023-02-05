@@ -87,7 +87,7 @@ export async function getCurrentOPFSTempFolders() {
 export function writeOPFSFile(path: string, blob: Blob) {
     return new Promise<string>((resolve, reject) => {
         try {
-            const worker = new Worker('opfs-file-saver.worker.js');
+            const worker = new Worker('/worker/opfs-file-saver.worker.js');
 
             worker.addEventListener('error', (e) => {
                 reject(e.error);

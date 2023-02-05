@@ -3,14 +3,13 @@
 importScripts('/wasm/vips/vips.js');
 
 // NOTE: when an error with name = 'RuntimeError' is fired, the instance should be dead (due to things like OOM).
+
 // Need to reload it.
 
 let vips = null;
 
 function initVips() {
     return new Promise(async (resolve, reject) => {
-        // firefox doesn't supprot dynamic module import in workers (https://bugzil.la/1540913)
-        // so the createModule function will be initialized in the script tag
         const VipsCreateModule = typeof globalThis.Vips === 'undefined' ? null : globalThis.Vips;
         if (!VipsCreateModule) {
             reject(new Error('Module Not Loaded'));
@@ -37,6 +36,7 @@ function initVips() {
                     },
                     onAbort(what) {
                         reject(new Error(what));
+                        console.warn(what);
                     },
                 });
                 // console.log(`${vips.version(0)}.${vips.version(1)}.${vips.version(2)}`);
@@ -88,7 +88,7 @@ async function vipsCall(
  * 
  * @param {'ok' | 'error'} code 
  * @param {string} message 
- * @param {Uint8Array | Error} data 
+ * @param {Uint8Array | Error} data
  */
 function postBackMessage(code, message, data) {
     self.postMessage({
@@ -100,13 +100,12 @@ function postBackMessage(code, message, data) {
 
 self.addEventListener('message', async (e) => {
     const data = e.data;
-    /*
-        {
+    /*  {
             type: 'run',
             args: [...arguments]
         }
+        Turn `arguments` into array before passing to the worker. ([...arguments])
     */
-
     if (data.type !== 'run' || !Array.isArray(data.args)) {
         postBackMessage('error', 'Unknown operation');
         return;
@@ -114,15 +113,10 @@ self.addEventListener('message', async (e) => {
 
     try {
         const result = await vipsCall(...data.args);
-
         postBackMessage('ok', 'done', result);
 
     } catch (err) {
         postBackMessage('error', 'Error occurred.', err);
     }
-
-
-
-    // Here begins.
 
 });

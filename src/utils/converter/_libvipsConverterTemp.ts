@@ -60,7 +60,6 @@ function initVips() {
         }
 
         try {
-
             if (!vips) {
                 vips = await VipsCreateModule({
                     // local file ** important **
@@ -76,9 +75,9 @@ function initVips() {
                         import.meta.env.DEV && console.warn(str);
                     },
                     onAbort(what) {
+                        import.meta.env.DEV && console.warn(what);
                         reject(new Error(what));
                     },
-                    
                 });
                 import.meta.env.DEV && console.log(`${vips.version(0)}.${vips.version(1)}.${vips.version(2)}`);
             }
@@ -287,10 +286,10 @@ export async function convertToGIF(file: Blob, config = {
  * @returns Uint8Array for output file buffer.
  */
 export async function vipsCall(
-    uint8Array: Uint8Array,
-    loadStrProps: string,
-    writeFormatString: string,
-    writeOptions: {},
+    uint8Array: Parameters<typeof Vips.Image.newFromBuffer>[0],
+    loadStrProps: Parameters<typeof Vips.Image.newFromBuffer>[1],
+    writeFormatString: Parameters<Vips.Image['writeToBuffer']>[0],
+    writeOptions: Parameters<Vips.Image['writeToBuffer']>[1],
     flatten: boolean = false,
     defaultBackgroundVector = [255, 255, 255]
 ) {
