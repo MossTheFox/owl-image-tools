@@ -38,7 +38,7 @@ export class OutputTreeNode {
 
     /** Output File */
     file: File | null = null;
-    private _finished: boolean = false;
+    private _finished = false;
     error: string | null = null;
 
     /** Even with error, it should be set as finished when it's end. */
@@ -57,7 +57,7 @@ export class OutputTreeNode {
     childrenCount = 0;
 
     /** 0 ~ 1 */
-    private _convertProgress: number = 0;
+    private _convertProgress = 0;
 
     get convertProgress() {
         if (this.originalNode.data.kind === 'file') {
@@ -195,7 +195,7 @@ interface OutputFileListContext {
     clearAll: () => void,
 
     terminateTask: () => void,
-};
+}
 
 ///////////// Some fn //////////////////////
 
@@ -305,7 +305,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
                 })
             });
         }
-    }, []);
+    }, [fireAlertSnackbar]);
 
     /**
      * Main convet fn.

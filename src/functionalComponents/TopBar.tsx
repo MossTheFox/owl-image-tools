@@ -6,6 +6,7 @@ import { loggerContext } from "../context/loggerContext";
 import { TOP_BAR_HEIGHT } from "../App";
 import LogHistoryDrawer from "./menus/LogHistoryDrawer";
 import AppConfigDrawerMenu from "./menus/AppConfigDrawerMenu";
+import { KeyframesFadeOutAndRemove } from "../transitions";
 
 export default function TopBar(props: BoxProps) {
 
@@ -20,8 +21,6 @@ export default function TopBar(props: BoxProps) {
 
     const openLoggerDrawer = useCallback(() => setLoggerDrawerOpen(true), []);
     const closeLoggerDrawer = useCallback(() => setLoggerDrawerOpen(false), []);
-
-    // TODO: view history modal
 
     const animationEnd = useCallback((e: React.AnimationEvent<HTMLDivElement>) => {
         e.currentTarget.style.display = 'none';
@@ -94,13 +93,9 @@ export default function TopBar(props: BoxProps) {
             </Box>
         </ButtonBase>
 
-
-        {/* TODO: ↓ FS Mode Chip auto fade out */}
-
-
         <Box display='flex' gap={1} justifyContent="center" alignItems="center" px={1}
             sx={{
-                animation: '0.25s ease-in 6s forwards fade-out-and-remove',
+                animation: `0.25s ease-in 6s forwards ${KeyframesFadeOutAndRemove}`,
             }}
             onAnimationEnd={animationEnd}
         >

@@ -69,7 +69,7 @@ export default function OutputFolderSaveZipDialog(props: {
         }
         setOpen(true);
         fireGenerate();
-    }, [nodes]);
+    }, [nodes, fireGenerate]);
 
 
     return <Dialog maxWidth="sm" fullWidth open={open} onClose={handleClose}

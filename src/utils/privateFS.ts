@@ -136,8 +136,8 @@ export function writeOPFSFile(path: string, blob: Blob) {
 }
 
 export async function readOPFSFile(path: string) {
-    let dirPath = path.split('/');
-    let filename = dirPath.pop() || 'what the';
+    const dirPath = path.split('/');
+    const filename = dirPath.pop() || 'what the';
 
     let handle = await navigator.storage.getDirectory();
 
@@ -150,7 +150,7 @@ export async function readOPFSFile(path: string) {
 
 // DEBUG FN
 // Keep it public since it can be useful
-// @ts-expect-error
+// @ts-expect-error Expose the iterate OPFS method.
 /* import.meta.env.DEV && */ (window.__OPFS_DEBUG = async () => {
 
     async function it(handle: FileSystemDirectoryHandle | FileSystemFileHandle, prefix = '') {

@@ -1,3 +1,7 @@
+/* Note: This file is no longer imported.
+   Put the CSS in `ui/WrappedThemeProvider.tsx` instead.
+*/
+
 :root {
     --font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }

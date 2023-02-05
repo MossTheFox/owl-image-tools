@@ -7,9 +7,11 @@ import { clearAllTempFolders } from "../../utils/privateFS";
 
 export default function InspectSiteDataDialog(props: DialogProps) {
 
+    const { open, onClose } = props;
+
     const btnHandleClose = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-        props.onClose && props.onClose(e, 'escapeKeyDown');
-    }, [props.onClose])
+        onClose && onClose(e, 'escapeKeyDown');
+    }, [onClose])
 
 
     const [text, setText] = useState('...');
@@ -34,11 +36,11 @@ export default function InspectSiteDataDialog(props: DialogProps) {
     const [localStorageSize, setLocalStorageSize] = useState(storageDisabled ? 0 : localStorage.length)
 
     useEffect(() => {
-        if (props.open) {
+        if (open) {
             fireFetch();
         }
         setLocalStorageSize(storageDisabled ? 0 : localStorage.length);
-    }, [props.open]);
+    }, [open, fireFetch]);
 
     const clearLocalStorage = useCallback(() => {
         localStorage.clear();

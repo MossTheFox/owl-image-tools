@@ -4,11 +4,12 @@ import { FileListStatistic } from "../../fileListContext";
 
 export default function FileListStatisticDialog(props: DialogProps & { detail: FileListStatistic }) {
 
+    const { onClose } = props;
     const closeDialog = useCallback((e: React.MouseEvent) => {
-        if (props.onClose) {
-            props.onClose(e, 'escapeKeyDown');
+        if (onClose) {
+            onClose(e, 'escapeKeyDown');
         }
-    }, [props.onClose]);
+    }, [onClose]);
 
     const {
         detail,

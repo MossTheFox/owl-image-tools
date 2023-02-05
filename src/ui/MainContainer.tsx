@@ -1,4 +1,5 @@
 import { Box } from "@mui/material";
+import { memo } from "react";
 
 /**
  * Safari PWA status bar color: background color defined in `ThemeProvicer`
@@ -18,4 +19,4 @@ function MainContainer({ children }: { children: React.ReactNode }) {
     </Box>
 }
 
-export default MainContainer;
+export default memo(MainContainer);

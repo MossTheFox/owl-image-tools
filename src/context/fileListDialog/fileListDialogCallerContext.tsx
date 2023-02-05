@@ -13,7 +13,7 @@ type FileNode = TreeNode<WebkitFileNodeData>;
 
 type FileListDialogCallerContext = {
     callFileListStatisticDialog: (detail: FileListStatistic | FileListStatistic[]) => void,
-    callFilePreviewDialog: (file: File, node: FileNode) => void,
+    callFilePreviewDialog: (node: FileNode) => void,
 
     callFileListItemContextMenu: (anchorPosition: { top: number, left: number }, node: FileNode) => void,
 
@@ -22,7 +22,7 @@ type FileListDialogCallerContext = {
 
 export const fileListDialogCallerContext = createContext<FileListDialogCallerContext>({
     callFileListStatisticDialog(detail) { throw new Error('Not init') },
-    callFilePreviewDialog(file, node) { throw new Error('Not init') },
+    callFilePreviewDialog(node) { throw new Error('Not init') },
     callFileListItemContextMenu(anchorPosition, node) { },
     contextMenuActiveItem: ''
 });
@@ -36,8 +36,9 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
     const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
     const closePreviewDialog = useCallback(() => setPreviewDialogOpen(false), []);
 
-    const callPreviewDialog = useCallback((file: File, fileNode: FileNode) => {
-        setPreviewFile(file);
+    const callPreviewDialog = useCallback((fileNode: FileNode) => {
+        if (fileNode.data.kind !== 'file') return;
+        setPreviewFile(fileNode.data.file);
         setPreviewDialogOpen(true);
     }, []);
 
@@ -53,7 +54,7 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
                 totalFiles: statistic.reduce((prev, curr) => prev + curr.totalFiles, 0),
                 perFormatCount: statistic.reduce((prev, curr) => {
                     for (const _key in curr.perFormatCount) {
-                        let key = _key as typeof ACCEPT_MIMEs[number];
+                        const key = _key as typeof ACCEPT_MIMEs[number];
                         prev[key] += curr.perFormatCount[key];
                     }
                     return prev;
@@ -71,7 +72,7 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
     }, []);
 
     // Context Menu //
-    const webkitFileListContext = useContext(_webkitFileListContext);
+    const { deleteNode: _deleteNode } = useContext(_webkitFileListContext);
 
     const [contextMenuNodeHold, setContextMenuNodeHold] = useState<FileNode>();
     const [contextMenuOpen, setContextMenuOpen] = useState(false);
@@ -86,7 +87,7 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
     const contextMenuSeeFileDetail = useCallback(() => {
         setContextMenuOpen(false);
         if (!contextMenuNodeHold || contextMenuNodeHold?.data.kind !== 'file') return;
-        callPreviewDialog(contextMenuNodeHold.data.file, contextMenuNodeHold);
+        callPreviewDialog(contextMenuNodeHold);
 
     }, [contextMenuNodeHold, callPreviewDialog]);
 
@@ -98,10 +99,10 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
     const deleteNode = useCallback(() => {
         if (!contextMenuNodeHold) return;
 
-        webkitFileListContext.deleteNode(contextMenuNodeHold as TreeNode<WebkitFileNodeData>);
+        _deleteNode(contextMenuNodeHold as TreeNode<WebkitFileNodeData>);
 
         setContextMenuOpen(false);
-    }, [contextMenuNodeHold, webkitFileListContext.deleteNode]);
+    }, [contextMenuNodeHold, _deleteNode]);
 
     // When context menu is open, right click outside will close it
     useEffect(() => {

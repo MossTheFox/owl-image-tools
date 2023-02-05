@@ -106,7 +106,7 @@ export default function StartTaskButton(props: BoxProps) {
     const justStart = useCallback(() => {
         startConvertion(clearNodes(), outputConfig);
         setNotifyPopperOpen(false);
-    }, [setOutputFolderHandle, startConvertion, clearNodes, outputConfig]);
+    }, [startConvertion, clearNodes, outputConfig]);
 
     // Zip Download
     const [zipDownloadDialogOperation, setZipDownloadDialogOperation] = useState<{ nodes: OutputTreeNode[] } | null>(null)

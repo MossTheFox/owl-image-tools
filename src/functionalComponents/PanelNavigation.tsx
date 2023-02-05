@@ -2,6 +2,7 @@ import { Box, useMediaQuery, Theme, BoxProps, SxProps } from '@mui/material';
 import { useMemo, useEffect, useCallback, useContext } from 'react';
 import { CONTROL_PANEL_HEIGHT } from '../App';
 import { panelNavigationContext } from '../context/panelNavigationContext';
+import { KeyframesFadeIn } from '../transitions';
 import ConfigPanel from './mainPanel/ConfigPanel';
 import InputPanel from './mainPanel/InputPanel';
 import OutputPanel from './mainPanel/OutputPanel';
@@ -41,7 +42,7 @@ function PanelBox({ left, width, sx, name, disabled, children }: {
         height={CONTROL_PANEL_HEIGHT}
         sx={{
             transition: 'filter 0.25s, left 0.125s, width 0.25s',
-            animation: '0.125s ease-in fade-in',
+            animation: `${KeyframesFadeIn} 0.125s ease-in`,
             // transform: nav === 'input' ? 'scale(1)' : 'scale(0.95)',
             ...sx
         }}
@@ -132,7 +133,7 @@ export default function PanelNavigation(props: BoxProps) {
             'config': focused.includes('config') ? 'brightness(100%)' : 'brightness(90%)',
             'output': focused.includes('output') ? 'brightness(100%)' : 'brightness(90%)'
         };
-    }, [screenSizePad, screenSizeDesktop, focused]);
+    }, [focused]);
 
     // Was planned to allow swipping but now let's forget it
     const transitionDuration = useMemo(() => {

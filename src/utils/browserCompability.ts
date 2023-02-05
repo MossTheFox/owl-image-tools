@@ -35,7 +35,7 @@ export const FS_Mode = (() => {
 
 export const storageDisabled = (() => {
     try {
-        let tryAccess = typeof localStorage.length === 'number';
+        const _tryAccess = typeof localStorage.length === 'number';
         return false;
     } catch (err) {
         return true;

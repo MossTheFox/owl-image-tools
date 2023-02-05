@@ -1,39 +1,30 @@
 import { TreeItem } from "@mui/lab";
 import { Typography, Box, PopoverPosition } from "@mui/material";
 import React, { useContext, useCallback, useState, useEffect } from "react";
-import { fileListContext as _fileListContext, webkitFileListContext } from "../../../../context/fileListContext";
+import { fileListContext as _fileListContext, TreeNode, WebkitFileNodeData } from "../../../../context/fileListContext";
 import { parseFileSizeString } from "../../../../utils/randomUtils";
 import ImageFilePreviewBox from "../../../../components/ImageFilePreviewBox";
 import { fileListDialogCallerContext } from "../../../../context/fileListDialog/fileListDialogCallerContext";
 
-// TODO: handle Safari long touch event..... (it don't open context menu)
+// TODO: handle Safari long touch event..... (it doesn't open context menu)
 
 export default function FileTreeItem({
-    nodeId,
-    file,
+    node,
     previewMode,
 }: {
-    nodeId: string;
-    file: File;
+    node: TreeNode<WebkitFileNodeData>;
     previewMode: boolean;
 }) {
 
-    const caller = useContext(fileListDialogCallerContext);
-
-    const webkitFile = useContext(webkitFileListContext);
+    const { callFilePreviewDialog, callFileListItemContextMenu } = useContext(fileListDialogCallerContext);
 
     const callPreviewDialog = useCallback(() => {
-        const node = webkitFile.nodeMap.get(nodeId);
-        if (!node) return;
-        caller.callFilePreviewDialog(file, node)
-
-    }, [webkitFile.nodeMap, caller.callFilePreviewDialog, file]);
+        callFilePreviewDialog(node)
+    }, [node, callFilePreviewDialog]);
 
     const callContextMenu = useCallback((anchorPosition: PopoverPosition) => {
-        const node = webkitFile.nodeMap.get(nodeId);
-        if (!node) return;
-        caller.callFileListItemContextMenu(anchorPosition, node)
-    }, [webkitFile.nodeMap, caller.callFileListItemContextMenu]);
+        callFileListItemContextMenu(anchorPosition, node)
+    }, [node, callFileListItemContextMenu]);
 
     const onRightClick = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
@@ -65,7 +56,7 @@ export default function FileTreeItem({
     }, []);
 
 
-    return <TreeItem nodeId={nodeId}
+    return <TreeItem nodeId={node.nodeId}
         // Click: Preview Dialog
         onClick={callPreviewDialog}
 
@@ -74,11 +65,11 @@ export default function FileTreeItem({
             onContextMenu: onRightClick,
         }}
 
-        label={
+        label={node.data.kind === 'file' &&
             <Box display={'flex'} justifyContent={'space-between'} alignItems="center"
                 height={previewMode ? "3em" : "1.5em"}
             >
-                {previewMode && <ImageFilePreviewBox file={file}
+                {previewMode && <ImageFilePreviewBox file={node.data.file}
                     height="3rem"
                     width="3rem"
                     minWidth="3rem"
@@ -94,22 +85,22 @@ export default function FileTreeItem({
                     overflow="hidden"
                 >
                     <Typography variant="body1" whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
-                        {file.name}
+                        {node.data.file.name}
                     </Typography>
                     <Box display='flex' alignItems="baseline" justifyContent="space-between">
                         <Typography variant="body2" color="textSecondary" whiteSpace='nowrap' textAlign="end" overflow='hidden'>
                             {imageSizeText}
                         </Typography>
                         <Typography flexGrow={1} variant="body1" color="textSecondary" whiteSpace='nowrap' textAlign="end" ml='1px'>
-                            {parseFileSizeString(file.size)}
+                            {parseFileSizeString(node.data.file.size)}
                         </Typography>
                     </Box>
                 </Box> : <>
                     <Typography variant="body1" color='textSecondary' whiteSpace='nowrap' flexGrow={1} overflow='hidden'>
-                        {file.name}
+                        {node.data.file.name}
                     </Typography>
                     <Typography variant="body1" color="textSecondary" whiteSpace='nowrap' ml="1px">
-                        {parseFileSizeString(file.size)}
+                        {parseFileSizeString(node.data.file.size)}
                     </Typography>
                 </>}
             </Box>

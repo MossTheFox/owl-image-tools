@@ -47,46 +47,37 @@ let vips: (typeof Vips) | null = null;
     Text rendering support:        no
 */
 
-function initVips() {
-    return new Promise<typeof Vips>(async (resolve, reject) => {
-        // firefox doesn't supprot dynamic module import in workers (https://bugzil.la/1540913)
-        // so the createModule function will be initialized in the script tag
-        const VipsCreateModule = typeof globalThis.Vips === 'undefined' ? null : globalThis.Vips;
-        if (!VipsCreateModule) {
-            reject(new Error('Module Not Loaded', {
-                cause: 'moduleNotFound'
-            }));
-            return;
-        }
-
-        try {
-            if (!vips) {
-                vips = await VipsCreateModule({
-                    // local file ** important **
-                    mainScriptUrlOrBlob: '/wasm/vips/vips.js',
-                    dynamicLibraries: ["/wasm/vips/vips-jxl.wasm"], // To fix an issue for parsing URLs when running in workers 
-                    locateFile(url, scriptDirectory) {
-                        return `/wasm/vips/${url}`;
-                    },
-                    print(str) {
-                        import.meta.env.DEV && console.log(str);
-                    },
-                    printErr(str) {
-                        import.meta.env.DEV && console.warn(str);
-                    },
-                    onAbort(what) {
-                        import.meta.env.DEV && console.warn(what);
-                        reject(new Error(what));
-                    },
-                });
-                import.meta.env.DEV && console.log(`${vips.version(0)}.${vips.version(1)}.${vips.version(2)}`);
+async function initVips() {
+    // firefox doesn't supprot dynamic module import in workers (https://bugzil.la/1540913)
+    // so the createModule function will be initialized in the script tag
+    const VipsCreateModule = typeof globalThis.Vips === 'undefined' ? null : globalThis.Vips;
+    if (!VipsCreateModule) {
+        throw new Error('Module Not Loaded', {
+            cause: 'moduleNotFound'
+        });
+    }
+    if (!vips) {
+        vips = await VipsCreateModule({
+            // local file ** important **
+            mainScriptUrlOrBlob: '/wasm/vips/vips.js',
+            dynamicLibraries: ["/wasm/vips/vips-jxl.wasm"], // To fix an issue for parsing URLs when running in workers 
+            locateFile(url, scriptDirectory) {
+                return `/wasm/vips/${url}`;
+            },
+            print(str) {
+                import.meta.env.DEV && console.log(str);
+            },
+            printErr(str) {
+                import.meta.env.DEV && console.warn(str);
+            },
+            onAbort(what) {
+                import.meta.env.DEV && console.warn(what);
             }
-            resolve(vips);
-        } catch (err) {
-            reject(err);
-        }
-    });
-};
+        });
+        import.meta.env.DEV && console.log(`${vips.version(0)}.${vips.version(1)}.${vips.version(2)}`);
+    }
+    return vips;
+}
 
 ///////////////////////////////////////////////////////////
 
@@ -290,7 +281,7 @@ export async function vipsCall(
     loadStrProps: Parameters<typeof Vips.Image.newFromBuffer>[1],
     writeFormatString: Parameters<Vips.Image['writeToBuffer']>[0],
     writeOptions: Parameters<Vips.Image['writeToBuffer']>[1],
-    flatten: boolean = false,
+    flatten = false,
     defaultBackgroundVector = [255, 255, 255]
 ) {
     if (!vips) {

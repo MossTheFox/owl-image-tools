@@ -56,11 +56,11 @@ function RenderTreeItem({
 
     return <>
         {rootNode.data.kind === 'file' ? (
-            <FileTreeItem file={rootNode.data.file} nodeId={rootNode.nodeId} previewMode={previewMode} />
+            <FileTreeItem node={rootNode} previewMode={previewMode} />
         ) : (
             <FolderTreeItem childrenCount={rootNode.data.childrenCount}
                 name={rootNode.data.name}
-                nodeId={rootNode.nodeId}>
+                node={rootNode}>
 
                 {/* Do the lazy load for File and Folder Items */}
 
@@ -85,7 +85,7 @@ function RenderTreeItem({
                         {
                             v.map((v, i) =>
                                 v.data.kind === 'file' &&
-                                <FileTreeItem key={i} file={v.data.file} nodeId={v.nodeId} previewMode={previewMode} />
+                                <FileTreeItem key={i} node={v} previewMode={previewMode} />
                             )
                         }
                     </LazyLoadChunk>
@@ -99,23 +99,23 @@ function RenderTreeItem({
 
 export default function FileListPreview() {
 
-    const webkitFileListContext = useContext(_webkitFileListContext);
+    const { statistic, clearNodes, inputFileTreeRoots } = useContext(_webkitFileListContext);
     const { contextMenuActiveItem } = useContext(fileListDialogCallerContext);
 
-    const totalFiles = useMemo(() => webkitFileListContext.statistic.totalFiles,
-        [webkitFileListContext.statistic]);
+    const totalFiles = useMemo(() => statistic.totalFiles,
+        [statistic]);
 
     const [previewMode, setPreviewMode] = useState(false);
     const enablePreview = useCallback(() => setPreviewMode(true), []);
     const disablePreview = useCallback(() => setPreviewMode(false), []);
 
-    const dialogCaller = useContext(fileListDialogCallerContext);
+    const { callFileListStatisticDialog } = useContext(fileListDialogCallerContext);
 
     const callFullStatisticDialog = useCallback(() => {
-        dialogCaller.callFileListStatisticDialog([
-            webkitFileListContext.statistic
+        callFileListStatisticDialog([
+            statistic
         ]);
-    }, [dialogCaller.callFileListStatisticDialog, webkitFileListContext.statistic]);
+    }, [callFileListStatisticDialog, statistic]);
 
     const menuAnchor = useRef<HTMLDivElement>(null);
     const [open, setOpen] = useState(false);
@@ -123,9 +123,9 @@ export default function FileListPreview() {
     const closeMenu = useCallback(() => setOpen(false), []);
 
     const clearAll = useCallback(() => {
-        webkitFileListContext.clearNodes();
+        clearNodes();
         closeMenu();
-    }, [closeMenu, webkitFileListContext.clearNodes]);
+    }, [closeMenu, clearNodes]);
 
     return <>
         {/* Note: The root layer of file array CAN have duplicated filenames or directory names.
@@ -188,7 +188,7 @@ export default function FileListPreview() {
             </ButtonGroup>
         </BGTransitionBox>
 
-        {webkitFileListContext.inputFileTreeRoots.length > 0 && <Box mb={1}>
+        {inputFileTreeRoots.length > 0 && <Box mb={1}>
             <Box display='flex' justifyContent='space-between' alignItems='center' pb={1}>
                 <Typography variant="body1" fontWeight="bolder" component="div"
                     display='flex' gap={1} whiteSpace="nowrap" ref={menuAnchor}
@@ -196,7 +196,7 @@ export default function FileListPreview() {
                     文件列表 <Link component="button" underline="hover" onClick={openMenu}>选项</Link>
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                    {`共 ${webkitFileListContext.statistic.totalFiles} 个文件`}
+                    {`共 ${statistic.totalFiles} 个文件`}
                 </Typography>
 
                 <Menu open={open} onClose={closeMenu} anchorEl={menuAnchor.current}>
@@ -219,7 +219,7 @@ export default function FileListPreview() {
                     }
                 }}
             >
-                {webkitFileListContext.inputFileTreeRoots.sort((a, b) => {
+                {inputFileTreeRoots.sort((a, b) => {
                     if (a.data.kind === 'directory' && b.data.kind === 'file') return -1;
                     if (a.data.kind === 'file' && b.data.kind === 'directory') return 1;
                     return 0;

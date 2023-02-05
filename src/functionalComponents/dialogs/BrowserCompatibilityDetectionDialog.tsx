@@ -66,7 +66,7 @@ export default function BrowserCompatibilityDetectionDialog() {
 
     useEffect(() => {
         fireSIMDCheck();
-    }, []);
+    }, [fireSIMDCheck]);
 
 
 

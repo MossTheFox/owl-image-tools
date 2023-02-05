@@ -24,7 +24,7 @@ function useAsync<T>(
     useEffect(() => {
         if (asyncFunc && fire) {
             let isActive = true;
-            let abortController = new AbortController();
+            const abortController = new AbortController();
             let timeout = -1;
             if (abortSeconds > 0) {
                 timeout = setTimeout(() => {

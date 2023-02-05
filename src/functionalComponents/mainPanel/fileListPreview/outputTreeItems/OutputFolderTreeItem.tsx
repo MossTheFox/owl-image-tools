@@ -2,7 +2,7 @@ import { TreeItem } from "@mui/lab";
 import { Typography, Box } from "@mui/material";
 import { FolderOpen } from "@mui/icons-material";
 import { useContext, useCallback } from "react";
-import { fileListContext as _fileListContext, webkitFileListContext, webkitFileListContext as _webkitFileListContext } from "../../../../context/fileListContext";
+import { fileListContext as _fileListContext } from "../../../../context/fileListContext";
 import { OutputTreeNode } from "../../../../context/outputFileListContext";
 import { outputFileListDialogCallerContext } from "../../../../context/fileListDialog/outputFileListDialogCallerContext";
 
@@ -15,8 +15,6 @@ export default function OutputFolderTreeItem({
 }) {
     const { callFileListItemContextMenu } = useContext(outputFileListDialogCallerContext);
 
-    const webkitFile = useContext(webkitFileListContext);
-
     const callContextMenu = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -25,7 +23,7 @@ export default function OutputFolderTreeItem({
             left: e.clientX
         };
         callFileListItemContextMenu(anchorPositon, node)
-    }, [webkitFile.nodeMap, callFileListItemContextMenu]);
+    }, [callFileListItemContextMenu, node]);
 
     return <TreeItem nodeId={node.nodeId}
         ContentProps={{

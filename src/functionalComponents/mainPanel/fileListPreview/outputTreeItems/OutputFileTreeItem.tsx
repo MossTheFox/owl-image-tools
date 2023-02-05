@@ -186,7 +186,7 @@ export default function OutputFileTreeItem({
                         </Typography>
                     </>
                 }
-            </Box >
+            </Box>
 
         } />
 }

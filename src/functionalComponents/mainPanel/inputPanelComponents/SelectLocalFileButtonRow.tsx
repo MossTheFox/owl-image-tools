@@ -2,15 +2,15 @@ import { Box, Button, Typography, Grid, GridProps, Popover } from "@mui/material
 import { useCallback, useRef, useContext, useMemo, useState } from "react";
 import { FolderOpen, Image as ImageIcon } from '@mui/icons-material';
 import { FS_Mode, isMobileBrowser } from "../../../utils/browserCompability";
-import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../../context/fileListContext";
+import { fileListContext as _fileListContext, webkitFileListContext } from "../../../context/fileListContext";
 import useAsync from "../../../hooks/useAsync";
 import { appConfigContext } from "../../../context/appConfigContext";
 
 export default function SelectLocalFileButtonRow(props: GridProps) {
-    const fileListContext = useContext(_fileListContext);
-    const webkitFileListContext = useContext(_webkitFileListContext);
+    const { appendInputFsHandles, ready: iterateDirReady } = useContext(_fileListContext);
+    const { ready, appendFileList } = useContext(webkitFileListContext);
 
-    const processing = useMemo(() => !fileListContext.ready || !webkitFileListContext.ready, [fileListContext.ready, webkitFileListContext.ready]);
+    const processing = useMemo(() => !iterateDirReady || !ready, [iterateDirReady, ready]);
 
     // Case 1: window.showDirectoryPicker
     const asyncRequestOpenFolder = useCallback(async () => {
@@ -20,8 +20,8 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
     }, []);
 
     const requestOpenFolderOnSuccess = useCallback((result: FileSystemDirectoryHandle) => {
-        fileListContext.appendInputFsHandles([result])
-    }, [fileListContext.appendInputFsHandles]);
+        appendInputFsHandles([result])
+    }, [appendInputFsHandles]);
 
     const requestOpenFolderOnError = useCallback((err: Error) => {
         // ignore?
@@ -52,23 +52,23 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
             return;
         }
         openWebkitDirectoryPicker();
-    }, [openWebkitDirectoryPicker, openWebkitDirectoryPicker, siteConfig.tipDisplay]);
+    }, [openWebkitDirectoryPicker, siteConfig.tipDisplay]);
 
 
 
     const handleMultipleImageInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.currentTarget.files;
         if (!files || !files.length) return;
-        webkitFileListContext.appendFileList(files);
+        appendFileList(files);
         e.target.value = '';    // ← if don't do so, picking the same file again won't fire onChange
-    }, [webkitFileListContext.appendFileList]);
+    }, [appendFileList]);
 
     const handleWebkitDirectoryInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.currentTarget.files;
         if (!files || !files.length) return;
-        webkitFileListContext.appendFileList(files, true);
+        appendFileList(files, true);
         e.target.value = '';    // ← if don't do so, picking the same file again won't fire onChange
-    }, [webkitFileListContext.appendFileList])
+    }, [appendFileList])
 
     return <Grid container {...props}>
         <Grid item xs={6} pr={0.5}>
@@ -89,8 +89,14 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
                 >打开文件夹</Button>
                 :
                 <>
-                    {/* @ts-expect-error */}
-                    <input ref={directoryInputRef} type='file' webkitdirectory="1" multiple hidden
+                    {/* @ts-expect-error: webkitdirectory property is not marked as valid tag for react. (It's also unusable for mobile browsers.) */}
+                    <input ref={directoryInputRef} type='file' webkitdirectory="1"
+                        hidden
+
+                        // ↓ For mobile browsers...
+                        multiple
+                        accept="image/*"
+
                         name="image-dir-selection"
                         onChange={handleWebkitDirectoryInput}
                     />

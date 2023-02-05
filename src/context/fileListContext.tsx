@@ -20,8 +20,8 @@ export class TreeNode<T> {
         if (parent) {
             this.parent = parent;
         }
-    };
-};
+    }
+}
 
 /** For those support File System API 
  * **DISCARDED** since 'override source file' is no longer a planned feature.
@@ -75,7 +75,7 @@ export function getAllNodeInTree<T extends { children: T[] }>(root: T) {
     }
     const result: T[] = [root];
     for (const child of root.children) {
-        let iterated = getAllNodeInTree(child);
+        const iterated = getAllNodeInTree(child);
         result.push(...iterated);
     }
     return result;
@@ -187,7 +187,7 @@ interface FileListContext {
     /** File iteration Error (if `error` is `null` and `ready` is `true`, then it's all ok) */
     error: Error | null,
 
-};
+}
 
 export const fileListContext = createContext<FileListContext>({
     rootInputFSHandles: [],
@@ -202,10 +202,10 @@ export const fileListContext = createContext<FileListContext>({
  */
 export function FileListContext({ children }: { children: React.ReactNode }) {
 
-    const logger = useContext(loggerContext);
+    const { fireAlertSnackbar, writeLine } = useContext(loggerContext);
 
     /////
-    const webkitFileList = useContext(webkitFileListContext);
+    const { appendNodes } = useContext(webkitFileListContext);
     /////
 
     const [rootInputFSHandles, setRootInputFsHandles] = useState<(FileSystemDirectoryHandle | FileSystemFileHandle)[]>([]);
@@ -226,20 +226,20 @@ export function FileListContext({ children }: { children: React.ReactNode }) {
         setError(null);
 
         if (nodeMap) {
-            webkitFileList.appendNodes(fileHandleTrees, nodeMap);
+            appendNodes(fileHandleTrees, nodeMap);
         }
-    }, [webkitFileList.appendNodes]);
+    }, [appendNodes]);
 
     const doFullIterationOnError = useCallback((err: Error) => {
         setError(err);
         setReady(true);
-        logger.writeLine(`读取文件时发生错误。错误信息: ` + err.message);
-        logger.fireAlertSnackbar({
+        writeLine(`读取文件时发生错误。错误信息: ` + err.message);
+        fireAlertSnackbar({
             severity: 'error',
             title: '添加文件夹失败',
             message: `读取文件时发生错误。错误信息: ` + err.message
         });
-    }, [logger.fireAlertSnackbar, logger.writeLine]);
+    }, [fireAlertSnackbar, writeLine]);
 
     const fireDoFullIteration = useAsync(asyncDoFullIteration, doFullIterationOnSuccess, doFullIterationOnError);
 
@@ -266,9 +266,9 @@ export function FileListContext({ children }: { children: React.ReactNode }) {
         setError(null);
 
         if (nodeMap) {
-            webkitFileList.appendNodes(fileHandleTrees, nodeMap);
+            appendNodes(fileHandleTrees, nodeMap);
         }
-    }, [webkitFileList.appendNodes]);
+    }, [appendNodes]);
 
     const fireDoAppendIteration = useAsync(asyncDoAppendedIteration, doAppendedIterationOnSuccess, doFullIterationOnError);
 
@@ -302,7 +302,7 @@ function iterateDirectoryEntry(
     nodeMap?: Map<string, TreeNode<WebkitFileNodeData>>,
     abortSignal?: AbortSignal
 ) {
-    return new Promise<void>(async (resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
         const reader = entry.createReader();
         reader.readEntries(async (entries) => {
             if (entries.length === 100) {
@@ -405,7 +405,7 @@ interface WebkitFileListContext {
 
     // allowDrop: boolean;
     // setAllowDrop: React.Dispatch<React.SetStateAction<boolean>>
-};
+}
 
 export const webkitFileListContext = createContext<WebkitFileListContext>({
     inputFileTreeRoots: [],
@@ -470,7 +470,7 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
                 // Now put it in the dir
                 let currentDir = newRoot;
                 for (const [i, dir] of dirPath.entries()) {
-                    let found = currentDir.children.find((v) => v.data.kind === 'directory' && v.data.name === dir) as ((TreeNode<WebkitFileNodeData & { kind: 'directory' }>) | undefined);;
+                    let found = currentDir.children.find((v) => v.data.kind === 'directory' && v.data.name === dir) as ((TreeNode<WebkitFileNodeData & { kind: 'directory' }>) | undefined);
                     // Create if not exist
                     if (!found) {
                         found = new TreeNode<WebkitFileNodeData & { kind: 'directory' }>({
@@ -508,6 +508,9 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
                     }
                     return newMap;
                 });
+            } else {
+                // ★ Mobile browsers cannot select directory. Fall back to default import and retry.
+                appendFileList(fileList, false);
             }
 
             return;

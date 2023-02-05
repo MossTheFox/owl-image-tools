@@ -61,7 +61,7 @@ export default function BaseColorConfig(props: BoxProps) {
 
     const handleColorInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         setColorInput(e.target.value);
-        let input = e.target.value;
+        const input = e.target.value;
         const t = new TinyColor(input);
         if (t.isValid) {
             updateOutputConfig('imageBaseColor', t.toHexString());
@@ -69,7 +69,7 @@ export default function BaseColorConfig(props: BoxProps) {
     }, [updateOutputConfig]);
 
     const onLostFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
-        let input = e.target.value;
+        const input = e.target.value;
         const t = new TinyColor(input);
         if (t.isValid) {
             setColorInput(convertTo(input, format));
@@ -88,7 +88,7 @@ export default function BaseColorConfig(props: BoxProps) {
 
 
     const handleNativeColorPickerChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        let result = convertTo(e.target.value, format);
+        const result = convertTo(e.target.value, format);
         setColorInput(result);
         updateOutputConfig('imageBaseColor', e.target.value);   // HEX
     }, [format, updateOutputConfig]);

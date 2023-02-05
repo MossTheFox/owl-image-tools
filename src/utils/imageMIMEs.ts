@@ -85,7 +85,7 @@ export function extToMime(extOrFileName: string) {
 }
 
 export function changeFileExt(fileName: string, targetExt: string) {
-    let splited = fileName.split('.');
+    const splited = fileName.split('.');
     if (splited.length === 1) return `${fileName}.${targetExt}`;
     splited.pop();
     splited.push(targetExt);
@@ -93,7 +93,7 @@ export function changeFileExt(fileName: string, targetExt: string) {
 }
 
 export function getFileExt(fileName: string) {
-    let splited = fileName.split('.');
+    const splited = fileName.split('.');
     if (splited.length === 1) return '';
     return splited.pop()?.toLowerCase() ?? '';
 }

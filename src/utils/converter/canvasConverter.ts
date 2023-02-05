@@ -19,20 +19,17 @@ const errorBuilder = (message: string, cause: ConvertWithCanvasErrorCause) => ne
 /**
  * When catching Errors, the `err.cause` is one of `CANVAS_ACTION_ERROR_CAUSES` exported.
  */
-export function convertViaCanvas(fileOrBlob: File | Blob, { outputMIME, jpegQualityParam, background }: {
+export async function convertViaCanvas(fileOrBlob: File | Blob, { outputMIME, jpegQualityParam, background }: {
     outputMIME: 'image/png' | 'image/jpeg' | 'image/webp',
     jpegQualityParam?: number,
     background?: string,
 }) {
-    return new Promise<Blob>(async (resolve, reject) => {
-
-        try {
-            await tryReadABlob(fileOrBlob);
-        } catch (err) {
-            reject(errorBuilder('无法读取文件，原文件可能已被修改、移动或删除。', 'ImageFileUnreadable'));
-            return;
-        }
-
+    try {
+        await tryReadABlob(fileOrBlob);
+    } catch (err) {
+        throw errorBuilder('无法读取文件，原文件可能已被修改、移动或删除。', 'ImageFileUnreadable');
+    }
+    return await new Promise<Blob>((resolve, reject) => {
         const url = URL.createObjectURL(fileOrBlob);
         // try read...
 

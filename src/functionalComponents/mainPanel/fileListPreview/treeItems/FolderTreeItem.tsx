@@ -2,21 +2,21 @@ import { TreeItem } from "@mui/lab";
 import { Typography, Box } from "@mui/material";
 import { FolderOpen } from "@mui/icons-material";
 import { useContext, useCallback } from "react";
-import { fileListContext as _fileListContext, webkitFileListContext } from "../../../../context/fileListContext";
+import { fileListContext as _fileListContext, TreeNode, webkitFileListContext, WebkitFileNodeData } from "../../../../context/fileListContext";
 import { fileListDialogCallerContext } from "../../../../context/fileListDialog/fileListDialogCallerContext";
 
 export default function FolderTreeItem({
-    nodeId,
+    node,
     name,
     childrenCount,
     children,
 }: {
-    nodeId: string;
+    node: TreeNode<WebkitFileNodeData>;
     name: string;
     childrenCount: number;
     children: React.ReactNode;
 }) {
-    const caller = useContext(fileListDialogCallerContext);
+    const { callFileListItemContextMenu } = useContext(fileListDialogCallerContext);
 
     const webkitFile = useContext(webkitFileListContext);
 
@@ -27,13 +27,11 @@ export default function FolderTreeItem({
             top: e.clientY,
             left: e.clientX
         };
-        const node = webkitFile.nodeMap.get(nodeId);
-        if (!node) return;
 
-        caller.callFileListItemContextMenu(anchorPositon, node,)
-    }, [webkitFile.nodeMap, caller.callFileListItemContextMenu]);
+        callFileListItemContextMenu(anchorPositon, node,)
+    }, [node, callFileListItemContextMenu]);
 
-    return <TreeItem nodeId={nodeId}
+    return <TreeItem nodeId={node.nodeId}
         ContentProps={{
             // Right Click (or touch hold): Context Menu
             onContextMenu: callContextMenu

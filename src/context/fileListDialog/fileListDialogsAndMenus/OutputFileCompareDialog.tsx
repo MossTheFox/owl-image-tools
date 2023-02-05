@@ -15,11 +15,13 @@ export default function OutputFileCompareDialog(props: DialogProps &
 }
 ) {
 
+    const { onClose } = props;
+
     const closeDialog = useCallback((e: React.MouseEvent) => {
-        if (props.onClose) {
-            props.onClose(e, 'escapeKeyDown');
+        if (onClose) {
+            onClose(e, 'escapeKeyDown');
         }
-    }, [props.onClose]);
+    }, [onClose]);
 
     const {
         node,

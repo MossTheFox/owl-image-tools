@@ -53,10 +53,10 @@ export async function isFileExists(filename: string, dirHandle: FileSystemDirect
 }
 
 export function renameFileForDuplication(filename: string) {
-    let splitted = filename.split('.');
-    let ext = splitted.pop() ?? '';
-    let name = splitted.join('.');
-    let nameSplitted = name.split(' ');
+    const splitted = filename.split('.');
+    const ext = splitted.pop() ?? '';
+    const name = splitted.join('.');
+    const nameSplitted = name.split(' ');
     const match = nameSplitted[nameSplitted.length - 1].match(/\((\d+)\)/);
 
     let tail = '(1)';

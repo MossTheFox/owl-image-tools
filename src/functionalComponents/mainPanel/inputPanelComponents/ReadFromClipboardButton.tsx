@@ -9,11 +9,11 @@ import { loggerContext } from "../../../context/loggerContext";
 
 
 export default function ReadFromClipboardButton(props: ButtonProps) {
-    const logger = useContext(loggerContext);
-    const fileListContext = useContext(_fileListContext);
-    const webkitFileListContext = useContext(_webkitFileListContext);
+    const { writeLine, fireAlertSnackbar } = useContext(loggerContext);
+    const { ready: iterateDirReady } = useContext(_fileListContext);
+    const { appendFileList, ready } = useContext(_webkitFileListContext);
 
-    const processing = useMemo(() => !fileListContext.ready || !webkitFileListContext.ready, [fileListContext.ready, webkitFileListContext.ready]);
+    const processing = useMemo(() => !iterateDirReady || !ready, [iterateDirReady, ready]);
 
     // From Clipboard (Async API)
     const asyncRequestReadClipboard = useCallback(async () => {
@@ -34,19 +34,19 @@ export default function ReadFromClipboardButton(props: ButtonProps) {
     }, []);
 
     const readClipboardOnSuccess = useCallback((files: File[]) => {
-        webkitFileListContext.appendFileList(files);
-        logger.writeLine(`从剪切板读取了 ${files.length} 张图片。`);
-        logger.fireAlertSnackbar({
+        appendFileList(files);
+        writeLine(`从剪切板读取了 ${files.length} 张图片。`);
+        fireAlertSnackbar({
             severity: 'success',
             message: `从剪切板读取了 ${files.length} 张图片。`
         }, 3000);
-    }, [webkitFileListContext.appendFileList, logger.writeLine, logger.fireAlertSnackbar]);
+    }, [appendFileList, writeLine, fireAlertSnackbar]);
 
     const readClipboardOnError = useCallback((err: Error) => {
         import.meta.env.DEV && console.log(err);
         // DOMExcention: Read permission denied.
         if (err instanceof DOMException) {
-            logger.fireAlertSnackbar({
+            fireAlertSnackbar({
                 severity: 'error',
                 title: '读取剪切板出错',
                 message: `${err.message}`
@@ -54,11 +54,11 @@ export default function ReadFromClipboardButton(props: ButtonProps) {
             return;
         }
         // Custom Errors
-        logger.fireAlertSnackbar({
+        fireAlertSnackbar({
             severity: 'warning',
             message: err.message
         })
-    }, [logger.fireAlertSnackbar]);
+    }, [fireAlertSnackbar]);
 
     const fireRequestClipboard = useAsync(asyncRequestReadClipboard, readClipboardOnSuccess, readClipboardOnError);
 
@@ -86,7 +86,7 @@ export default function ReadFromClipboardButton(props: ButtonProps) {
         e.preventDefault();
         const data = e.clipboardData;
         if (!data || data.files.length === 0) {
-            logger.fireAlertSnackbar({
+            fireAlertSnackbar({
                 severity: 'warning',
                 message: '剪切板中没有有效的图片数据'
             });
@@ -99,14 +99,14 @@ export default function ReadFromClipboardButton(props: ButtonProps) {
             }
         }
         if (imageFiles.length === 0) {
-            logger.fireAlertSnackbar({
+            fireAlertSnackbar({
                 severity: 'warning',
                 message: '剪切板中没有有效的图片数据'
             });
             return;
         }
         readClipboardOnSuccess(imageFiles);
-    }, [readClipboardOnSuccess, logger.fireAlertSnackbar]);
+    }, [readClipboardOnSuccess, fireAlertSnackbar]);
 
     const resetTextField = useCallback(() => inputField.current && (inputField.current.value = ''), [inputField]);
 

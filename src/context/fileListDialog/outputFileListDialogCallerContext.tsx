@@ -1,9 +1,9 @@
 import { Box, Typography, Menu, MenuItem, ListItem, ListItemButton, ListItemIcon, ListItemText, PopoverPosition } from "@mui/material";
 import { Info, Download, FolderZip } from "@mui/icons-material";
-import { createContext, useCallback, useState, useMemo, useEffect, useContext } from "react";
+import { createContext, useCallback, useState, useMemo, useEffect } from "react";
 import ImageFilePreviewBox from "../../components/ImageFilePreviewBox";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../context/fileListContext";
-import { outputFileListContext, OutputTreeNode } from "../outputFileListContext";
+import { OutputTreeNode } from "../outputFileListContext";
 import OutputFileCompareDialog from "./fileListDialogsAndMenus/OutputFileCompareDialog";
 import { fireFileDownload } from "../../utils/randomUtils";
 import { FS_Mode } from "../../utils/browserCompability";
@@ -49,9 +49,6 @@ export function OutputFileListDialogCallerContextProvider({ children }: { childr
             setPreviewNode(null);
         }
     }, [previewDialogOpen]);
-
-    // Context Menu //
-    const { } = useContext(outputFileListContext);
 
     const [contextMenuNodeHold, setContextMenuNodeHold] = useState<OutputTreeNode>();
     const [contextMenuOpen, setContextMenuOpen] = useState(false);

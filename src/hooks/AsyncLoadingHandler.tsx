@@ -86,6 +86,7 @@ function AsyncLoadingHandler<T>({
             error ? (
                 <OnErrorRender message={error?.message || 'Unknown Error'} retryFunc={startFetch} />
             ) : (
+                // eslint-disable-next-line
                 <OnSuccessRender data={data!} />
             )
         )

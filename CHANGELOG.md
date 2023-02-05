@@ -13,6 +13,8 @@ Changelog
 
 - Web workers moved to path `/worker`.
 - Function paramater names of `libvipsConverter.ts` will now match the real argument names of vips.
+- Code checked and modified with eslint (react-hooks plug-in).
+- All CSS will be bundled by emotion now.
 
 ### Fixed (TODO:)
 

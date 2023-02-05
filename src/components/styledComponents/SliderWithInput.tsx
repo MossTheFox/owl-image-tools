@@ -49,7 +49,7 @@ export default function SliderWithInput({
         }
         onChange(trim);
         e.target.value = trim + '';
-    }, [onChange, shouldBeInteger, max]);
+    }, [onChange, shouldBeInteger, max, min]);
 
     return <Box display='flex' gap={2} {...boxProps}>
         <Slider sx={{ flexGrow: 1 }}

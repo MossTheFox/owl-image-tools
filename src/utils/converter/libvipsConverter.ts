@@ -191,7 +191,7 @@ function fireVipsWorkerTask(
     writeFormatString: Parameters<Vips.Image['writeToBuffer']>[0],
     writeOptions: Parameters<Vips.Image['writeToBuffer']>[1],
 
-    flatten: boolean = false,
+    flatten = false,
     defaultBackgroundVector = [255, 255, 255]
 ) {
     return new Promise<Uint8Array>((resolve, reject) => {
@@ -247,7 +247,10 @@ function fireVipsWorkerTask(
             // CALL
             worker.postMessage({
                 type: 'run',
-                args: [...arguments]
+                // eslint-disable-next-line
+                args: [...arguments]    
+                // ↑ the worker will call the relatived function with the EXACT same arguments.
+                // see `vipsCall` function in `_libvipsConverterTemp.ts`.
             });
 
         } catch (err) {
@@ -263,5 +266,3 @@ export async function restartVipsWorker() {
     }
     worker = new Worker('/wasm/vips-loader.worker.js');
 }
-
-//////////////////////////////////////////////////////////////

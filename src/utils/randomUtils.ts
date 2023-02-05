@@ -87,7 +87,7 @@ function objectCheck<T>(unknown: unknown, expected: T) {
         }
         for (const [key, val] of Object.entries(source)) {
             if (key in unknown) {
-                // @ts-expect-error
+                // @ts-expect-error The check should already be finished.
                 source[key] = objectCheck(unknown[key], val)
             }
         }
@@ -98,7 +98,7 @@ function objectCheck<T>(unknown: unknown, expected: T) {
 /**
  * Validate object from localStorage, and return it.
  */
-export function getFromLocalStorageAndValidate<T extends Object>(key: string, object: T) {
+export function getFromLocalStorageAndValidate<T extends object>(key: string, object: T) {
     try {
         const stored = localStorage.getItem(key);
         if (!stored) return { ...object };
@@ -107,10 +107,10 @@ export function getFromLocalStorageAndValidate<T extends Object>(key: string, ob
             ...object
         };
         for (const [key, val] of Object.entries(json)) {
-            // @ts-expect-error
+            // @ts-expect-error um, unknown
             if (key in result && typeof result[key] === typeof json[key]) {
                 // Additional check for the FIRST layer.
-                // @ts-expect-error
+                // @ts-expect-error um.
                 result[key] = objectCheck(val, result[key]);
             }
         }
@@ -142,7 +142,7 @@ export async function estimateStorageUsage(): Promise<
         result: 'success',
         available: number,
         used: number,
-        rawUsageObject: Object
+        rawUsageObject: object
     } | {
         result: 'error',
         reason: 'NotSupportError' | 'AccessDenied' | 'UnknownError'
@@ -162,7 +162,7 @@ export async function estimateStorageUsage(): Promise<
             result: 'success',
             available: estimate.quota ?? -1,
             used: estimate.usage ?? -1,
-            // @ts-expect-error
+            // @ts-expect-error The `usageDetails` is only available on Chromium-based browsers.
             rawUsageObject: estimate.usageDetails
         }
 
