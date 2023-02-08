@@ -6,9 +6,9 @@ import DialogLoadingIndicator from "../../ui/smallComponents/DialogLoadingIndica
 import { mimeToExt, OUTPUT_MIMEs } from "../../utils/imageMIMEs";
 import OutputConfigArea from "./configPanelComponents/OutputConfigArea";
 import { appConfigContext } from "../../context/appConfigContext";
-import { KNOWN_ISSUES } from "../../constraints";
 import { panelNavigationContext } from "../../context/panelNavigationContext";
 import { Forward } from "@mui/icons-material";
+import { t } from "i18next";
 
 export default function ConfigPanel(props: PaperProps) {
 
@@ -192,7 +192,7 @@ export default function ConfigPanel(props: PaperProps) {
                 </Stack>
                 <Box py={2}>
                     <Typography variant="body2" color="textSecondary" whiteSpace="pre-wrap">
-                        {KNOWN_ISSUES['zh-CN']}
+                        {t('global.knownIssues')}
                     </Typography>
                 </Box>
             </Box>

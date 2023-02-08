@@ -6,6 +6,7 @@ import { clipboardSupport } from "../../../utils/browserCompability";
 import useAsync from "../../../hooks/useAsync";
 import { checkIsMimeSupported, extToMime, mimeToExt } from "../../../utils/imageMIMEs";
 import { loggerContext } from "../../../context/loggerContext";
+import { t } from "i18next";
 
 
 export default function ReadFromClipboardButton(props: ButtonProps) {
@@ -19,7 +20,7 @@ export default function ReadFromClipboardButton(props: ButtonProps) {
     const asyncRequestReadClipboard = useCallback(async () => {
         if (!clipboardSupport) throw new Error('Not supported.');
         const items = await navigator.clipboard.read()
-        if (!items.length) throw new Error('剪切板为空');
+        if (!items.length) throw new Error(t('errorMessage.clipboardEmpty'));
         const picArray: File[] = [];
         for (const item of items) {
             const imageType = item.types.find((v) => checkIsMimeSupported(v));
@@ -29,16 +30,17 @@ export default function ReadFromClipboardButton(props: ButtonProps) {
                 type: imageType
             }));
         }
-        if (picArray.length === 0) throw new Error('剪切板中没有有效的图片数据');
+        if (picArray.length === 0) throw new Error(t('errorMessage.noImageFoundFromClipboard'));
         return picArray;
     }, []);
 
     const readClipboardOnSuccess = useCallback((files: File[]) => {
         appendFileList(files);
-        writeLine(`从剪切板读取了 ${files.length} 张图片。`);
+        const log = t('logger.readFromClipboard', { length: files.length });
+        writeLine(log);
         fireAlertSnackbar({
             severity: 'success',
-            message: `从剪切板读取了 ${files.length} 张图片。`
+            message: log
         }, 3000);
     }, [appendFileList, writeLine, fireAlertSnackbar]);
 
@@ -48,7 +50,7 @@ export default function ReadFromClipboardButton(props: ButtonProps) {
         if (err instanceof DOMException) {
             fireAlertSnackbar({
                 severity: 'error',
-                title: '读取剪切板出错',
+                title: t('errorMessage.failToReadClipboard'),
                 message: `${err.message}`
             });
             return;
@@ -88,7 +90,7 @@ export default function ReadFromClipboardButton(props: ButtonProps) {
         if (!data || data.files.length === 0) {
             fireAlertSnackbar({
                 severity: 'warning',
-                message: '剪切板中没有有效的图片数据'
+                message: t('errorMessage.noImageFoundFromClipboard')
             });
             return;
         }
@@ -101,7 +103,7 @@ export default function ReadFromClipboardButton(props: ButtonProps) {
         if (imageFiles.length === 0) {
             fireAlertSnackbar({
                 severity: 'warning',
-                message: '剪切板中没有有效的图片数据'
+                message: t('errorMessage.noImageFoundFromClipboard')
             });
             return;
         }
@@ -117,7 +119,7 @@ export default function ReadFromClipboardButton(props: ButtonProps) {
             sx={{ whiteSpace: 'nowrap' }}
             {...props}
         >
-            从剪贴板读取
+            {t('button.readFromClipboard')}
         </Button>
         <Popover open={popoverOpen} onClose={closePopover} anchorEl={anchorEl.current}
             anchorOrigin={{
@@ -128,7 +130,7 @@ export default function ReadFromClipboardButton(props: ButtonProps) {
         >
             <Box p={2}>
                 <Typography variant="body1" gutterBottom>
-                    请在输入框中粘贴图片:
+                    {t('ui.readFromClipboardInputPopup')}
                 </Typography>
                 <TextField fullWidth autoComplete="off" inputRef={inputField} size="small" variant="standard"
                     onPaste={readFromPaste}

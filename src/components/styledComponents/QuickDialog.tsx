@@ -1,4 +1,5 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogProps, DialogTitle } from "@mui/material";
+import { t } from "i18next";
 import React, { useCallback, useMemo } from "react";
 
 export type QuickDialogData = {
@@ -29,14 +30,18 @@ export default function QuickDialog(props: Omit<DialogProps, 'title'> & {
 
     return <Dialog maxWidth="sm" fullWidth {...dialogProps}>
         <DialogTitle fontWeight="bolder">
-            {title ?? '提示'}
+            {title ?? t('commonWords.tips')}
         </DialogTitle>
         <DialogContent>
             {renderLines}
         </DialogContent>
         <DialogActions>
-            {actions ?? <Button onClick={btnHandleClose}>关闭</Button>}
-            {!!actions && keepCloseButton && <Button onClick={btnHandleClose}>关闭</Button>}
+            {actions ?? <Button onClick={btnHandleClose}>
+                {t('commonWords.close')}
+            </Button>}
+            {!!actions && keepCloseButton && <Button onClick={btnHandleClose}>
+                {t('commonWords.close')}
+            </Button>}
         </DialogActions>
 
     </Dialog>

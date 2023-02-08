@@ -7,6 +7,7 @@ import { TOP_BAR_HEIGHT } from "../App";
 import LogHistoryDrawer from "./menus/LogHistoryDrawer";
 import AppConfigDrawerMenu from "./menus/AppConfigDrawerMenu";
 import { KeyframesFadeOutAndRemove } from "../transitions";
+import { t } from "i18next";
 
 export default function TopBar(props: BoxProps) {
 
@@ -66,7 +67,7 @@ export default function TopBar(props: BoxProps) {
                         mr: '4px'
                     }} />
                     <Typography variant="body2" whiteSpace='nowrap'>
-                        设置
+                        {t('commonWords.settings')}
                     </Typography>
                 </Box>
             </ButtonBase>
@@ -94,18 +95,18 @@ export default function TopBar(props: BoxProps) {
         </ButtonBase>
 
         <Box display='flex' gap={1} justifyContent="center" alignItems="center" px={1}
-            sx={{
+            sx={storageDisabled ? {} : {
                 animation: `0.25s ease-in 6s forwards ${KeyframesFadeOutAndRemove}`,
             }}
             onAnimationEnd={animationEnd}
         >
             {storageDisabled ? <>
-                <Chip color="error" label={"访问 Storage API 被拒绝"} size="small" />
+                <Chip color="error" label={t('ui.topBar.storageDiabledError')} size="small" />
             </> : <>
-                <Typography variant="body2" whiteSpace='nowrap'>FS Mode: </Typography>
-                {FS_Mode === 'noFS' && <Chip color="warning" label={"受限模式"} size="small" />}
-                {FS_Mode === 'privateFS' && <Chip color="info" label={"Private FS"} size="small" />}
-                {FS_Mode === 'publicFS' && <Chip color="success" label={"Full Support"} size="small" />}
+                <Typography variant="body2" whiteSpace='nowrap'>{t('ui.topBar.FSMode')}</Typography>
+                {FS_Mode === 'noFS' && <Chip color="warning" label={t('ui.topBar.noFS')} size="small" />}
+                {FS_Mode === 'privateFS' && <Chip color="info" label={t('ui.topBar.privateFS')} size="small" />}
+                {FS_Mode === 'publicFS' && <Chip color="success" label={t('ui.topBar.publicFS')} size="small" />}
             </>}
         </Box>
 

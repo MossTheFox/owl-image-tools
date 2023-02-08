@@ -1,4 +1,5 @@
 import { Box, BoxProps, Button } from "@mui/material";
+import { t } from "i18next";
 import { useCallback, useEffect, useState } from "react";
 
 export default function BottomTipDisplay(props: BoxProps & {
@@ -43,7 +44,7 @@ export default function BottomTipDisplay(props: BoxProps & {
             <Button variant="contained" color="info" onClick={onClosed} disableElevation
                 aria-hidden={hidden}
             >
-                {buttonText ?? '好的，不再提示'}
+                {buttonText ?? t('button.okAndDontShowAgain')}
             </Button>
         </Box>
     </Box>

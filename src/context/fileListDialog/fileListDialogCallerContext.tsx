@@ -8,6 +8,7 @@ import SingleFileDetailDialog from "./fileListDialogsAndMenus/SingleFileDetailDi
 import FileListStatisticDialog from "./fileListDialogsAndMenus/FileListStatisticDialog";
 import { fileListContext as _fileListContext, webkitFileListContext as _webkitFileListContext } from "../../context/fileListContext";
 import { fireFileDownload } from "../../utils/randomUtils";
+import { t } from "i18next";
 
 type FileNode = TreeNode<WebkitFileNodeData>;
 
@@ -169,14 +170,14 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
                     <Typography variant="body2" fontWeight="bolder" color="textSecondary"
                         sx={{ lineBreak: 'anywhere' }}
                     >
-                        {`文件夹: ${contextMenuNodeHold.data.name}`}
+                        {`${t('commonWords.folder')}: ${contextMenuNodeHold.data.name}`}
                     </Typography>
                 </ListItem>,
                 <MenuItem key={2} onClick={deleteNode} >
                     <ListItemIcon><Delete color="error" /></ListItemIcon>
                     <ListItemText>
                         <Typography color={(theme) => theme.palette.error.main}>
-                            {`移除目录 (${contextMenuNodeHold.data.childrenCount} 个子项)`}
+                            {t('menu.contextMenu.deleteDirectory', { count: contextMenuNodeHold.data.childrenCount })}
                         </Typography>
                     </ListItemText>
                 </MenuItem>
@@ -209,19 +210,23 @@ export function FileListDialogCallerContextProvider({ children }: { children: Re
                     onClick={contextMenuSeeFileDetail}
                 >
                     <ListItemIcon><Info /></ListItemIcon>
-                    <ListItemText>详情</ListItemText>
+                    <ListItemText>
+                        {t('menu.contextMenu.showDetail')}
+                    </ListItemText>
                 </MenuItem>,
                 <MenuItem key={3}
                     onClick={downloadOne}
                 >
                     <ListItemIcon><Download color="primary" /></ListItemIcon>
-                    <ListItemText sx={{ color: (t) => t.palette.primary.main }}>下载</ListItemText>
+                    <ListItemText sx={{ color: (t) => t.palette.primary.main }}>
+                        {t('commonWords.download')}
+                    </ListItemText>
                 </MenuItem>,
                 <MenuItem key={4} onClick={deleteNode} >
                     <ListItemIcon><Delete color="error" /></ListItemIcon>
                     <ListItemText>
                         <Typography color={(theme) => theme.palette.error.main}>
-                            移除
+                            {t('commonWords.remove')}
                         </Typography>
                     </ListItemText>
                 </MenuItem>

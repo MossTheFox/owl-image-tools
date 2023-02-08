@@ -7,6 +7,8 @@ import { dragAndDropAPILimitDetector } from "../utils/browserCompability";
 import { appConfigContext } from "./appConfigContext";
 import QuickDialog from "../components/styledComponents/QuickDialog";
 import { Button } from "@mui/material";
+import { t } from "i18next";
+import { MarkdownRenderer } from "../utils/mdRenderer";
 
 export class TreeNode<T> {
     data: T;
@@ -233,11 +235,12 @@ export function FileListContext({ children }: { children: React.ReactNode }) {
     const doFullIterationOnError = useCallback((err: Error) => {
         setError(err);
         setReady(true);
-        writeLine(`读取文件时发生错误。错误信息: ` + err.message);
+        writeLine(`${t('logger.failToLoadFile')}${t('content.errorMessage', { 'msg': err.message })}`);
         fireAlertSnackbar({
             severity: 'error',
-            title: '添加文件夹失败',
-            message: `读取文件时发生错误。错误信息: ` + err.message
+            title: t('title.failToImportDirectory'),
+            message: `${t('content.failToLoadDirectory')}${t('content.errorMessage', { 'msg': err.message })
+                }} `
         });
     }, [fireAlertSnackbar, writeLine]);
 
@@ -445,7 +448,7 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
         if (fileList instanceof FileList && webkitDirectory) {
             // NOTE: For duplicated folder names, KEEP it. Handle it when creating folder on outputing
 
-            // This root node will be discarded later since it's at `/`
+            // This root node will be discarded later since it's at `/ `
             // (the files' `webkitRelativePath` string starts without '/')
             const newRoot = new TreeNode<WebkitFileNodeData>({
                 kind: 'directory',
@@ -757,15 +760,15 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
     }}>
         <QuickDialog open={DaDDialogOPen && siteConfig.tipDisplay['dragAndDropEntryLimit']}
             onClose={closeDialog}
-            title="Drag and Drop 文件列表完整性问题"
+            title={t('title.dragAndDropFileListIntergrityTip')}
             actions={
                 <Button onClick={dontPopNextTime}>
-                    好的，不再提示
+                    {t('button.okAndDontShowAgain')}
                 </Button>
             }
-            content={'检测到潜在的文件列表完整性问题: \n'
-                + '你的浏览器可能限制了单个文件夹内的项目数量 (限制为 100)，超过此限制的文件在导入时会被跳过。\n'
-                + '可以尝试使用文件夹选择按钮，或者手动进行多次的导入。'
+            content={<MarkdownRenderer
+                md={t('content.dragAndDropFileListIntegrityDialogContent')}
+                typographyProps={{ color: 'text.secondary' }} />
             }
         />
         {children}

@@ -8,6 +8,9 @@ import BGTransitionBox from "../../components/styledComponents/BGTransitionBox";
 import QuickDialog, { QuickDialogData } from "../../components/styledComponents/QuickDialog";
 import InspectSiteDataDialog from "../dialogs/InspectSiteDataDialog";
 import ExternalLink from "../../ui/icons/ExternalLink";
+import { t } from "i18next";
+import { MarkdownRenderer } from "../../utils/mdRenderer";
+import ChangeLanguageDialog from "../dialogs/ChangeLanguageDialog";
 
 export default function AppConfigDrawerMenu(props: SwipeableDrawerProps) {
 
@@ -26,13 +29,13 @@ export default function AppConfigDrawerMenu(props: SwipeableDrawerProps) {
 
     const openResetTipsDialog = useCallback(() => {
         setDialogData({
-            title: '将重置所有提示信息',
-            content: '被选择过 "不再提示" 的提示信息将会恢复正常显示。',
+            title: t('title.resetTipDisplayPreference'),
+            content: t('content.resetTipDisplayPreference'),
             actions: <Button onClick={() => {
                 updateSiteConfig('tipDisplay', { ...defaultSiteConfig.tipDisplay });
                 setDialogOpen(false);
             }}>
-                确认重置
+                {t('button.confirmReset')}
             </Button>
         });
         setDialogOpen(true);
@@ -40,16 +43,13 @@ export default function AppConfigDrawerMenu(props: SwipeableDrawerProps) {
 
     const openFSDetailDialog = useCallback(() => {
         setDialogData({
-            title: '关于文件系统访问模式',
-            content: '不同浏览器对于网页应用的文件系统访问有着不同的支持程度。\n'
-                + '此应用对于不同的浏览器支持程度进行了三种划分，如下: \n'
-                + '- 完整支持: 浏览器支持 Public File System Access API，此模式下，应用程序可以在请求授权目录访问之后，直接将输出的文件写入指定目录；\n'
-                + '- Private FS: 浏览器支持 Origin Private File System，此模式下，转换完成的图片会在私有文件系统中暂存，并提供打包下载；\n'
-                + '- 受限模式: 浏览器不支持上述两种文件系统访问，此模式下，输出的文件会被暂存在内存中，同时转换较多的文件可能会造成页面内存占用过多而崩溃。\n'
-                + '\n'
-                + '你的浏览器' +
-                (FS_Mode === 'noFS' ? '不支持文件系统访问' :
-                    FS_Mode === 'publicFS' ? '有着完整的文件系统访问支持' : '支持 Private FS (私有文件系统)') + '。'
+            title: t('title.aboutFSMode'),
+            content: <MarkdownRenderer md={
+                t('content.aboutFSModeDialogContent') + '\n\n'
+                + (FS_Mode === 'noFS' ? t('content.aboutFSModeDetectResult.noFS') :
+                    FS_Mode === 'publicFS' ? t('content.aboutFSModeDetectResult.fullSupport') :
+                        t('content.aboutFSModeDetectResult.privateFS'))
+            } typographyProps={{ color: "text.secondary" }} />
         })
         setDialogOpen(true);
     }, []);
@@ -60,6 +60,10 @@ export default function AppConfigDrawerMenu(props: SwipeableDrawerProps) {
         // site data: localStorage, privateFS
         setClearSiteDataDialogOpen(true);
     }, []);
+
+    const [langDialogOpen, setLangDialogOpen] = useState(false);
+    const openLangDialog = useCallback(() => setLangDialogOpen(true), []);
+    const closeLangDialog = useCallback(() => setLangDialogOpen(false), []);
 
     return <SwipeableDrawer anchor="left" disableSwipeToOpen {...props}
         sx={{
@@ -73,10 +77,12 @@ export default function AppConfigDrawerMenu(props: SwipeableDrawerProps) {
 
         <InspectSiteDataDialog open={clearSiteDataDialogOpen} onClose={closeClearSiteDataDialog} />
 
+        <ChangeLanguageDialog open={langDialogOpen} onClose={closeLangDialog} />
+
         <BGTransitionBox flexGrow={1}>
             <Box display='flex' justifyContent='space-between' alignItems='center' px={2} py={1} >
                 <Typography variant="h6" fontWeight='bolder'>
-                    设置
+                    {t('commonWords.settings')}
                 </Typography>
                 <IconButton color="primary" size="small" aria-label="Close" onClick={props.onClose}>
                     <Close />
@@ -86,14 +92,15 @@ export default function AppConfigDrawerMenu(props: SwipeableDrawerProps) {
             <List
                 subheader={<ListSubheader>
                     <Typography variant="body1" fontWeight="bolder">
-                        界面设置
+                        {t('ui.interfaceSettings')}
                     </Typography>
                 </ListSubheader>}
             >
                 <ListItem>
-                    <ListItemText primary="主题跟随系统" />
+                    <ListItemText primary={t('menu.colorThemeFollowSystem')} />
                     <Switch onChange={toggleThemeFollowSystem} checked={siteConfig.colorModeFollowSystem} />
                 </ListItem>
+
                 <Collapse in={!siteConfig.colorModeFollowSystem}>
 
                     <ListItemButton disabled={siteConfig.colorModeFollowSystem}
@@ -103,26 +110,27 @@ export default function AppConfigDrawerMenu(props: SwipeableDrawerProps) {
                             {siteConfig.colorMode === 'dark' ?
                                 <DarkMode /> : <LightMode />}
                         </ListItemIcon>
-                        <ListItemText primary={siteConfig.colorMode === 'dark' ? "深色模式" : "亮色模式"} />
+                        <ListItemText primary={siteConfig.colorMode === 'dark' ? t('menu.darkMode') : t('menu.lightMode')} />
                     </ListItemButton>
                 </Collapse>
+
+                <ListItemButton onClick={openLangDialog}>
+                    <ListItemText primary={t('menu.language')} />
+                </ListItemButton>
+
             </List>
 
             <Divider />
             <List
                 subheader={<ListSubheader>
                     <Typography variant="body1" fontWeight="bolder">
-                        偏好设置
+                        {t('ui.preferenceConfig')}
                     </Typography>
                 </ListSubheader>}
             >
-                {/* <ListItem>
-                    <ListItemText primary="从剪切板读取后自动开始任务" secondary="对于快速操作很有用" />
-                    <Switch />
-                </ListItem> */}
                 <ListItemButton onClick={openResetTipsDialog}>
-                    <ListItemText primary="重置提示信息显示状态"
-                        secondary={`移除所有勾选过的 "不再提示" 选项`}
+                    <ListItemText primary={t('menu.resetAllTipDisplayPreference')}
+                        secondary={t('menu.resetAllTipDisplayPreferenceSecondary')}
                     />
                 </ListItemButton>
             </List>
@@ -131,37 +139,41 @@ export default function AppConfigDrawerMenu(props: SwipeableDrawerProps) {
             <List
                 subheader={<ListSubheader>
                     <Typography variant="body1" fontWeight="bolder">
-                        系统
+                        {t('ui.systemConfig')}
                     </Typography>
                 </ListSubheader>}
             >
                 <ListItemButton onClick={openFSDetailDialog} >
-                    <ListItemText primary={"文件系统模式: " + (() => {
-                        switch (FS_Mode) {
-                            case 'noFS':
-                                return '不支持文件系统访问';
-                            case 'privateFS':
-                                return 'Private FS';
-                            case 'publicFS':
-                                return '完整支持'
-                        }
-                    })()}
+                    <ListItemText primary={t('menu.fsMode', {
+                        text: (() => {
+                            switch (FS_Mode) {
+                                case 'noFS':
+                                    return t('menu.fsModeText.noFS');
+                                case 'privateFS':
+                                    return t('menu.fsModeText.privateFS');
+                                case 'publicFS':
+                                    return t('menu.fsModeText.fullSupport');
+                                default:
+                                    return t('commonWords.unknown');
+                            }
+                        })()
+                    })}
                         secondary={(() => {
                             switch (FS_Mode) {
                                 case 'noFS':
-                                    return '批量转换的任务结果将存储在内存中，可能造成程序崩溃';
+                                    return t('menu.fsModeSecondaryText.noFS');
                                 case 'privateFS':
-                                    return '批量转换的任务会在 Origin Private File System 中暂存';
+                                    return t('menu.fsModeSecondaryText.privateFS');
                                 case 'publicFS':
-                                    return '对于取得访问权限的目录有着完整的读写支持'
+                                    return t('menu.fsModeSecondaryText.fullSupport');
                             }
                         })()}
                     />
                 </ListItemButton>
 
                 <ListItemButton onClick={clearSiteData}>
-                    <ListItemText primary="检查站点数据"
-                        secondary={`查看和清除保存的配置信息与文件缓存`}
+                    <ListItemText primary={t('menu.inspectSiteData')}
+                        secondary={t('menu.inspectSiteDataSecondary')}
                     />
                 </ListItemButton>
 

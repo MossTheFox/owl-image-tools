@@ -9,6 +9,7 @@ import { fireFileDownload } from "../../utils/randomUtils";
 import { FS_Mode } from "../../utils/browserCompability";
 import OutputFolderSaveAsDialog from "./fileListDialogsAndMenus/OutputFolderSaveAsDialog";
 import OutputFolderSaveZipDialog from "./fileListDialogsAndMenus/OutputFolderSaveZipDialog";
+import { t } from "i18next";
 
 
 type OutputFileListDialogCallerContext = {
@@ -188,15 +189,15 @@ export function OutputFileListDialogCallerContextProvider({ children }: { childr
                     <Typography variant="body2" fontWeight="bolder" color="textSecondary"
                         sx={{ lineBreak: 'anywhere' }}
                     >
-                        {`文件夹: ${contextMenuNodeHold.name}`}
+                        {`${t('commonWords.folder')}: ${contextMenuNodeHold.name}`}
                     </Typography>
                 </ListItem>,
                 <ListItem key={2} dense>
                     <Typography variant="body2" color="textSecondary" sx={{ whiteSpace: 'pre-wrap' }}>
-                        {`文件数量: ${contextMenuNodeHold.childrenCount}`
+                        {t('menu.contextMenu.outputDirectoryFileCount', { count: contextMenuNodeHold.childrenCount })
                             +
                             (contextMenuNodeHold.errorChildrenCount > 0 ?
-                                `\n有 ${contextMenuNodeHold.errorChildrenCount} 个子项发生错误。`
+                                `\n${t('menu.contextMenu.outputDirectoryErrorCount', { count: contextMenuNodeHold.errorChildrenCount })}`
                                 : ''
                             )
                         }
@@ -207,7 +208,7 @@ export function OutputFileListDialogCallerContextProvider({ children }: { childr
                         <ListItemIcon><FolderZip color="primary" /></ListItemIcon>
                         <ListItemText>
                             <Typography color={(theme) => theme.palette.primary.main}>
-                                打包下载
+                                {t('menu.contextMenu.downloadZip')}
                             </Typography>
                         </ListItemText>
                     </MenuItem>,
@@ -216,7 +217,7 @@ export function OutputFileListDialogCallerContextProvider({ children }: { childr
                             <ListItemIcon><Download color="primary" /></ListItemIcon>
                             <ListItemText>
                                 <Typography color={(theme) => theme.palette.primary.main}>
-                                    保存到本地
+                                    {t('menu.contextMenu.saveToLocal')}
                                 </Typography>
                             </ListItemText>
                         </MenuItem>
@@ -224,7 +225,7 @@ export function OutputFileListDialogCallerContextProvider({ children }: { childr
                 ] : [
                     <ListItem key={3} dense>
                         <Typography variant="body2" color="textSecondary" sx={{ whiteSpace: 'pre-wrap' }}>
-                            {`进度: ${(contextMenuNodeHold.convertProgress * 100).toFixed(0)}%`}
+                            {t('menu.contextMenu.progress', { progress: (contextMenuNodeHold.convertProgress * 100).toFixed(0) })}
                         </Typography>
                     </ListItem>
                 ]
@@ -259,7 +260,7 @@ export function OutputFileListDialogCallerContextProvider({ children }: { childr
                     <ListItem key={2}>
                         <Typography variant="body2" color="textSecondary" maxWidth="12rem"  // -------
                         >
-                            错误信息: {contextMenuNodeHold.error}
+                            {t('menu.contextMenu.errMsg', { msg: contextMenuNodeHold.error })}
                         </Typography>
                     </ListItem>
                 ] :
@@ -270,7 +271,7 @@ export function OutputFileListDialogCallerContextProvider({ children }: { childr
                                 <ListItemIcon><Download color="primary" /></ListItemIcon>
                                 <ListItemText>
                                     <Typography color={(theme) => theme.palette.primary.main}>
-                                        下载
+                                        {t('commonWords.download')}
                                     </Typography>
                                 </ListItemText>
                             </MenuItem>,
@@ -278,7 +279,9 @@ export function OutputFileListDialogCallerContextProvider({ children }: { childr
                                 onClick={contextMenuSeeFileDetail}
                             >
                                 <ListItemIcon><Info /></ListItemIcon>
-                                <ListItemText>详情</ListItemText>
+                                <ListItemText>
+                                    {t('commonWords.details')}
+                                </ListItemText>
                             </MenuItem>,
                         ] :
                         [
@@ -286,7 +289,7 @@ export function OutputFileListDialogCallerContextProvider({ children }: { childr
                             <ListItem key={2}>
                                 <Typography variant="body2" color="textSecondary" maxWidth="12rem"  // -------
                                 >
-                                    进度: {`${(contextMenuNodeHold.convertProgress * 100).toFixed(0)}%`}
+                                    {t('menu.contextMenu.progress', { progress: (contextMenuNodeHold.convertProgress * 100).toFixed(0) })}
                                 </Typography>
                             </ListItem>
                         ]

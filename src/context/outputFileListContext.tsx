@@ -9,6 +9,7 @@ import { FS_Mode } from "../utils/browserCompability";
 import { isFileExists, renameFileForDuplication } from "../utils/FS";
 import { convertViaCanvas } from "../utils/converter/canvasConverter";
 import { clearCurrentActiveTempFolders, parseTempFolderDirectory, readOPFSFile, writeOPFSFile } from "../utils/privateFS";
+import { t } from "i18next";
 
 /**
  * um.
@@ -301,7 +302,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
             clearCurrentActiveTempFolders().catch((err) => {
                 fireAlertSnackbar({
                     severity: 'warning',
-                    message: '清理私有文件系统缓存目录时遇到问题。错误信息: ' + err?.message
+                    message: t('content.failToClearOPFS') + t('content.errorMessage', { msg: err?.message })
                 })
             });
         }
@@ -326,14 +327,14 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
         });
 
         if (!isFormatAcceptedByVips(originalFileExt)) {
-            writeLine(`文件 ${node.originalNode.data.file.name} 不受当前版本的 libvips 支持，将借助浏览器进行第一次转换。元数据和透明度信息会丢失。`);
+            writeLine(t('logger.notSupportedByVipsThenDoCanvasConverting', { name: node.originalNode.data.file.name }));
             originalFile = await convertViaCanvas(originalFile, {
                 outputMIME: 'image/png',
                 background: C.imageBaseColor
             });
         }
 
-        writeLine(`开始处理文件: ${node.originalNode.data.file.name}, 目标类型: ${ext}`);
+        writeLine(t('logger.startProcessingFile', { name: node.originalNode.data.file.name, ext }));
 
         let resultBuffer = await doConvertion(originalFile, ext, C);
 
@@ -393,10 +394,10 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
 
             }
 
+            const fileLoggerData = `${node.name} (${parseFileSizeString(node.originalNode.data.file.size)} → ${parseFileSizeString(resultBuffer.size)})`;
             writeLine((FS_Mode === 'publicFS' ?
-                `已保存文件: ` :
-                `已在临时存储中保存文件: `)
-                + `${node.name} (${parseFileSizeString(node.originalNode.data.file.size)} → ${parseFileSizeString(resultBuffer.size)})`
+                t('logger.fileSavedPublicFS', { name: fileLoggerData }) :
+                t('logger.fileSavedOPFS', { name: fileLoggerData }))
             );
         }
 
@@ -423,11 +424,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
         if (currentMapNodeIndex >= nodeArray.length) {
             setCurrentMapNodeIndex(-1); // end it. May call a finish function here or something if needed
             setLoading(false);
-            writeLine('转换任务已完成，耗时 ' + parseDateDelta(new Date(), startTime));
-            // fireAlertSnackbar({
-            //     severity: 'success',
-            //     message: '任务已完成。'
-            // });
+            writeLine(t('logger.taskFinished', { time: parseDateDelta(new Date(), startTime) }));
             return;
         }
         const curr = nodeArray[currentMapNodeIndex];
@@ -491,7 +488,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
             curr.error = `${err?.message}`;
 
             // log it
-            writeLine(`${err} (文件: ${curr.name})`);
+            writeLine(`${err} (${t('commonWords.file')}: ${curr.name})`);
 
             // Mark as finished
             curr.finished = true;
@@ -566,7 +563,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
         setError(null);
         setCurrentMapNodeIndex(0);
         setStartTime(new Date());
-        writeLine('开始转换任务。队列长度: ' + statistic.inputFiles.totalFiles);
+        writeLine(t('logger.taskBegin', { length: statistic.inputFiles.totalFiles }));
     }, [writeLine]);
 
 

@@ -1,4 +1,5 @@
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, DialogProps, TableContainer, Table, TableHead, TableBody, TableCell, TableRow } from "@mui/material";
+import { t } from "i18next";
 import { useCallback } from "react";
 import { FileListStatistic } from "../../fileListContext";
 
@@ -19,15 +20,15 @@ export default function FileListStatisticDialog(props: DialogProps & { detail: F
 
     return <Dialog fullWidth maxWidth="sm" {...dialogProps}>
         <DialogTitle fontWeight="bolder">
-            文件列表信息
+            {t('title.inputFileListInfo')}
         </DialogTitle>
         <DialogContent>
             <TableContainer>
                 <Table size="small">
                     <TableHead>
                         <TableRow sx={{ '& > *': { fontWeight: 'bolder' } }}>
-                            <TableCell>类型</TableCell>
-                            <TableCell>数量</TableCell>
+                            <TableCell>{t('commonWords.type')}</TableCell>
+                            <TableCell>{t('commonWords.count')}</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -38,17 +39,17 @@ export default function FileListStatisticDialog(props: DialogProps & { detail: F
                                     {`${v[0]}`}
                                 </TableCell>
                                 <TableCell>
-                                    {`${v[1]} 个`}
+                                    {`${v[1]}`}
                                 </TableCell>
                             </TableRow>
                         ))}
 
                         <TableRow>
                             <TableCell>
-                                {`合计`}
+                                {t('commonWords.total')}
                             </TableCell>
                             <TableCell>
-                                {`${detail.totalFiles} 个`}
+                                {`${detail.totalFiles}`}
                             </TableCell>
                         </TableRow>
                     </TableBody>
@@ -57,7 +58,7 @@ export default function FileListStatisticDialog(props: DialogProps & { detail: F
         </DialogContent>
         <DialogActions>
             <Button onClick={closeDialog}>
-                关闭
+                {t('commonWords.close')}
             </Button>
         </DialogActions>
     </Dialog>
