@@ -128,7 +128,7 @@ const en = {
             "sourceFileFormat": "Source File Format",
             "targetFormat": "Target Format",
             "outputFormat": "Output Format",
-            "advancedOutputSettings": "Advanced Output Settings",
+            "advancedOutputSettings": "Advanced Settings",
             "png8NotSupported": "PNG8 is not supported.",
             "JPEG": "JPEG Settings",
             "PNG": "PNG Settings",
@@ -210,7 +210,7 @@ const en = {
         "lightMode": "Light Mode",
         "darkMode": "Dark Mode",
         "resetAllTipDisplayPreference": "Reset Tip Display Status",
-        "resetAllTipDisplayPreferenceSecondary": "Undo all \"don't show again\" for the tips.",
+        "resetAllTipDisplayPreferenceSecondary": "Undo all \"don't show again\" for the tips",
         "fsMode": "File System Mode: {{text}}",
         "fsModeText": {
             "fullSupport": "Full Support",
@@ -354,7 +354,7 @@ This app will run in these three modes depend on the browser it runs on: \n
             "noFS": "Your browser doesn't support File System API."
         },
         "resetTipDisplayPreference": "Tip display status will be reset for those selected \"don't show again\".",
-        "languageDialogTipContent": 'Change the APP language. \n\n**Page will need to reload when language is changed. Make sure to save your files before continue.**',
+        "languageDialogTipContent": 'Change the language. \n\n**Page will need to reload when language is changed. Make sure to save your files before continue.**',
 
         // --- End of Config Drawer Menu --- //
 
@@ -410,7 +410,7 @@ This app will run in these three modes depend on the browser it runs on: \n
             "main": `Here is the overview of the site data status.`,
             "secondary": `This data is from \`navigator.storage.estimate()\`.\n
 Browsers may calculate this number differently. Clear the site data in the browser settings if needed.\n
-Sometimes this data may looks weird. Any data that is created and manageable for the app can be cleared below.\n
+Sometimes this data may look weird. Any data that is created and manageable for the app can be cleared below.\n
 Your local files will not be affected.`,
             "available": "Available",
             "used": "Used",
@@ -426,7 +426,7 @@ Your local files will not be affected.`,
             "unregisterSWTip": "Remove all actived Service Workers. Clear the App Cache above too if you are going to do this.",
 
             "clearOPFS": "Clear OPFS Cache (For Caching Output Files)",
-            "clearOPFSTip": "Be careful. If there is some non-empty output file lists, clearing OPFS will cause losing access to those files. \n\nTo check the file structure inside OPFS, you may run `await window.__OPFS_DEBUG()` in the browser console."
+            "clearOPFSTip": "Be careful. If there are some non-empty output file lists that have not been downloaded, clearing OPFS will cause losing access to those files if FS Mode is PrivateFS. \n\nTo check the file structure inside OPFS, you may run `await window.__OPFS_DEBUG()` in the browser console."
         },
         // --- End Site Data Dialog --- //
     }
