@@ -8,7 +8,9 @@ A simple image conversion tool that runs in your browser, powered by [wasm-vibs]
 
 [Live Demo Here](https://img.mowl.cc/).
 
-Language Support: `zh-CN`, `zh-TW` (via Google Translation), `en`
+Language Support: `zh-CN`, `zh-TW` (via Google Translation), `en`.
+
+<sub>If you've visited this page before, you will need to wait for the Service Worker to update itself before accessing to the newer version of the page (if any) since Service Worker will always serve the local cached version to you. Do a page refresh to check if the newer version is loaded.</sub>
 
 #### IMPORTANT NOTES for browser compatibility
 
@@ -57,7 +59,7 @@ The code base is a bit messy and needs some optimization. Do it later (I guess).
 
 ## Build
 
-It's a React project created with [Vite](https://vitejs.dev/). Not much eslint plugins was installed for a quicker development step (...and a lower code quality. I know.)
+This is a React project created with [Vite](https://vitejs.dev/).
 
 ```sh
 npm install         # Install dependences
@@ -75,7 +77,7 @@ workbox generateSW workbox-config.cjs
 
 > <sub>or, never-to-be-done(s)</sub>
 
-- Add page loading BG when static files are loading (the bundle size is now larger than 800 KB, which is probably unfriendly for slow networks).
+- Add page loading background when static files are loading (the bundle size is now larger than 800 KB, which is probably unfriendly for slow networks).
 - Update to wasm-vips 0.0.5 with AVIF support when it's ready.
 - More image tools other than converting.
 
