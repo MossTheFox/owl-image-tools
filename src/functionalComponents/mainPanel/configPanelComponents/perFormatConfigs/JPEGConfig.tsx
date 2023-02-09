@@ -1,8 +1,10 @@
 import { Box, BoxProps, Typography } from "@mui/material";
+import { t } from "i18next";
 import { useContext } from "react";
 import CheckboxWithTooltop from "../../../../components/styledComponents/CheckboxWithTooltip";
 import SliderWithInput from "../../../../components/styledComponents/SliderWithInput";
 import { appConfigContext } from "../../../../context/appConfigContext";
+import { MarkdownRendererNoGutterBottom } from "../../../../utils/mdRenderer";
 
 export default function JPEGConfig(props: BoxProps) {
 
@@ -10,7 +12,7 @@ export default function JPEGConfig(props: BoxProps) {
 
     return <Box {...props}>
         <Typography variant="body2" color="textSecondary" fontWeight="bolder" gutterBottom>
-            JPEG 质量
+            {t('label.JPEG_quality')}
         </Typography>
 
         <SliderWithInput value={outputConfig.JPEG_quality}
@@ -21,8 +23,8 @@ export default function JPEGConfig(props: BoxProps) {
 
 
         <CheckboxWithTooltop
-            label="交错 (Interlace)"
-            tooltip='启用交错，可以让图片在没有被加载完成时也可以有低分辨率的预览。'
+            label={t('label.JPEG_interlace')}
+            tooltip={<MarkdownRendererNoGutterBottom md={t('tooltip.JPEG_interlace')} />}
             checkboxProps={{
                 checked: outputConfig.JPEG_interlace,
                 onChange: (e, v) => {

@@ -9,6 +9,7 @@ import OutputFolderTreeItem from "./outputTreeItems/OutputFolderTreeItem";
 import { outputFileListContext, OutputTreeNode } from "../../../context/outputFileListContext";
 import { outputFileListDialogCallerContext } from "../../../context/fileListDialog/outputFileListDialogCallerContext";
 import LazyLoadChunk from "../../../components/LazyLoadChunk";
+import { t } from "i18next";
 
 export type OutputTreeItemDataDisplayMode = 'size' | 'sizeChange';
 
@@ -157,18 +158,18 @@ export default function OutputFileListPreview() {
                         <Box display="flex" justifyContent="left" alignItems="center" gap={1}>
                             {loading &&
                                 <Typography variant="body2" color='textSecondary' display="inline-block" whiteSpace="nowrap">
-                                    {`进度: ${outputStatistic.converted.totalFiles} / ${outputStatistic.inputFiles.totalFiles}`}
+                                    {`${t('ui.outputPanel.progress')}: ${outputStatistic.converted.totalFiles} / ${outputStatistic.inputFiles.totalFiles}`}
                                 </Typography>
                             }
                             {!loading &&
                                 <Typography variant="body2" color='textSecondary' display="inline-block" whiteSpace="nowrap">
-                                    {`文件总数: ${outputStatistic.inputFiles.totalFiles}`}
+                                    {`${t('ui.outputPanel.fileTotal')}: ${outputStatistic.inputFiles.totalFiles}`}
                                 </Typography>
                             }
                         </Box>
                     ) : (
                         <Typography variant="body2" color='textSecondary' display="inline-block">
-                            输出列表为空
+                            {t('ui.outputPanel.outputListEmpty')}
                         </Typography>
                     )}
                 </Box>
@@ -181,31 +182,31 @@ export default function OutputFileListPreview() {
                         }}
                     >
                         <Typography variant="body2" color="textSecondary">
-                            显示:
+                            {t('ui.outputPanel.displayConfigLabel')}
                         </Typography>
                         <Link component="button" underline={detailDataDisplay === 'size' ? 'always' : 'none'}
                             onClick={() => setDetailDataDisplay('size')}
                         >
-                            文件大小
+                            {t('ui.outputPanel.displayFileSize')}
                         </Link>
                         <Link component="button" underline={detailDataDisplay === 'sizeChange' ? 'always' : 'none'}
                             onClick={() => setDetailDataDisplay('sizeChange')}
                         >
-                            变化量
+                            {t('ui.outputPanel.displaySizeChange')}
                         </Link>
                     </Box>
                 }
             </Box>
 
             <ButtonGroup variant="outlined" size="small" disableElevation>
-                <Tooltip title="紧凑列表" arrow>
+                <Tooltip title={t('button.denseList')} arrow>
                     <Button variant={previewMode ? "outlined" : "contained"} aria-label="Show list"
                         onClick={disablePreview}
                     >
                         <ListIcon fontSize="small" />
                     </Button>
                 </Tooltip>
-                <Tooltip title="显示预览" arrow>
+                <Tooltip title={t('button.showPreview')} arrow>
                     <Button variant={!previewMode ? "outlined" : "contained"} aria-label="Show list with preview"
                         onClick={enablePreview}
                     >
@@ -221,25 +222,25 @@ export default function OutputFileListPreview() {
                 <Typography variant="body1" fontWeight="bolder" component="div"
                     display='flex' gap={1} whiteSpace="nowrap" ref={menuAnchor}
                 >
-                    文件输出 <Link component="button" underline="hover" onClick={openMenu}
+                    {t('ui.outputPanel.fileOutput')} <Link component="button" underline="hover" onClick={openMenu}
                         hidden={loading}
-                    >选项</Link>
+                    >{t('ui.outputPanel.options')}</Link>
                 </Typography>
 
                 <Typography variant="body2" color="textSecondary">
-                    {`共 ${outputStatistic.inputFiles.totalFiles} 个文件`}
+                    {t('ui.outputPanel.filesInTotal', { count: outputStatistic.inputFiles.totalFiles })}
                 </Typography>
 
                 <Menu open={open} onClose={closeMenu} anchorEl={menuAnchor.current}>
                     <MenuItem dense onClick={clearAll}>
                         <Typography variant="body2" color={(t) => t.palette.error.main} fontWeight="bolder">
-                            清空列表
+                            {t('ui.outputPanel.menuClearFiles')}
                         </Typography>
                     </MenuItem>
                     <ListItem dense>
                         <Typography variant="body2" fontWeight="bolder" color="textSecondary">
                             <small>
-                                请要确保你的文件已被正确保存。
+                                {t('ui.outputPanel.menuClearFilesSecondary')}
                             </small>
                         </Typography>
                     </ListItem>

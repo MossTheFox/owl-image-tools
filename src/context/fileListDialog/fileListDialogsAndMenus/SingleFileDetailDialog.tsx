@@ -4,6 +4,7 @@ import { useCallback, useState, useEffect } from "react";
 import ImageFilePreviewBox from "../../../components/ImageFilePreviewBox";
 import { fireFileDownload, parseFileSizeString, tryReadABlob } from "../../../utils/randomUtils";
 import { extToMime } from "../../../utils/imageMIMEs";
+import { t } from "i18next";
 
 export default function SingleFileDetailDialog(props: DialogProps &
 {
@@ -80,7 +81,7 @@ export default function SingleFileDetailDialog(props: DialogProps &
         if ('naturalWidth' in e.target && 'naturalHeight' in e.target) {
             setImageSize(`${e.target.naturalWidth} x ${e.target.naturalHeight}`);
         } else {
-            setImageSize('获取失败');
+            setImageSize(t('ui.fileDetailDialog.failToGetData'));
         }
         setIsImageDecodable(true);
         setImageLoading(false);
@@ -102,7 +103,7 @@ export default function SingleFileDetailDialog(props: DialogProps &
                         alignItems: 'center'
                     }}
                 >
-                    <Typography variant="h6" fontWeight="bolder">文件信息</Typography>
+                    <Typography variant="h6" fontWeight="bolder">{t('title.fileDetail')}</Typography>
                     <IconButton color="primary" onClick={closeDialog} size="small"><Close /></IconButton>
                 </DialogTitle>
                 <DialogContent sx={{ position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'stretch' }}>
@@ -119,13 +120,13 @@ export default function SingleFileDetailDialog(props: DialogProps &
                     <Box flexShrink={0} sx={{ overflowX: 'auto' }}>
                         {!pending && !canDownload &&
                             <DialogContentText gutterBottom fontWeight="bolder">
-                                无法读取文件。原始文件可能已被修改、移动或删除。
+                                {t('ui.fileDetailDialog.fileBufferUnreadableError')}
                             </DialogContentText>
                         }
 
                         {!pending && canDownload && !imageLoading && !isImageDecodable &&
                             <DialogContentText gutterBottom fontWeight="bolder">
-                                当前浏览器无法解码此图片。可能是格式不支持或文件损坏。
+                                {t('ui.fileDetailDialog.browserFailToDecodeImageError')}
                             </DialogContentText>
                         }
 
@@ -135,17 +136,17 @@ export default function SingleFileDetailDialog(props: DialogProps &
                         <DialogContentText gutterBottom component={"ul"} whiteSpace="nowrap">
                             {!!imageSize && (
                                 <DialogContentText component={"li"} whiteSpace="nowrap">
-                                    {`尺寸: ${imageSize}`}
+                                    {`${t('ui.fileDetailDialog.imageSize')}: ${imageSize}`}
                                 </DialogContentText>
                             )}
                             <DialogContentText component={"li"} whiteSpace="nowrap">
-                                {`类型: ${file.type || extToMime(file.name)}`}
+                                {`${t('ui.fileDetailDialog.imageFormat')}: ${file.type || extToMime(file.name)}`}
                             </DialogContentText>
                             <DialogContentText component={"li"} whiteSpace="nowrap">
-                                {`文件大小: ${parseFileSizeString(file.size, true)}`}
+                                {`${t('ui.fileDetailDialog.imageSize')}: ${parseFileSizeString(file.size, true)}`}
                             </DialogContentText>
                             <DialogContentText component={"li"} whiteSpace="nowrap">
-                                {`修改日期: ${new Date(file.lastModified).toLocaleString()}`}
+                                {`${t('ui.fileDetailDialog.imageLastModified')}: ${new Date(file.lastModified).toLocaleString()}`}
                             </DialogContentText>
                         </DialogContentText>
                     </Box>
@@ -155,12 +156,12 @@ export default function SingleFileDetailDialog(props: DialogProps &
                     <Button startIcon={<Download />} onClick={download}
                         disabled={!canDownload || pending}
                     >
-                        {pending && '正在确认'}
-                        {!pending && canDownload && '下载'}
-                        {!pending && !canDownload && '无法读取文件'}
+                        {pending && t('ui.fileDetailDialog.pending')}
+                        {!pending && canDownload && t('commonWords.download')}
+                        {!pending && !canDownload && t('ui.fileDetailDialog.downloadButtonError')}
                     </Button>
                     <Button onClick={closeDialog}>
-                        关闭
+                        {t('commonWords.close')}
                     </Button>
                 </DialogActions>
             </Dialog>

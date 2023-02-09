@@ -5,6 +5,7 @@ import { useContext, useCallback } from "react";
 import { fileListContext as _fileListContext } from "../../../../context/fileListContext";
 import { OutputTreeNode } from "../../../../context/outputFileListContext";
 import { outputFileListDialogCallerContext } from "../../../../context/fileListDialog/outputFileListDialogCallerContext";
+import { t } from "i18next";
 
 export default function OutputFolderTreeItem({
     node,
@@ -50,7 +51,7 @@ export default function OutputFolderTreeItem({
                     {node.name}
                 </Typography>
                 <Typography variant="body1" color="textSecondary" whiteSpace='nowrap' ml='1px'>
-                    {node.childrenCount}{node.errorChildrenCount > 0 ? ` (${node.errorChildrenCount} 错误)` : ''}
+                    {node.childrenCount}{node.errorChildrenCount > 0 ? ` (${node.errorChildrenCount} ${t('commonWords.error')})` : ''}
                 </Typography>
             </Box>
         }>

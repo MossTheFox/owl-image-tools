@@ -42,7 +42,7 @@ export default function ChangeLanguageDialog(props: DialogProps) {
         <DialogContent>
 
             <MarkdownRenderer typographyProps={{ color: 'text.secondary' }}
-                md={t('content.languageDialogTipContent')} />
+                md={t('content.languageDialogTipContent', tConf)} />
 
             <FormControl>
 

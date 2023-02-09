@@ -145,7 +145,8 @@ export async function estimateStorageUsage(): Promise<
         rawUsageObject: object
     } | {
         result: 'error',
-        reason: 'NotSupportError' | 'AccessDenied' | 'UnknownError'
+        reason: 'NotSupportError' | 'AccessDenied' | 'UnknownError',
+        err?: unknown
     }
 > {
     if (!navigator.storage) {
@@ -169,7 +170,8 @@ export async function estimateStorageUsage(): Promise<
     } catch (err) {
         return {
             result: 'error',
-            reason: 'UnknownError'
+            reason: 'UnknownError',
+            err: err
         };
     }
 }

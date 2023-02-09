@@ -8,6 +8,7 @@ import FileTreeItem from "./treeItems/FileTreeItem";
 import FolderTreeItem from "./treeItems/FolderTreeItem";
 import BGTransitionBox from "../../../components/styledComponents/BGTransitionBox";
 import LazyLoadChunk from "../../../components/LazyLoadChunk";
+import { t } from "i18next";
 
 /**
  * Tree Renderer.
@@ -152,7 +153,7 @@ export default function FileListPreview() {
 
                 <Box display="flex" justifyContent="left" alignItems="center" gap={1}>
                     <Typography variant="body2" color='textSecondary' display="inline-block" whiteSpace="nowrap">
-                        {`${totalFiles} 个文件`}
+                        {t('ui.inputPanel.fileCount', { count: totalFiles })}
                     </Typography>
 
                     <Link component="button"
@@ -161,24 +162,24 @@ export default function FileListPreview() {
                         whiteSpace="nowrap"
                         onClick={callFullStatisticDialog}
                     >
-                        查看详细信息
+                        {t('ui.inputPanel.checkFileListDetail')}
                     </Link>
 
                 </Box>
             ) : (
                 <Typography variant="body2" color='textSecondary' display="inline-block">
-                    文件列表为空
+                    {t('ui.inputPanel.fileListEmpty')}
                 </Typography>
             )}
             <ButtonGroup variant="outlined" size="small" disableElevation>
-                <Tooltip title="紧凑列表" arrow>
+                <Tooltip title={t('button.denseList')} arrow>
                     <Button variant={previewMode ? "outlined" : "contained"} aria-label="Show list"
                         onClick={disablePreview}
                     >
                         <ListIcon fontSize="small" />
                     </Button>
                 </Tooltip>
-                <Tooltip title="显示预览" arrow>
+                <Tooltip title={t('button.showPreview')} arrow>
                     <Button variant={!previewMode ? "outlined" : "contained"} aria-label="Show list with preview"
                         onClick={enablePreview}
                     >
@@ -193,16 +194,18 @@ export default function FileListPreview() {
                 <Typography variant="body1" fontWeight="bolder" component="div"
                     display='flex' gap={1} whiteSpace="nowrap" ref={menuAnchor}
                 >
-                    文件列表 <Link component="button" underline="hover" onClick={openMenu}>选项</Link>
+                    {t('ui.inputPanel.fileList')} <Link component="button" underline="hover" onClick={openMenu}>
+                        {t('ui.inputPanel.options')}
+                    </Link>
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                    {`共 ${statistic.totalFiles} 个文件`}
+                    {t('ui.inputPanel.filesInTotal', { count: statistic.totalFiles })}
                 </Typography>
 
                 <Menu open={open} onClose={closeMenu} anchorEl={menuAnchor.current}>
                     <MenuItem dense onClick={clearAll}>
                         <Typography variant="body2" color={(t) => t.palette.error.main} fontWeight="bolder">
-                            清空文件
+                            {t('ui.inputPanel.clearAll')}
                         </Typography>
                     </MenuItem>
                 </Menu>

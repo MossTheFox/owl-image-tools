@@ -1,5 +1,6 @@
 import { Download } from "@mui/icons-material";
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, LinearProgress, Typography } from "@mui/material";
+import { t } from "i18next";
 import { useCallback, useEffect, useState } from "react";
 import useAsync from "../../../hooks/useAsync";
 import ErrorBox from "../../../ui/smallComponents/ErrorBox";
@@ -84,8 +85,8 @@ export default function OutputFolderSaveZipDialog(props: {
             <LinearProgress variant="determinate" value={progress} />
         </Box>
         <DialogTitle fontWeight="bolder">
-            {loading ? '正在生成压缩包文件' : (
-                err ? '发生错误' : '压缩完毕'
+            {loading ? t('ui.fileSaverDialog.titleGeneratingZip') : (
+                err ? t('ui.fileSaverDialog.titleErrorOccurred') : t('ui.fileSaverDialog.titleZipFinished')
             )} {progress < 100 ?
                 <Typography component="span" fontFamily="var(--font-monospace)">
                     {`${progress.toFixed(2)}%`}
@@ -94,24 +95,24 @@ export default function OutputFolderSaveZipDialog(props: {
         </DialogTitle>
         <DialogContent>
             {err && <Box pb={1}>
-                <ErrorBox title="发生错误" message={err.message} />
+                <ErrorBox title={t('ui.fileSaverDialog.titleErrorOccurred')} message={err.message} />
             </Box>
             }
             {loading && !err && <>
-                <DialogContentText>请稍等片刻……</DialogContentText>
+                <DialogContentText>{t('ui.fileSaverDialog.holdAWhile')}</DialogContentText>
             </>}
             {!loading && !err && resultBlob && <>
                 <DialogContentText gutterBottom>
-                    文件名: {blobName}
+                    {t('ui.fileSaverDialog.zipFileName')}: {blobName}
                 </DialogContentText>
                 <DialogContentText gutterBottom>
-                    大小: {parseFileSizeString(resultBlob.size, true)}
+                    {t('ui.fileSaverDialog.zipFileSize')}: {parseFileSizeString(resultBlob.size, true)}
                 </DialogContentText>
                 <Box py={2}>
                     <Button variant="contained" fullWidth startIcon={<Download />}
                         onClick={downloadBlob}
                     >
-                        下载 ({parseFileSizeString(resultBlob.size)})
+                        {t('commonWords.download')} ({parseFileSizeString(resultBlob.size)})
                     </Button>
                 </Box>
 
@@ -120,7 +121,7 @@ export default function OutputFolderSaveZipDialog(props: {
 
         <DialogActions>
             <Button onClick={handleClose} disabled={loading}>
-                {loading ? '终止' : (err ? '取消' : '完成')}
+                {loading ? t('commonWords.abort') : (err ? t('commonWords.cancel') : t('commonWords.finished'))}
             </Button>
         </DialogActions>
     </Dialog>

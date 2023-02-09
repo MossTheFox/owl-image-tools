@@ -2,6 +2,7 @@ import i18next from "i18next";
 import { initReactI18next } from "react-i18next";
 import I18nextBrowserLanguageDetector from "i18next-browser-languagedetector";
 import zhCN from './zh-CN';
+import zhTW from './zh-TW';
 import en from './en';
 import { LOCALSTORAGE_KEYS } from "../constraints";
 
@@ -17,6 +18,9 @@ export const resources = {
     'zh-CN': {
         translation: zhCN
     },
+    'zh-TW': {
+        translation: zhTW
+    }
 } as const;
 
 /**
@@ -54,7 +58,7 @@ i18next
     .use(initReactI18next)
     .init({
         ...getSavedLangConfig(), // <- will override language detection
-        fallbackLng: 'zh-CN',
+        fallbackLng: 'en',
         debug: import.meta.env.DEV,
         resources,
         interpolation: {
@@ -63,7 +67,8 @@ i18next
         react: {
             transSupportBasicHtmlNodes: true,
             transKeepBasicHtmlNodesFor: ['br', 'strong', 'i', 'p', 'small', 'del'],
-        }
+        },
+        returnObjects: true,
 
     });
 

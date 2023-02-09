@@ -1,9 +1,10 @@
 import { Alert, AlertTitle, Button } from "@mui/material";
+import { t } from "i18next";
 
 function ErrorBox({ retryFunc,
     title,
     message,
-    retryButtonText = '重试'
+    retryButtonText = t('commonWords.retry')
 }: {
     retryFunc?: () => void;
     retryButtonText?: string;

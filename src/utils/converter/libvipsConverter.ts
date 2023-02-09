@@ -1,5 +1,6 @@
 import type Vips from "wasm-vips";
 import { TinyColor } from "@ctrl/tinycolor";
+import { VIPS_WORKER_PATH } from "../../constraints";
 
 /* DEBUG OUTPUT:
     vips version:                  8.13.3
@@ -35,10 +36,10 @@ export async function convertToJPEG(file: Blob, config = {
     const result = await fireVipsWorkerTask(
         await blobToUint8Array(file), '',
         '.jpg', {
-        Q: config.Q,
-        strip: config.strip,
-        background: parseBackground(config.defaultBackground),
-        interlace: config.interlace,
+        'Q': config.Q,
+        'strip': config.strip,
+        'background': parseBackground(config.defaultBackground),
+        'interlace': config.interlace,
     });
     return new Blob([result], {
         type: 'image/jpeg',
@@ -60,12 +61,12 @@ export async function convertToPNG(file: Blob, config = {
     const result = await fireVipsWorkerTask(
         await blobToUint8Array(file), '',
         '.png', {
-        compression: config.compression,
-        strip: config.strip,
-        interlace: config.interlace,
-        dither: config.dither,
-        ...config.bitdepth !== 0 ? { bitdepth: config.bitdepth } : {},
-        Q: config.Q
+        'compression': config.compression,
+        'strip': config.strip,
+        'interlace': config.interlace,
+        'dither': config.dither,
+        ...config.bitdepth !== 0 ? { 'bitdepth': config.bitdepth } : {},
+        'Q': config.Q
     },
         config.flatten, parseBackground(config.defaultBackground)
     );
@@ -90,10 +91,10 @@ export async function convertToWebp(file: Blob, config = {
     const result = await fireVipsWorkerTask(
         await blobToUint8Array(file), props,
         '.webp', {
-        Q: config.Q,
-        strip: config.strip,
-        lossless: config.lossless,
-        preset: config.preset,
+        'Q': config.Q,
+        'strip': config.strip,
+        'lossless': config.lossless,
+        'preset': config.preset,
         'smart-subsample': config["smart-subsample"],
         'alpha-q': config["alpha-q"],
     },
@@ -120,11 +121,11 @@ export async function convertToGIF(file: Blob, config = {
     const result = await fireVipsWorkerTask(
         await blobToUint8Array(file), props,
         '.gif', {
-        bitdepth: config.bitdepth,
-        strip: config.strip,
-        effort: config.effort,
+        'bitdepth': config.bitdepth,
+        'strip': config.strip,
+        'effort': config.effort,
         // interlace: config.interlace,
-        dither: config.dither,
+        'dither': config.dither,
         'interframe-maxerror': config["interframe-maxerror"],
         'interpalette-maxerror': config["interpalette-maxerror"],
     },
@@ -198,7 +199,7 @@ function fireVipsWorkerTask(
         try {
             // INIT
             if (!worker) {
-                worker = new Worker('/worker/vips-loader.worker.js');
+                worker = new Worker(VIPS_WORKER_PATH);
             }
 
             // The callback functions will be override everytime
@@ -264,5 +265,5 @@ export async function restartVipsWorker() {
     if (worker) {
         worker.terminate();
     }
-    worker = new Worker('/wasm/vips-loader.worker.js');
+    worker = new Worker(VIPS_WORKER_PATH);
 }

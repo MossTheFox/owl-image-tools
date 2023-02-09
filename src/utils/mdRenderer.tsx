@@ -20,7 +20,7 @@ export function MarkdownRenderer(
     if (!md) return null;
 
     function TypographyWrapper<T extends React.ElementType>(props: TypographyProps<T> & { component?: T }) {
-        return <Typography {...props} {...typographyProps} />
+        return <Typography gutterBottom variant="inherit" {...props} {...typographyProps} />
     }
 
     const Text = TypographyWrapper;
@@ -38,15 +38,15 @@ export function MarkdownRenderer(
                     return <Text key={i}
                         // Note: No <p> inside <p>
                         component={'div'}
-                        variant="body1"
-                        color="textSecondary"
                         pl={4}
-                        gutterBottom
+
                     >{children}</Text>;
                 case 'br':
                     return <br key={i} />;
                 case 'code':
-                    return <pre><code key={i}>{children || v.text}</code></pre>;
+                    return <pre key={i}>
+                        <code>{children || v.text}</code>
+                    </pre>;
                 case 'codespan':
                     return <code key={i}>{children || v.text}</code>;
                 case 'del':
@@ -54,27 +54,17 @@ export function MarkdownRenderer(
                 case 'def':
                     // what is this?
                     // console.log(`Unsupported type: def, `, v);
-                    return <>{v.raw}</>;
+                    return <span key={i}>{v.raw}</span>;
                 case 'em':
                     return <em key={i}>{children}</em>;
                 case 'escape':
-                    return <span key={i}>{`${v.text}`}</span>;
+                    return <span key={i}>{`${v.raw.substring(1)}`}</span>;
                 case 'heading':
                     const level = v.depth;  // 1 ~ 6
                     const depthVariant = ['body1', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const;
-                    // ↓ Uncomment these if ya want the fontSize to follow the GitHub Markdown styles. Not useful here though.
-                    // const fontSize = ['unset', '2rem', '1.5rem', '1.25rem', '1rem', '0.875rem', '0.85rem'] as const;
                     return <Text key={i}
                         variant={depthVariant[level]}
                         fontWeight="bolder"
-                        // {...depthVariant[level] !== 'body1' ? { fontSize: `${fontSize[level]} !important` } : {}}
-                        // {...depthVariant[level] === 'h6' ? { fontColor: 'textSecondary' } : {}}
-                        // {...(depthVariant[level] === 'h1' || depthVariant[level] === 'h2') ? {
-                        //     borderBottom: 1,
-                        //     borderColor: 'divider',
-                        //     pb: '.3em'
-                        // } : {}}
-                        gutterBottom
                     >
                         {children}
                     </Text>;
@@ -101,17 +91,17 @@ export function MarkdownRenderer(
 
                 case 'list':
                     if (v.ordered) {
-                        return <Text component="ol" start={v.start || 1} key={i} gutterBottom>
+                        return <Text component="ol" start={v.start || 1} key={i}>
                             <MarkdownRenderer md={v.items} typographyProps={typographyProps} />
                         </Text>;
                     }
-                    return <Text component="ul" key={i} gutterBottom>
+                    return <Text component="ul" key={i}>
                         <MarkdownRenderer md={v.items} typographyProps={typographyProps} />
                     </Text>;
                 case 'list_item':
                     return <li key={i}>{children}</li>;
                 case 'paragraph':
-                    return <Text key={i} variant="body1" gutterBottom>{children}</Text>;
+                    return <Text key={i}>{children}</Text>;
                 case 'space':
                     // hum, skip
                     return null;
@@ -154,4 +144,28 @@ export function MarkdownRenderer(
             }
         })}
     </>
+}
+
+export function MarkdownRendererNoGutterBottom({
+    md,
+    typographyProps
+}: {
+    md: string | marked.Token[],
+    typographyProps?: TypographyProps
+}) {
+
+    return <MarkdownRenderer md={md} typographyProps={{ gutterBottom: false, ...typographyProps }} />
+}
+
+export function MarkdownRendererDialogContentText({
+    md,
+    typographyProps
+}: {
+    md: string | marked.Token[],
+    typographyProps?: TypographyProps
+}) {
+
+    return <MarkdownRenderer md={md} typographyProps={{
+        color: 'text.secondary', ...typographyProps
+    }} />
 }

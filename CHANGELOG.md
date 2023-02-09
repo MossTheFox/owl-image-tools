@@ -1,13 +1,27 @@
 Changelog
 ----
 
-## Dev 0.1.4 - TBA
+## Dev 0.1.5 - TBA
 
-### Added (TODO: )
+### Added (TODO)
 
+- Localization for English and Traditional Chinese.
 [ ] Tasks can be paused and resume now, as well as retrying failed tasks.
 [ ] Added support to convert single file or specific directory from input list from context menu.
 [ ] Output file list can be kept without clearing now.
+
+### Fixed (TODO)
+
+[ ] Performance issues caused by context provider rerendering.
+[ ] OPFS file cache created 24h earlier will be automatically cleared on application launch.
+[ ] Safari context menu calling via long touch.
+[ ] JSZip will write to a file (in OPFS or directly to Public FS) when doing compression, rather than put the entire file in the memory.
+
+## Dev 0.1.4 - 2023-02-10
+
+### Added
+
+- Localization for English and Traditional Chinese.
 
 ### Changed
 
@@ -16,12 +30,9 @@ Changelog
 - Code checked and modified with eslint (react-hooks plug-in).
 - All CSS will be bundled by emotion now.
 
-### Fixed (TODO:)
+### Fixed
 
-[ ] Performance issues caused by context provider rerendering.
-[ ] OPFS file cache created 24h earlier will be automatically cleared on application launch.
-[ ] Safari context menu calling via long touch.
-[ ] JSZip will write to a file in OPFS when doing compression, rather than put the entire file in the memory.
+- SharedArrayBuffer API not detected properly for browser compatibility dialog.
 
 ## Dev 0.1.3b - 2023-01-30
 

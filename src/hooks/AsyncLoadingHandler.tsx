@@ -28,7 +28,7 @@ export function TemplateOnErrorRender({ title, message = 'Unknown Error', retryF
  * 
  * Suitable for components that **won't need any rerenders during the life cycle**. (change of `asyncFunc` won't trigger rerender.)
  * 
- * Required fields: `asyncFunc` amd `OnSuccessRender`。
+ * Required fields: `asyncFunc` amd `OnSuccessRender`.
  * 
  * Note: OnXXRender should return JSX.Element. Wrap with useCallback to avoid unnecessary rerenders.
  * 

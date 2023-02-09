@@ -5,6 +5,8 @@ import { FS_Mode, isMobileBrowser } from "../../../utils/browserCompability";
 import { fileListContext as _fileListContext, webkitFileListContext } from "../../../context/fileListContext";
 import useAsync from "../../../hooks/useAsync";
 import { appConfigContext } from "../../../context/appConfigContext";
+import { t } from "i18next";
+import { MarkdownRenderer } from "../../../utils/mdRenderer";
 
 export default function SelectLocalFileButtonRow(props: GridProps) {
     const { appendInputFsHandles, ready: iterateDirReady } = useContext(_fileListContext);
@@ -75,7 +77,9 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
             <Button fullWidth startIcon={<ImageIcon />} onClick={openFilePicker} variant="outlined"
                 disabled={processing}
                 sx={{ whiteSpace: 'nowrap' }}
-            >选择文件</Button>
+            >
+                {t('button.selectFiles')}
+            </Button>
             <input ref={fileInputRef} type='file' accept="image/*" multiple hidden
                 name="image-selection-multiple"
                 onChange={handleMultipleImageInput}
@@ -86,7 +90,9 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
                 <Button fullWidth startIcon={<FolderOpen />} onClick={fireRequestDir} variant="outlined"
                     disabled={processing}
                     sx={{ whiteSpace: 'nowrap' }}
-                >打开文件夹</Button>
+                >
+                    {t('button.selectDirectory')}
+                </Button>
                 :
                 <>
                     {/* @ts-expect-error: webkitdirectory property is not marked as valid tag for react. (It's also unusable for mobile browsers.) */}
@@ -107,7 +113,7 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
                         sx={{ whiteSpace: 'nowrap' }}
                         ref={webkitDirectoryPickerButton}
                     >
-                        导入文件夹
+                        {t('button.selectWebkitDirectory')}
                     </Button>
                     <Popover open={notifyPopperOpen} onClose={closeNotify}
                         anchorEl={webkitDirectoryPickerButton.current}
@@ -118,22 +124,24 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
                     >
                         <Box p={2} display="flex" flexDirection="column" alignItems="end">
                             <Box>
-                                <Typography variant="body2" color="textSecondary" gutterBottom>
-                                    选择文件夹时，浏览器的对话框可能会将此操作写作 "上传"。
-                                </Typography>
-                                <Typography variant="body2" color="textSecondary" gutterBottom>
-                                    请放心，你的文件不会离开此设备。
-                                </Typography>
+                                <MarkdownRenderer typographyProps={{
+                                    color: 'text.secondary',
+                                    variant: 'body2'
+                                }}
+                                    md={t('ui.inputPanel.webkitDirectoryPickerTip')}
+                                />
                             </Box>
                             {isMobileBrowser && <Box pt={1}>
-                                <Typography variant="body2" color="textSecondary" gutterBottom>
-                                    此外，<strong>移动端浏览器</strong>可能会不支持文件夹选择。
-                                </Typography>
-                                <Typography variant="body2" color="textSecondary" gutterBottom>
-                                    如果设备支持，你可以尝试在文件管理器中，将文件夹<strong>拖拽进入此页面</strong>。
-                                </Typography>
+                                <MarkdownRenderer typographyProps={{
+                                    color: 'text.secondary',
+                                    variant: 'body2'
+                                }}
+                                    md={t('ui.inputPanel.webkitDirectoryPickerTipMobile')}
+                                />
                             </Box>}
-                            <Button onClick={openWebkitDirectoryPicker}>好的，不再提示</Button>
+                            <Button onClick={openWebkitDirectoryPicker}>
+                                {t('button.okAndDontShowAgain')}
+                            </Button>
                         </Box>
                     </Popover>
                 </>

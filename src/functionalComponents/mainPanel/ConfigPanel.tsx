@@ -55,7 +55,7 @@ export default function ConfigPanel(props: PaperProps) {
                     component='div' display='flex' alignItems='stretch' justifyContent='space-between'
                     whiteSpace="nowrap"
                 >
-                    <span>输出设置</span>
+                    <span>{t('ui.configPanel.outputSettings')}</span>
 
                 </Typography>
             </Box>
@@ -76,7 +76,7 @@ export default function ConfigPanel(props: PaperProps) {
                         disabled={onScreenPanelCount === 3}
                         sx={{ whiteSpace: 'nowrap', py: 0 }}
                     >
-                        导入文件
+                        {t('ui.navigateButton.input')}
                     </Button>}
                     {(!focused.includes('output') || onScreenPanelCount === 1) &&
                         <Button variant={'contained'} size="small"
@@ -86,7 +86,7 @@ export default function ConfigPanel(props: PaperProps) {
                             disabled={onScreenPanelCount === 3}
                             sx={{ whiteSpace: 'nowrap', py: 0 }}
                         >
-                            开始任务
+                            {t('ui.navigateButton.output')}
                         </Button>}
                 </Box>
 
@@ -101,15 +101,17 @@ export default function ConfigPanel(props: PaperProps) {
                 <Typography ref={menuAnchor} variant="body1" fontWeight='bolder' gutterBottom
                     component="div" display="flex" alignItems="baseline" justifyContent="left" gap={1}
                 >
-                    <span>目标格式</span>
+                    <span>{t('ui.configPanel.targetFormat')}</span>
                     <Link component="button" underline="hover" variant="body2" onClick={openMenu}>
-                        选项
+                        {t('ui.configPanel.options')}
                     </Link>
                 </Typography>
 
                 <Menu open={menuOpen} anchorEl={menuAnchor.current} onClose={closeMenu}>
                     <ListItem dense>
-                        <Typography fontWeight="bolder">全部设置为:</Typography>
+                        <Typography fontWeight="bolder">
+                            {t('ui.configPanel.setAllTo')}
+                        </Typography>
                     </ListItem>
                     {OUTPUT_MIMEs.map((v, i) =>
                         <MenuItem dense key={v} value={v} onClick={setAllTo.bind(null, v)}>
@@ -123,7 +125,7 @@ export default function ConfigPanel(props: PaperProps) {
 
                 {webkitFileListContext.statistic.totalFiles <= 0 &&
                     <Typography variant="body2" color="textSecondary" gutterBottom>
-                        请先导入文件。
+                        {t('ui.configPanel.pleaseImportFiles')}
                     </Typography>
                 }
                 {webkitFileListContext.statistic.totalFiles > 0 &&
@@ -131,12 +133,12 @@ export default function ConfigPanel(props: PaperProps) {
 
                         <Grid item xs={5}>
                             <Typography variant="body2" fontWeight="bolder">
-                                源文件格式
+                                {t('ui.configPanel.sourceFileFormat')}
                             </Typography>
                         </Grid>
                         <Grid item xs={7}>
                             <Typography variant="body2" fontWeight="bolder">
-                                输出格式
+                                {t('ui.configPanel.outputFormat')}
                             </Typography>
 
                         </Grid>
@@ -159,7 +161,7 @@ export default function ConfigPanel(props: PaperProps) {
 
                                     <Select autoComplete="off"
                                         fullWidth
-                                        label={'输出格式'}
+                                        label={t('ui.configPanel.outputFormat')}
                                         size="small"
                                         value={outputConfig.outputFormats[mime]}
                                         variant="standard"

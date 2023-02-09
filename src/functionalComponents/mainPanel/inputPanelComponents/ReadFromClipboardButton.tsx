@@ -130,7 +130,7 @@ export default function ReadFromClipboardButton(props: ButtonProps) {
         >
             <Box p={2}>
                 <Typography variant="body1" gutterBottom>
-                    {t('ui.readFromClipboardInputPopup')}
+                    {t('ui.inputPanel.readFromClipboardInputPopup')}
                 </Typography>
                 <TextField fullWidth autoComplete="off" inputRef={inputField} size="small" variant="standard"
                     onPaste={readFromPaste}

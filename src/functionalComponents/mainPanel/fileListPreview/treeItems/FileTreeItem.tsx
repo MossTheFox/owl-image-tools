@@ -5,6 +5,7 @@ import { fileListContext as _fileListContext, TreeNode, WebkitFileNodeData } fro
 import { parseFileSizeString } from "../../../../utils/randomUtils";
 import ImageFilePreviewBox from "../../../../components/ImageFilePreviewBox";
 import { fileListDialogCallerContext } from "../../../../context/fileListDialog/fileListDialogCallerContext";
+import { t } from "i18next";
 
 // TODO: handle Safari long touch event..... (it doesn't open context menu)
 
@@ -52,7 +53,7 @@ export default function FileTreeItem({
     }, []);
 
     const onImageError = useCallback((e: React.SyntheticEvent<HTMLDivElement, Event>) => {
-        setImageSizeText('无法载入图片');
+        setImageSizeText(t('errorMessage.imageLoadFailed'));
     }, []);
 
 

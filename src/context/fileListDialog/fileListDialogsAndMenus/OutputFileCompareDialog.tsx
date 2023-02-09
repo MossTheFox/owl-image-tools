@@ -5,6 +5,7 @@ import ImageFilePreviewBox from "../../../components/ImageFilePreviewBox";
 import { fireFileDownload, parseFileSizeString, tryReadABlob } from "../../../utils/randomUtils";
 import { OutputTreeNode } from "../../outputFileListContext";
 import { extToMime } from "../../../utils/imageMIMEs";
+import { t } from "i18next";
 
 const VIEW_MODE = ['output', 'original', 'compare'] as const;
 
@@ -100,7 +101,7 @@ export default function OutputFileCompareDialog(props: DialogProps &
         if ('naturalWidth' in e.target && 'naturalHeight' in e.target) {
             setImageSize(`${e.target.naturalWidth} x ${e.target.naturalHeight}`);
         } else {
-            setImageSize('获取失败');
+            setImageSize(t('ui.fileDetailDialog.failToGetData'));
         }
         setIsImageDecodable(true);
         setImageLoading(false);
@@ -114,7 +115,7 @@ export default function OutputFileCompareDialog(props: DialogProps &
 
     const [viewMode, setViewMode] = useState<'output' | 'original' | 'compare'>('output');
     const i18nViewMode = useMemo(() => {
-        return ['输出', '原图', '对比'];
+        return [t('ui.fileDetailDialog.output'), t('ui.fileDetailDialog.original'), t('ui.fileDetailDialog.comparison')];
     }, []);
 
     return <>
@@ -131,7 +132,7 @@ export default function OutputFileCompareDialog(props: DialogProps &
                         alignItems: 'center'
                     }}
                 >
-                    <Typography variant="h6" fontWeight="bolder">文件信息</Typography>
+                    <Typography variant="h6" fontWeight="bolder">{t('title.fileDetail')}</Typography>
                     <IconButton color="primary" onClick={closeDialog} size="small"><Close /></IconButton>
                 </DialogTitle>
                 <DialogContent sx={{ position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'stretch' }}>
@@ -168,13 +169,13 @@ export default function OutputFileCompareDialog(props: DialogProps &
                     <Box flexShrink={0} sx={{ overflowX: 'auto' }}>
                         {!pending && (!canDownload || !canDownloadOriginal) &&
                             <DialogContentText gutterBottom fontWeight="bolder">
-                                无法读取文件。目标文件可能已被修改、移动或删除。
+                                {t('ui.fileDetailDialog.fileBufferUnreadableError')}
                             </DialogContentText>
                         }
 
                         {!pending && canDownload && !imageLoading && !isImageDecodable &&
                             <DialogContentText gutterBottom fontWeight="bolder">
-                                当前浏览器无法解码此图片。可能是格式不支持或文件损坏。
+                                {t('ui.fileDetailDialog.browserFailToDecodeImageError')}
                             </DialogContentText>
                         }
 
@@ -186,27 +187,27 @@ export default function OutputFileCompareDialog(props: DialogProps &
                             <DialogContentText gutterBottom component={"ul"} whiteSpace="nowrap">
                                 {!!imageSize && (
                                     <DialogContentText component={"li"} whiteSpace="nowrap">
-                                        {`尺寸: ${imageSize}`}
+                                        {`${t('ui.fileDetailDialog.imageResolution')}: ${imageSize}`}
                                     </DialogContentText>
                                 )}
                                 <DialogContentText component={"li"} whiteSpace="nowrap">
-                                    {`类型: ${node.file.type || extToMime(node.name)}`}
+                                    {`${t('ui.fileDetailDialog.imageFormat')}: ${node.file.type || extToMime(node.name)}`}
                                 </DialogContentText>
                                 <DialogContentText component={"li"} whiteSpace="nowrap">
-                                    {`大小: ${parseFileSizeString(node.file.size, true)}`}
+                                    {`${t('ui.fileDetailDialog.imageSize')}: ${parseFileSizeString(node.file.size, true)}`}
                                 </DialogContentText>
                             </DialogContentText>
 
                             <DialogContentText gutterBottom component={"ul"} whiteSpace="nowrap">
                                 {node.originalNode.data.kind === 'file' && <>
                                     <DialogContentText component={"li"} whiteSpace="nowrap">
-                                        {`源文件大小: ${parseFileSizeString(node.originalNode.data.file.size, true)}`}
+                                        {`${t('ui.fileDetailDialog.originalImageSize')}: ${parseFileSizeString(node.originalNode.data.file.size, true)}`}
                                     </DialogContentText>
                                     <DialogContentText component={"li"} whiteSpace="nowrap">
-                                        {`源文件类型: ${node.originalNode.data.file.type || extToMime(node.originalNode.data.file.name)}`}
+                                        {`${t('ui.fileDetailDialog.originalImageFormat')}: ${node.originalNode.data.file.type || extToMime(node.originalNode.data.file.name)}`}
                                     </DialogContentText>
                                     <DialogContentText component={"li"} whiteSpace="nowrap">
-                                        {`源文件修改日期: ${new Date(node.originalNode.data.file.lastModified).toLocaleString()}`}
+                                        {`${t('ui.fileDetailDialog.originalImageLastModified')}: ${new Date(node.originalNode.data.file.lastModified).toLocaleString()}`}
                                     </DialogContentText>
                                 </>
                                 }
@@ -220,22 +221,22 @@ export default function OutputFileCompareDialog(props: DialogProps &
                         <Button startIcon={<Download />} onClick={downloadOutputFile}
                             disabled={!canDownload || pending}
                         >
-                            {pending && '正在确认'}
-                            {!pending && canDownload && '下载输出文件'}
-                            {!pending && !canDownload && '无法读取输出文件'}
+                            {pending && t('ui.fileDetailDialog.pending')}
+                            {!pending && canDownload && t('ui.fileDetailDialog.downloadOutputFileButton')}
+                            {!pending && !canDownload && t('ui.fileDetailDialog.downloadOutputFileButtonError')}
                         </Button>
 
                         <Button startIcon={<Download />} onClick={downloadOriginalFile}
                             disabled={!canDownloadOriginal || pending}
                         >
-                            {pending && '正在确认'}
-                            {!pending && canDownloadOriginal && '下载原始文件'}
-                            {!pending && !canDownloadOriginal && '无法读取原始文件'}
+                            {pending && t('ui.fileDetailDialog.pending')}
+                            {!pending && canDownloadOriginal && t('ui.fileDetailDialog.downloadOriginalFileButton')}
+                            {!pending && !canDownloadOriginal && t('ui.fileDetailDialog.downloadOriginalFileButtonError')}
                         </Button>
                     </Box>
 
                     <Button onClick={closeDialog}>
-                        关闭
+                        {t('commonWords.close')}
                     </Button>
                 </DialogActions>
             </Dialog>

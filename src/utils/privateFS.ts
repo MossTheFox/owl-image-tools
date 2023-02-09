@@ -1,3 +1,5 @@
+import { OPFS_FILE_SAVER_WORKER_PATH } from "../constraints";
+
 /**
  * folders of
  *      temp/_____
@@ -87,7 +89,7 @@ export async function getCurrentOPFSTempFolders() {
 export function writeOPFSFile(path: string, blob: Blob) {
     return new Promise<string>((resolve, reject) => {
         try {
-            const worker = new Worker('/worker/opfs-file-saver.worker.js');
+            const worker = new Worker(OPFS_FILE_SAVER_WORKER_PATH);
 
             worker.addEventListener('error', (e) => {
                 reject(e.error);

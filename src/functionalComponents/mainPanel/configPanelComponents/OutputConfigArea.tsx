@@ -1,7 +1,9 @@
 import { Box, BoxProps, Link, Menu, MenuItem, Typography } from "@mui/material";
+import { t } from "i18next";
 import { useCallback, useContext, useRef, useState } from "react";
 import CheckboxWithTooltop from "../../../components/styledComponents/CheckboxWithTooltip";
 import { appConfigContext } from "../../../context/appConfigContext";
+import { MarkdownRendererNoGutterBottom } from "../../../utils/mdRenderer";
 import BaseColorConfig from "./BaseColorConfig";
 import ConfigPanelAccordion from "./ConfigPanelAccordion";
 import GIFConfig from "./perFormatConfigs/GIFConfig";
@@ -28,9 +30,9 @@ export default function OutputConfigArea(props: BoxProps) {
             component='div' display='flex' justifyContent='left' alignItems='baseline'
             gap={1}
         >
-            <span>高级输出设置</span>
+            <span>{t('ui.configPanel.advancedOutputSettings')}</span>
             <Link ref={menuAnchor} component='button' underline='hover' variant='body2' onClick={openMenu}>
-                选项
+                {t('commonWords.options')}
             </Link>
         </Typography>
 
@@ -38,7 +40,7 @@ export default function OutputConfigArea(props: BoxProps) {
         <Menu open={menuOpen} onClose={closeMenu} anchorEl={menuAnchor.current}>
             <MenuItem dense onClick={resetConfig}>
                 <Typography variant="body2" fontWeight="bolder" color={(theme) => theme.palette.warning.main}>
-                    重置为默认值
+                    {t('ui.configPanel.resetToDefault')}
                 </Typography>
             </MenuItem>
         </Menu>
@@ -46,12 +48,10 @@ export default function OutputConfigArea(props: BoxProps) {
 
         <BaseColorConfig py={1} pb={2} />
 
-        <CheckboxWithTooltop label="保留图像元数据"
-            tooltip={<>
-                如果勾选，对于支持的格式将会保留原始图片的 Exif meta data。<br />
-                对于照片，这些数据可以包含图片的拍摄曝光信息、拍摄地点等信息。 <br />
-                请留意，一些浏览器可能会在导入图片时默认抹去元数据。
-            </>}
+        <CheckboxWithTooltop label={t('label.keepMetaData')}
+            tooltip={
+                <MarkdownRendererNoGutterBottom md={t('tooltip.keepMetaData')} />
+            }
             checkboxProps={{
                 checked: outputConfig.keepMetaData,
                 onChange: (e, checked) => {
@@ -63,27 +63,27 @@ export default function OutputConfigArea(props: BoxProps) {
 
         <Box py={1}>
 
-            <ConfigPanelAccordion recordIndex={1} summary="JPEG 设置">
+            <ConfigPanelAccordion recordIndex={1} summary={t('ui.configPanel.JPEG')}>
                 <JPEGConfig />
             </ConfigPanelAccordion>
 
-            <ConfigPanelAccordion recordIndex={2} summary="PNG 设置">
+            <ConfigPanelAccordion recordIndex={2} summary={t('ui.configPanel.PNG')}>
                 <PNGConfig />
             </ConfigPanelAccordion>
 
-            <ConfigPanelAccordion hidden recordIndex={3} summary="APNG 设置">
+            {/* <ConfigPanelAccordion hidden recordIndex={3} summary="APNG Settings">
                 TODO
-            </ConfigPanelAccordion>
+            </ConfigPanelAccordion> */}
 
-            <ConfigPanelAccordion recordIndex={4} summary="GIF 设置">
+            <ConfigPanelAccordion recordIndex={4} summary={t('ui.configPanel.GIF')}>
                 <GIFConfig />
             </ConfigPanelAccordion>
 
-            <ConfigPanelAccordion recordIndex={5} summary="WEBP 设置">
+            <ConfigPanelAccordion recordIndex={5} summary={t('ui.configPanel.WEBP')}>
                 <WEBPConfig />
             </ConfigPanelAccordion>
 
-            <ConfigPanelAccordion disabled recordIndex={6} summary="AVIF 设置 (暂时不可用)">
+            <ConfigPanelAccordion disabled recordIndex={6} summary={t('ui.configPanel.AVIF_notAvailable')}>
                 TODO
             </ConfigPanelAccordion>
         </Box>

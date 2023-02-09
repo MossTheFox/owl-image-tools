@@ -7,6 +7,7 @@ import ImageFilePreviewBox from "../../../../components/ImageFilePreviewBox";
 import { OutputTreeNode } from "../../../../context/outputFileListContext";
 import { OutputTreeItemDataDisplayMode } from "../OutputFileListPreview";
 import { outputFileListDialogCallerContext } from "../../../../context/fileListDialog/outputFileListDialogCallerContext";
+import { t } from "i18next";
 
 
 export default function OutputFileTreeItem({
@@ -76,7 +77,7 @@ export default function OutputFileTreeItem({
     }, []);
 
     const onImageError = useCallback((e: React.SyntheticEvent<HTMLDivElement, Event>) => {
-        setImageSizeText('无法载入图片');
+        setImageSizeText(t('errorMessage.imageLoadFailed'));
     }, []);
 
 
@@ -154,7 +155,7 @@ export default function OutputFileTreeItem({
                                 node.error ? "error" : "textSecondary"
                             } whiteSpace='nowrap' textAlign="end" ml='1px'>
                                 {!node.error && (node.file ? parseFileSizeString(node.file.size) : '')}
-                                {!!node.error && '出错'}
+                                {!!node.error && t('errorMessage.errorOccurred')}
                             </Typography>
                         </Box>
                     </Box> :
@@ -181,7 +182,7 @@ export default function OutputFileTreeItem({
                                         </Typography>
                                     }</>
                                 : '')}
-                            {!!node.error && '出错'}
+                            {!!node.error && t('errorMessage.errorOccurred')}
 
                         </Typography>
                     </>

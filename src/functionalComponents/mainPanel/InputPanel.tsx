@@ -11,6 +11,8 @@ import { Forward } from "@mui/icons-material";
 import { panelNavigationContext } from "../../context/panelNavigationContext";
 import { appConfigContext } from "../../context/appConfigContext";
 import BottomTipDisplay from "../../components/styledComponents/BottomTipDisplay";
+import { MarkdownRenderer } from "../../utils/mdRenderer";
+import { t } from "i18next";
 
 export default function InputPanel(props: PaperProps) {
 
@@ -51,7 +53,7 @@ export default function InputPanel(props: PaperProps) {
                     component='div' display='flex' alignItems='stretch' justifyContent='space-between'
                     whiteSpace="nowrap"
                 >
-                    <span>源文件</span>
+                    <span>{t('ui.inputPanel.sourceFiles')}</span>
 
                 </Typography>
             </Box>
@@ -69,7 +71,7 @@ export default function InputPanel(props: PaperProps) {
                     disabled={onScreenPanelCount === 1 ? false : true}
                     sx={{ whiteSpace: 'nowrap', py: 0 }}
                 >
-                    输出设置
+                    {t('ui.navigateButton.config')}
                 </Button>
             </Box>
         </Box>
@@ -81,7 +83,7 @@ export default function InputPanel(props: PaperProps) {
             <Stack spacing={1} pb={1}>
 
                 <Typography variant="body2" color="primary" gutterBottom>
-                    将文件拖动至此处以快速导入图片。
+                    {t('ui.inputPanel.dragFilesHereToImport')}
                 </Typography>
 
                 {/* 2 Cases: Clipboard API or popup an input then let user paste */}
@@ -105,12 +107,7 @@ export default function InputPanel(props: PaperProps) {
         <BottomTipDisplay onDismiss={tipConfirm}
             hidden={webkitFileListContext.statistic.totalFiles === 0 || !siteConfig.tipDisplay['fileListTip']}
         >
-            <Typography variant="body1" gutterBottom>
-                在文件列表的文件上，<strong>鼠标右击</strong> 或 <strong>触摸长按</strong> 以显示更多操作。
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-                此操作同样适用于右侧输出面板上的文件列表。
-            </Typography>
+            <MarkdownRenderer md={t('content.inputPanelTip')} />
         </BottomTipDisplay>
 
     </Paper>;

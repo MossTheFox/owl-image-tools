@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { tryReadABlob } from "../randomUtils";
 
 const CANVAS_MAX_IMG_SIZE = 32767;
@@ -27,7 +28,7 @@ export async function convertViaCanvas(fileOrBlob: File | Blob, { outputMIME, jp
     try {
         await tryReadABlob(fileOrBlob);
     } catch (err) {
-        throw errorBuilder('无法读取文件，原文件可能已被修改、移动或删除。', 'ImageFileUnreadable');
+        throw errorBuilder(t('errorMessage.cannotReadFileBuffer'), 'ImageFileUnreadable');
     }
     return await new Promise<Blob>((resolve, reject) => {
         const url = URL.createObjectURL(fileOrBlob);
@@ -36,7 +37,7 @@ export async function convertViaCanvas(fileOrBlob: File | Blob, { outputMIME, jp
         const img = new Image();
         img.src = url;
         img.onerror = (ev) => {
-            reject(errorBuilder('浏览器无法解析此图片。可能是由于格式不受支持或图片文件损坏。', 'FormatNotSupportedByBrowser'));
+            reject(errorBuilder(t('errorMessage.browserDecodingFailed'), 'FormatNotSupportedByBrowser'));
         };
         img.onload = (ev) => {
             const { width, height } = {
@@ -45,12 +46,12 @@ export async function convertViaCanvas(fileOrBlob: File | Blob, { outputMIME, jp
             };
 
             if (Math.min(width, height) <= 0) {
-                reject(errorBuilder('无效的图形大小。', 'InvalidImageSize'));
+                reject(errorBuilder(t('errorMessage.canvasConverter.invalidImageSize'), 'InvalidImageSize'));
                 return;
             }
 
             if (Math.max(width, height) > CANVAS_MAX_IMG_SIZE) {
-                reject(errorBuilder('图片尺寸过大。', 'ImageTooLarge'));
+                reject(errorBuilder(t('errorMessage.canvasConverter.imageSizeTooLarge'), 'ImageTooLarge'));
                 return;
             }
 
@@ -59,7 +60,7 @@ export async function convertViaCanvas(fileOrBlob: File | Blob, { outputMIME, jp
             canvas.width = width;
             const context = canvas.getContext('2d');
             if (!context) {
-                reject(errorBuilder('Canvas 出错。', 'CanvasError'));
+                reject(errorBuilder(t('errorMessage.canvasConverter.canvasError'), 'CanvasError'));
                 return;
             }
             if (background) {
@@ -70,13 +71,13 @@ export async function convertViaCanvas(fileOrBlob: File | Blob, { outputMIME, jp
             try {
                 canvas.toBlob((blob) => {
                     if (!blob) {
-                        reject(errorBuilder('Canvas 导出图形时出错。', 'CanvasError'));
+                        reject(errorBuilder(t('errorMessage.canvasConverter.canvasFailToExport'), 'CanvasError'));
                         return;
                     }
                     resolve(blob);
                 }, outputMIME, jpegQualityParam);
             } catch (err) {
-                reject(errorBuilder('Canvas 导出图形时出错。' + err, 'CanvasError'));
+                reject(errorBuilder(t('errorMessage.canvasConverter.canvasFailToExport') + err, 'CanvasError'));
                 return;
             }
         };

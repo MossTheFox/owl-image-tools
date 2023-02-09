@@ -2,6 +2,7 @@ import { useContext, useEffect, useRef } from "react";
 import { SwipeableDrawer, SwipeableDrawerProps, Box, Typography, Divider, IconButton, Link } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import { loggerContext } from "../../context/loggerContext";
+import { t } from "i18next";
 
 export default function LogHistoryDrawer(props: SwipeableDrawerProps) {
 
@@ -24,7 +25,9 @@ export default function LogHistoryDrawer(props: SwipeableDrawerProps) {
                     <Typography variant="h6" fontWeight='bolder' component="div"
                         display="flex" gap={1} alignItems="baseline" justifyContent="left"
                     >
-                        日志输出 <Link hidden={history.length === 0} component="button" underline="hover" onClick={clear}>清空</Link>
+                        {t('ui.topBar.loggerOutput')} <Link hidden={history.length === 0} component="button" underline="hover" onClick={clear}>
+                            {t('ui.topBar.clear')}
+                        </Link>
                     </Typography>
                     <IconButton color="primary" size="small" aria-label="Close" onClick={props.onClose}>
                         <Close />
@@ -36,7 +39,7 @@ export default function LogHistoryDrawer(props: SwipeableDrawerProps) {
             <Box ref={loggerRef} overflow='auto' p={2} flexGrow={1}>
                 {history.length === 0 &&
                     <Typography variant='body2' color={'textSecondary'}>
-                        {`当前没有日志输出。`}
+                        {t('ui.topBar.noLogs')}
                     </Typography>
                 }
                 {/* In case of performance issues... (too many DOM nodes) Merge into One. */}

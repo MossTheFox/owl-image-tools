@@ -1,4 +1,5 @@
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, LinearProgress } from "@mui/material";
+import { t } from "i18next";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ErrorBox from "../../../ui/smallComponents/ErrorBox";
 import { getFileHandle, OutputTreeNode } from "../../outputFileListContext";
@@ -58,9 +59,11 @@ export default function OutputFolderSaveAsDialog(props: {
 
                 if (!one.file) {
                     setProgress((prev) => prev + 1);
-                    setLogs((prev) => [...prev,
-                    `跳过无效的文件: ${one.name}`
-                    ]);
+                    setLogs((prev) =>
+                        [...prev,
+                        t('ui.fileSaverDialog.skipInvalidFile', { name: one.name })
+                        ]
+                    );
                     setErrorFileCount((prev) => prev + 1);
                     continue;
                 }
@@ -80,18 +83,22 @@ export default function OutputFolderSaveAsDialog(props: {
                         return;
                     }
 
-                    setLogs((prev) => [...prev,
-                    `已保存文件: ${handle.name}`
-                    ]);
+                    setLogs((prev) =>
+                        [...prev,
+                        t('ui.fileSaverDialog.savedFile', { name: handle.name })
+                        ]
+                    );
                     setProgress((prev) => prev + 1);
                 } catch (err) {
                     if (unmounted) {
                         return;
                     }
                     setProgress((prev) => prev + 1);
-                    setLogs((prev) => [...prev,
-                    `无法读取文件: ${one.name}, 错误信息: ${err}`
-                    ]);
+                    setLogs((prev) =>
+                        [...prev,
+                        t('ui.fileSaverDialog.failToLoadFileWithError', { name: one.name, msg: err + '' })
+                        ]
+                    );
                     setErrorFileCount((prev) => prev + 1);
                     continue;
                 }
@@ -132,12 +139,14 @@ export default function OutputFolderSaveAsDialog(props: {
             <LinearProgress variant="determinate" value={progressBarProgress} />
         </Box>
         <DialogTitle fontWeight="bolder">
-            {loading ? '正在保存文件' : err ? '发生错误' : '文件存储完毕'} {`${progress} / ${node.kind === 'file' ? 1 : node.childrenCount}`}
-            {errorFileCount > 0 && ` (${errorFileCount} 个出错的文件被跳过)`}
+            {loading ? t('ui.fileSaverDialog.titleSavingFile') :
+                err ? t('ui.fileSaverDialog.titleErrorOccurred') : t('ui.fileSaverDialog.titleSaveFinished')
+            } {`${progress} / ${node.kind === 'file' ? 1 : node.childrenCount}`}
+            {errorFileCount > 0 && ` ${t('ui.fileSaverDialog.skippedSomeFiles', { count: errorFileCount })}`}
         </DialogTitle>
         <DialogContent>
             {err && <Box pb={1}>
-                <ErrorBox title="发生错误" message={err.message} />
+                <ErrorBox title={t('ui.fileSaverDialog.titleErrorOccurred')} message={err.message} />
             </Box>
             }
             {logs.map((v, i) =>
@@ -149,7 +158,7 @@ export default function OutputFolderSaveAsDialog(props: {
 
         <DialogActions>
             <Button onClick={loading ? handleAbort : handleClose}>
-                {loading ? '终止' : '完成'}
+                {loading ? t('commonWords.abort') : t('commonWords.finished')}
             </Button>
         </DialogActions>
     </Dialog>

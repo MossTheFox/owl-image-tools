@@ -1,5 +1,6 @@
 import { Download, Folder, PlayArrow } from "@mui/icons-material";
 import { Box, BoxProps, Button, Collapse, Popover, Typography } from "@mui/material";
+import { t } from "i18next";
 import { useCallback, useContext, useRef, useState, useMemo } from "react";
 import { appConfigContext } from "../../../context/appConfigContext";
 import { webkitFileListContext } from "../../../context/fileListContext";
@@ -8,6 +9,7 @@ import { loggerContext } from "../../../context/loggerContext";
 import { outputFileListContext, OutputTreeNode } from "../../../context/outputFileListContext";
 import useAsync from "../../../hooks/useAsync";
 import { FS_Mode } from "../../../utils/browserCompability";
+import { MarkdownRenderer } from "../../../utils/mdRenderer";
 import { clearCurrentActiveTempFolders, createOPFSTempFolder } from "../../../utils/privateFS";
 
 const openDirPicker = window.showDirectoryPicker?.bind(null, {
@@ -43,8 +45,8 @@ export default function StartTaskButton(props: BoxProps) {
         if (err.name !== 'AbortError') {
             fireAlertSnackbar({
                 severity: 'error',
-                title: '开始任务时出错',
-                message: '错误信息: ' + err?.message
+                title: t('ui.outputPanel.errorWhenStartingTask'),
+                message: t('content.errorMessage', { msg: err?.message })
             });
         }
 
@@ -135,7 +137,7 @@ export default function StartTaskButton(props: BoxProps) {
                     disabled={!hasFileToDownload}
                     onClick={fireZipSaveDialog}
                 >
-                    打包下载
+                    {t('button.downloadZip')}
                 </Button>
             </Box>
         </Collapse>
@@ -150,8 +152,8 @@ export default function StartTaskButton(props: BoxProps) {
                         whiteSpace: 'nowrap'
                     }}
                 >
-                    {lastTaskFolderName ? '开始下一组任务' :
-                        '选择输出目录并开始转换'
+                    {lastTaskFolderName ? t('button.startNextTask') :
+                        t('button.selectDirAndStartTask')
                     }
                 </Button>
                 :
@@ -161,8 +163,8 @@ export default function StartTaskButton(props: BoxProps) {
                     disableElevation
                     disabled={statistic.totalFiles <= 0 || loading}
                 >
-                    {lastTaskFolderName ? '开始下一组任务' :
-                        '开始转换'
+                    {lastTaskFolderName ? t('button.startNextTask') :
+                        t('button.startTask')
                     }
                 </Button>
             }
@@ -177,27 +179,28 @@ export default function StartTaskButton(props: BoxProps) {
         >
             <Box p={2} display="flex" flexDirection="column" alignItems="end">
                 <Box>
-                    <Typography variant="body2" color="textSecondary" gutterBottom>
-                        已完成的任务将会被清空。
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary" gutterBottom>
-                        <strong>请确定文件已经被正确保存</strong>，然后，点击继续来从开始下一组任务。
-                    </Typography>
+                    <MarkdownRenderer md={t('ui.outputPanel.startNextTaskTip')} typographyProps={{
+                        variant: 'body2',
+                        color: 'text.secondary'
+                    }} />
                     {!!lastTaskFolderName && FS_Mode === 'publicFS' &&
-                        <Typography variant="body2" color="textSecondary" gutterBottom>
-                            上一次的输出目录名称: {lastTaskFolderName}
-                        </Typography>
+                        <MarkdownRenderer md={
+                            `${t('ui.outputPanel.startNextTaskLastOutputDirectoryName')}: ${lastTaskFolderName}`
+                        } typographyProps={{
+                            variant: 'body2',
+                            color: 'text.secondary'
+                        }} />
                     }
                 </Box>
                 <Box display="flex" gap={1} alignItems="center" justifyContent="end" flexWrap="wrap">
                     {FS_Mode === 'publicFS' && <Button onClick={justStart}
                         sx={{ textTransform: 'unset' }}
                     >
-                        使用上一次的输出目录继续
+                        {t('button.useLastOutputDirectoryAndContinue')}
                     </Button>}
 
                     <Button onClick={notifyConfirmClearAndContinueBtn}>
-                        {FS_Mode === 'publicFS' ? '选择输出目录并继续' : '继续'}
+                        {FS_Mode === 'publicFS' ? t('button.pickNewDirectoryAndContinue') : t('button.continue')}
                     </Button>
                 </Box>
             </Box>

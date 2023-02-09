@@ -8,9 +8,9 @@ A simple image conversion tool that runs in your browser, powered by [wasm-vibs]
 
 [Live Demo Here](https://img.mowl.cc/).
 
-(Currently with zh-CN only. Localization in the to-do list.)
+Language Support: `zh-CN`, `zh-TW` (via Google Translation), `en`
 
-**IMPORTANT NOTES for browser compatibility**
+#### IMPORTANT NOTES for browser compatibility
 
 The latest stable version of Safari (currently iOS 16.3) is still not supported yet due to its missing the WebAssembly SIMD support (which has been fixed in a preview version). Wasm-vips will fail to initialize.
 
@@ -75,8 +75,8 @@ workbox generateSW workbox-config.cjs
 
 > <sub>or, never-to-be-done(s)</sub>
 
-- Localization (if there's someone using it);
-- Update to wasm-vips 0.0.5 with AVIF support when it's ready;
+- Add page loading BG when static files are loading (the bundle size is now larger than 800 KB, which is probably unfriendly for slow networks).
+- Update to wasm-vips 0.0.5 with AVIF support when it's ready.
 - More image tools other than converting.
 
 ## License

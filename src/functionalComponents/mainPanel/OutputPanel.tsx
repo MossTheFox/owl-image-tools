@@ -12,6 +12,8 @@ import BottomTipDisplay from "../../components/styledComponents/BottomTipDisplay
 import { appConfigContext } from "../../context/appConfigContext";
 import { loggerContext } from "../../context/loggerContext";
 import { restartVipsWorker } from "../../utils/converter/libvipsConverter";
+import { MarkdownRenderer } from "../../utils/mdRenderer";
+import { t } from "i18next";
 
 export default function OutputPanel(props: PaperProps) {
 
@@ -48,12 +50,12 @@ export default function OutputPanel(props: PaperProps) {
         restartVipsWorker().then(() => {
             fireAlertSnackbar({
                 severity: 'success',
-                message: '已重置运行 wasm-vips 的 Worker。'
+                message: t('ui.outputPanel.workerReloaded')
             });
         }).catch((err) => {
             fireAlertSnackbar({
                 severity: 'error',
-                message: '发生错误。错误信息：' + err
+                message: t('ui.outputPanel.errorSnackbarWithMessage', {msg: err})
             });
         });
     }, [closeMenu, fireAlertSnackbar]);
@@ -94,7 +96,7 @@ export default function OutputPanel(props: PaperProps) {
                     component='div' display='flex' alignItems='baseline' justifyContent='space-between'
                     whiteSpace="nowrap"
                 >
-                    <span>输出</span>
+                    <span>{t('ui.outputPanel.output')}</span>
 
                     <Box display="flex"
                         alignItems="baseline"
@@ -105,7 +107,7 @@ export default function OutputPanel(props: PaperProps) {
                         <Link component="button" variant="body2" underline="hover"
                             onClick={openMenu}
                         >
-                            选项
+                            {t('commonWords.options')}
                         </Link>
                     </Box>
 
@@ -125,7 +127,7 @@ export default function OutputPanel(props: PaperProps) {
                     disabled={onScreenPanelCount === 1 ? false : true}
                     sx={{ whiteSpace: 'nowrap', py: 0 }}
                 >
-                    输出设置
+                    {t('ui.navigateButton.config')}
                 </Button>
             </Box>
         </Box>
@@ -149,10 +151,10 @@ export default function OutputPanel(props: PaperProps) {
                         <Typography variant="body1" color={(t) => t.palette.error.main} fontWeight="bolder"
                             gutterBottom
                         >
-                            终止任务
+                            {t('ui.outputPanel.menuAbortTask')}
                         </Typography>
                         <Typography variant="body2" color="textSecondary">
-                            任务终止后，你会需要重新导入文件来继续任务。
+                            {t('ui.outputPanel.menuAbortTaskSecondary')}
                         </Typography>
                     </Box>
                 </MenuItem>
@@ -163,10 +165,10 @@ export default function OutputPanel(props: PaperProps) {
                     <Typography variant="body1" color={(t) => t.palette.error.main} fontWeight="bolder"
                         gutterBottom
                     >
-                        重启处理程序
+                        {t('ui.outputPanel.menuReloadWorker')}
                     </Typography>
                     <Typography variant="body2" color="textSecondary" gutterBottom>
-                        重新启动运行 wasm-vips 的 Web Worker。
+                        {t('ui.outputPanel.menuReloadWorkerSecondary')}
                     </Typography>
                 </Box>
             </MenuItem>
@@ -188,15 +190,7 @@ export default function OutputPanel(props: PaperProps) {
         <BottomTipDisplay onDismiss={tipConfirm}
             hidden={outputStatistic.inputFiles.totalFiles === 0 || !siteConfig.tipDisplay['outputFileListTip']}
         >
-            <Typography variant="body1" gutterBottom>
-                在文件列表的文件上，可以通过 <strong>鼠标右击</strong> 或 <strong>触摸长按</strong> 来对于单个 文件/文件夹 打开下载菜单。
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-                请留意，转换出错的文件会在批量保存时被跳过。请一定要保留好自己源文件的备份。
-            </Typography>
-            <Typography variant="body1" gutterBottom>
-                <strong>开始新的转换任务之后，此列表将会被清空。</strong>确定文件已经正确保存完成之后，再开始下一组转换任务吧。
-            </Typography>
+            <MarkdownRenderer md={t('content.outputPanelTip')} />
         </BottomTipDisplay>
     </Paper>;
 }

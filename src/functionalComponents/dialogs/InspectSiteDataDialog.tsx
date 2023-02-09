@@ -4,6 +4,8 @@ import useAsync from "../../hooks/useAsync";
 import { FS_Mode, serviceWorkerSupport, storageDisabled } from "../../utils/browserCompability";
 import { estimateStorageUsage, parseFileSizeString } from "../../utils/randomUtils";
 import { clearAllTempFolders } from "../../utils/privateFS";
+import { t } from "i18next";
+import { MarkdownRendererDialogContentText } from "../../utils/mdRenderer";
 
 export default function InspectSiteDataDialog(props: DialogProps) {
 
@@ -20,14 +22,16 @@ export default function InspectSiteDataDialog(props: DialogProps) {
         if (data.result === 'error') {
             switch (data.reason) {
                 case 'NotSupportError':
-                    setText('你的浏览器不支持获取存储占用的详细信息。');
+                    setText(t('content.inspectSiteDataDialog.notSupportError'));
                     break;
                 default:
-                    setText('未知错误。');
+                    setText(t('errorMessage.unknownError') + (data.err ? ` ${data.err}` : ''));
             }
             return;
         }
-        setText(`可用: ${parseFileSizeString(data.available)}; 已用: ${parseFileSizeString(data.used, true)}`);
+        setText(`${t('content.inspectSiteDataDialog.available')
+            }: ${parseFileSizeString(data.available)}; ${t('content.inspectSiteDataDialog.used')
+            }: ${parseFileSizeString(data.used, true)}`);
     }, [])
 
     const fireFetch = useAsync(estimateStorageUsage, onResolved);
@@ -79,7 +83,7 @@ export default function InspectSiteDataDialog(props: DialogProps) {
     }, [fireFetch]);
 
     const onOPFSErr = useCallback((err: Error) => {
-        setText(`发生错误, 错误信息: ${err?.message}`);
+        setText(t('errorMessage.errorOccurredWithMsg', { msg: err?.message }));
         setOPFSBtnDisabled(false);
     }, []);
 
@@ -103,7 +107,7 @@ export default function InspectSiteDataDialog(props: DialogProps) {
 
     const onCacheClearError = useCallback((err: Error) => {
         setCacheBtnDisabled(false);
-        setText(`发生错误, 错误信息: ${err?.message}`);
+        setText(t('errorMessage.errorOccurredWithMsg', { msg: err?.message }));
     }, []);
 
     const fireCacheClear = useAsync(asyncClearCacheStorage, onCacheClearOK, onCacheClearError);
@@ -126,34 +130,25 @@ export default function InspectSiteDataDialog(props: DialogProps) {
 
     const onRemoveSWErr = useCallback((err: Error) => {
         setRemoveSWBtnDisabled(false);
-        setText(`发生错误, 错误信息: ${err?.message}`);
+        setText(t('errorMessage.errorOccurredWithMsg', { msg: err?.message }));
     }, []);
 
     const fireRemoveSW = useAsync(asyncRemoveSW, onRemoveSWOK, onRemoveSWErr);
 
     return <Dialog maxWidth="sm" fullWidth {...props}>
         <DialogTitle fontWeight="bolder">
-            站点数据管理
+            {t('title.inspectSiteData')}
         </DialogTitle>
         <DialogContent>
-            <DialogContentText gutterBottom>
-                以下是站点的数据占用情况。你可以手动执行需要的清除操作。
-            </DialogContentText>
+            <MarkdownRendererDialogContentText md={t('content.inspectSiteDataDialog.main')} />
             <DialogContentText gutterBottom>
                 {text}
             </DialogContentText>
-            <DialogContentText variant='body2' gutterBottom>
-                此数据来源于 <code>navigator.storage.estimate()</code>。
-            </DialogContentText>
-            <DialogContentText variant='body2' gutterBottom>
-                一些浏览器可能会将浏览器本身的缓存行为也计入存储占用量中。这些内容会需要你在浏览器设置中进行清除。
-            </DialogContentText>
-            <DialogContentText variant='body2' gutterBottom>
-                要查看详细信息，请打开浏览器的开发者工具。一些未知问题可能导致这个数据不是很正常，此应用程序<strong>主动</strong>存储的所有信息都可以在下方被清除。
-            </DialogContentText>
-            <DialogContentText variant='body2' gutterBottom>
-                对于这里的所有操作，你的本地文件不会受到任何影响。
-            </DialogContentText>
+            <MarkdownRendererDialogContentText md={t('content.inspectSiteDataDialog.secondary')}
+                typographyProps={{
+                    variant: 'body2'
+                }}
+            />
             <Divider />
             <Box display='flex' flexDirection="column" gap={1} pt={1}>
 
@@ -162,11 +157,15 @@ export default function InspectSiteDataDialog(props: DialogProps) {
                         disabled={localStorageSize === 0}
                         onClick={clearLocalStorage}
                     >
-                        {localStorageSize > 0 ? '清除存储的设置信息' : '没有保存的设置信息'}
+                        {localStorageSize > 0 ?
+                            t('content.inspectSiteDataDialog.clearLocalStorage') :
+                            t('content.inspectSiteDataDialog.localStorageEmpty')}
                     </Button>
-                    <DialogContentText variant='body2' gutterBottom>
-                        设置信息包含偏好设置和输出设置。清除设置不会立即重置当前页面正在使用的设置项。要立即应用，可以手动刷新页面。
-                    </DialogContentText>
+                    <MarkdownRendererDialogContentText md={t('content.inspectSiteDataDialog.clearLocalStorageTip')}
+                        typographyProps={{
+                            variant: 'body2'
+                        }}
+                    />
                 </>
                 }
 
@@ -175,21 +174,27 @@ export default function InspectSiteDataDialog(props: DialogProps) {
                         disabled={cacheBtnDisabled}
                         onClick={fireCacheClear}
                     >
-                        清除 Service Worker 缓存的静态文件
+                        {t('content.inspectSiteDataDialog.clearCacheStorage')}
                     </Button>
-                    <DialogContentText variant='body2' gutterBottom>
-                        Service Worker 提供的缓存可以给予网页应用离线运行的能力。清除后，下一次进入页面将会需要重新下载程序所需要的数据。
-                    </DialogContentText>
+                    <MarkdownRendererDialogContentText
+                        md={t('content.inspectSiteDataDialog.cleatCacheStorageTip')}
+                        typographyProps={{
+                            variant: 'body2'
+                        }}
+                    />
 
                     <Button variant="outlined" size="small" color="warning"
                         disabled={removeSWBtnDisabled}
                         onClick={fireRemoveSW}
                     >
-                        移除 Service Worker
+                        {t('content.inspectSiteDataDialog.unregisterSW')}
                     </Button>
-                    <DialogContentText variant='body2' gutterBottom>
-                        将取消注册所有运行中的 Service Worker。如果要这么做，建议同步进行一下上方的缓存清除。
-                    </DialogContentText>
+                    <MarkdownRendererDialogContentText
+                        md={t('content.inspectSiteDataDialog.unregisterSWTip')}
+                        typographyProps={{
+                            variant: 'body2'
+                        }}
+                    />
                 </>
                 }
 
@@ -198,14 +203,14 @@ export default function InspectSiteDataDialog(props: DialogProps) {
                         disabled={opfsBtnDisabled}
                         onClick={fireOPFS}
                     >
-                        清空私有文件系统 (用于输出缓存)
+                        {t('content.inspectSiteDataDialog.clearOPFS')}
                     </Button>
-                    <DialogContentText variant='body2' gutterBottom>
-                        请小心，若当前或者其他窗口有在进行转换任务，如果有使用到私有文件系统作为缓存的话，进行清理可能会导致正在进行的任务出错。未保存的文件也将被清除。
-                    </DialogContentText>
-                    <DialogContentText variant='body2' gutterBottom>
-                        如果要查看私有文件系统的内容，可以在浏览器控制台调用 <code>await window.__OPFS_DEBUG()</code>。
-                    </DialogContentText>
+
+                    <MarkdownRendererDialogContentText md={t('content.inspectSiteDataDialog.clearOPFSTip')}
+                        typographyProps={{
+                            variant: 'body2'
+                        }}
+                    />
                 </>
                 }
 
@@ -214,7 +219,9 @@ export default function InspectSiteDataDialog(props: DialogProps) {
 
         </DialogContent>
         <DialogActions>
-            <Button onClick={btnHandleClose}>关闭</Button>
+            <Button onClick={btnHandleClose}>
+                {t('commonWords.close')}
+            </Button>
         </DialogActions>
     </Dialog>
 }

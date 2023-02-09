@@ -3,6 +3,8 @@ import { TinyColor } from '@ctrl/tinycolor';
 import { useCallback, useContext, useMemo, useRef, useState } from "react";
 import { appConfigContext, ColorFormatConfig } from "../../../context/appConfigContext";
 import TypographyWithTooltip from "../../../components/styledComponents/TypographyWithTooltip";
+import { t } from "i18next";
+import { MarkdownRenderer, MarkdownRendererNoGutterBottom } from "../../../utils/mdRenderer";
 
 
 const formats: ColorFormatConfig[] = ['hex', 'rgb', 'hsl', 'hsv'];
@@ -105,9 +107,9 @@ export default function BaseColorConfig(props: BoxProps) {
             pb={0.5}
         >
             <TypographyWithTooltip variant="body2" color="textSecondary" fontWeight='bolder'
-                tooltip='丢失透明度信息时，默认的图像底色。不会影响支持透明通道的图像格式，除非手动指定丢弃透明度信息。'
+                tooltip={<MarkdownRendererNoGutterBottom md={t('tooltip.imageBaseColor')} />}
             >
-                图片底色
+                {t('label.imageBaseColor')}
             </TypographyWithTooltip>
 
             <Box flexGrow={1} display='flex' gap={0.5} flexWrap='nowrap' overflow='hidden'
