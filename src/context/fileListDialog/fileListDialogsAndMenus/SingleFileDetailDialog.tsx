@@ -136,7 +136,7 @@ export default function SingleFileDetailDialog(props: DialogProps &
                         <DialogContentText gutterBottom component={"ul"} whiteSpace="nowrap">
                             {!!imageSize && (
                                 <DialogContentText component={"li"} whiteSpace="nowrap">
-                                    {`${t('ui.fileDetailDialog.imageSize')}: ${imageSize}`}
+                                    {`${t('ui.fileDetailDialog.imageResolution')}: ${imageSize}`}
                                 </DialogContentText>
                             )}
                             <DialogContentText component={"li"} whiteSpace="nowrap">

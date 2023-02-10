@@ -338,9 +338,10 @@ May try to use the directory picker button, or do manually imports for several t
         // --- Tip on Panels --- // 
         "inputPanelTip": `**Right click** or **touch hold** on the files in the list to show more actions.\n
 The same action is avalible for the output file list on the right.`,
+
         "outputPanelTip": `**Right click** or **touch hold** on the files or directories in the list to show download actions.\n
 Notice that if converting is failed for a file, it will be skipped and will not be saved here. Make sure to keep your original files.\n
-**This list will be cleared when a new task is fired. ** Make sure your files are saved properly before starting the next task.`,
+**This list will be cleared when a new task is fired.** Make sure your files are saved properly before starting the next task.`,
 
         // --- Config Drawer Menu --- //
         "aboutFSModeDialogContent": `Different browsers have different support level for File System Access.\n

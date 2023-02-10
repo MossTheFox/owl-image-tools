@@ -193,9 +193,7 @@ export default function StartTaskButton(props: BoxProps) {
                     }
                 </Box>
                 <Box display="flex" gap={1} alignItems="center" justifyContent="end" flexWrap="wrap">
-                    {FS_Mode === 'publicFS' && <Button onClick={justStart}
-                        sx={{ textTransform: 'unset' }}
-                    >
+                    {FS_Mode === 'publicFS' && <Button onClick={justStart}>
                         {t('button.useLastOutputDirectoryAndContinue')}
                     </Button>}
 
