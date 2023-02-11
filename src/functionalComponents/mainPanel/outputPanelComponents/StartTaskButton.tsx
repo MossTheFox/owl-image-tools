@@ -177,7 +177,7 @@ export default function StartTaskButton(props: BoxProps) {
                 horizontal: 'left'
             }}
         >
-            <Box p={2} display="flex" flexDirection="column" alignItems="end">
+            <Box p={2} display="flex" flexDirection="column" alignItems="start">
                 <Box>
                     <MarkdownRenderer md={t('ui.outputPanel.startNextTaskTip')} typographyProps={{
                         variant: 'body2',

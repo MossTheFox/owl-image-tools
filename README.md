@@ -77,9 +77,16 @@ workbox generateSW workbox-config.cjs
 
 > <sub>or, never-to-be-done(s)</sub>
 
-- Add page loading background when static files are loading (the bundle size is now larger than 800 KB, which is probably unfriendly for slow networks).
-- Update to wasm-vips 0.0.5 with AVIF support when it's ready.
-- More image tools other than converting.
+- [x] Modify the hardcoded text to support localization.
+    - [x] zh-CN and zh-TW
+    - [x] English 
+- [ ] More image tools other than converting.
+    - [ ] Image Filters (Greyscale, etc.) ([doc](https://www.libvips.org/API/current/libvips-colour.html))
+    - [ ] Resize Images ([doc](https://www.libvips.org/API/current/libvips-resample.html#vips-resize) and [wiki](https://github.com/libvips/libvips/wiki/HOWTO----Image-shrinking)) 
+- [ ] A simpler Settings panel for processing filters or changing resolution for images.
+    - To save the final result, show menus like "Save As" rather than using the verbose converttion config panel. 
+- [ ]  Add page loading background when static files are loading (the bundle size is now larger than 800 KB, which is probably unfriendly for slow networks).
+- [ ] Update to wasm-vips 0.0.5 with AVIF support when it's ready.
 
 ## License
 
