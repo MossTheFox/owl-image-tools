@@ -80,6 +80,15 @@ workbox generateSW workbox-config.cjs
 - [x] Modify the hardcoded text to support localization.
     - [x] zh-CN and zh-TW
     - [x] English 
+- [ ] Copy image to clipboard in the context menu.
+    - [ ] Test for different browsers:
+        - Safari: [Allow `image/png` Only](https://webkit.org/blog/10855/async-clipboard-api/);
+        - [Chrome](https://stackoverflow.com/questions/68897154/list-of-supported-mime-types-for-clipboard-write) and [Firefox](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/write) are mostly the same.
+        - Which means it might need to use the canvas to do a convertion first for non-PNGs.
+- [ ] Quick convertion for a single file/directory in the source file list context menu.
+- [ ] 'Retry' for the errored tasks.
+- [ ] 'Pause' and 'Resume' for the tasks, rather than only allowing aborting.
+- [ ] Save the output directory handle in the indexedDB (with [idb-keyfal](https://www.npmjs.com/package/idb-keyval)) for supported browsers.
 - [ ] More image tools other than converting.
     - [ ] Image Filters (Greyscale, etc.) ([doc](https://www.libvips.org/API/current/libvips-colour.html))
     - [ ] Resize Images ([doc](https://www.libvips.org/API/current/libvips-resample.html#vips-resize) and [wiki](https://github.com/libvips/libvips/wiki/HOWTO----Image-shrinking)) 
