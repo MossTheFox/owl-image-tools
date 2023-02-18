@@ -1,4 +1,4 @@
-export const VERSION_TEXT = 'Dev 0.1.4';    // <-- um if I forget to increase this number then just ignore this.
+export const VERSION_TEXT = 'Dev 0.1.4';    // <-- Change this when building for prod.
 export const VERSION_TEXT_SECONDARY = '2023-02-10, wasm-vibs version 0.0.4';
 export const GITHUB_REPO_URL = 'https://github.com/MossTheFox/owl-image-tools';
 

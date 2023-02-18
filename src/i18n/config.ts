@@ -74,3 +74,32 @@ i18next
 
 document.documentElement.setAttribute('lang', i18next.language);
 document.title = i18next.t('document.title');
+
+// DEBUG
+// @ts-expect-error Log the translation completion
+window.__I18N_DEBUG = () => {
+    function iterateKeys(obj: { [key: string]: unknown }, prefix = '', receiver: string[]) {
+        for (const key in obj) {
+            if (typeof obj[key] === 'object') {
+                // @ts-expect-error Um.
+                iterateKeys(obj[key], prefix + `.${key}`, receiver)
+                continue;
+            }
+            receiver.push(prefix + '.' + key);
+        }
+    }
+
+    const keyMap = new Map<string, string[]>();
+
+    for (const [key, val] of Object.entries(resources)) {
+        const iterArr: string[] = [];
+        iterateKeys(val, '', iterArr);
+        console.log(`lang: ${key}, keys: ${iterArr.length}`);
+        keyMap.set(key, iterArr);
+    }
+
+    for (const [key, val] of keyMap.entries()) {
+        console.log([key, val]);
+    }
+
+}

@@ -321,6 +321,7 @@ const zhCN = {
         "inputFileListInfo": "文件列表信息",
         "fileDetail": "文件信息",
         "inspectSiteData": "站點數據管理",
+        "directoryPickerNotSupported": "文件夾選擇不受支持",
     },
     // Keep the period unless it's like "error message: {{msg}}".
     // For Dialog Content, Markdown Parser will be used. Use markdown syntax for formatting.
@@ -386,7 +387,7 @@ const zhCN = {
                 // This one was supposed to be fatal issue but many non-latest browsers still not fully supported.
                 "SIMD": `###### (重要) 圖像處理引擎 wasm-vips 無法正常運行\n\n` +
                     `當前瀏覽器對於 WebAssembly SIMD 的支持存在問題。 `,
-                "SIMDSafari": `對於 Safari 瀏覽器，截至此程序當前版本發佈時，此問題僅在 Safari 預覽版本中得到解決。請在桌面設備中從 Chorme 或 Firefox 瀏覽器來使用此應用吧。 `,
+                "SIMDSafari": `對於 Safari 瀏覽器，請使用 Safari 16.4+。如果是桌面設備，請用 Chorme 或 Firefox 瀏覽器來使用此應用吧。`,
                 "SIMDNon-Safari": `請嘗試在版本較新的 Google Chorme、Microsoft Edge 或 Firefox 瀏覽器來使用此應用吧。 `,
                 "noFS": `###### 不支持 File System API\n\n` +
                     `**這可能會影響圖片的批量轉換功能。**單次或少量的文件轉換操作不會受到影響。\n\n` +
@@ -429,7 +430,11 @@ const zhCN = {
             "clearOPFSTip": "請小心，若當前或者其他窗口有在進行轉換任務，如果有使用到私有文件系統作為緩存的話，進行清理可能會導致正在進行的任務出錯。未保存的文件也將被清除。\n\n如果要查看私有文件系統的內容，可以在瀏覽器控制台調用 `await window.__OPFS_DEBUG()`。"
         },
         // --- End Site Data Dialog --- //
+        "directoryPickerNotSupported": "移動端瀏覽器可能不支持導入文件夾，可能是受限於系統文件選擇器。參考：[文件夾選擇 兼容性](https://caniuse.com/input-file-directory)\n\n"
+            + "即使呼出了文件選擇窗口，選擇的文件也可能無法被程序獲取到。\n\n"
+            + "請嘗試用普通的文件導入按鈕，或者通過 Drag and Drop 來將文件拖入頁面吧。\n\n",
 
+        "directoryPickerNotSupportedIOS": "**iOS/iPadOS 下，可以從“文件”應用中，將文件夾拖入頁面來進行導入。**"
     },
 } as const;
 

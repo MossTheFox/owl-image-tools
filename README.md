@@ -12,13 +12,14 @@ Language Support: `zh-CN`, `zh-TW` (via Google Translation), `en`.
 
 <sub>If you've visited this page before, you will need to wait for the Service Worker to update itself before accessing to the newer version of the page (if any) since Service Worker will always serve the local cached version to you. Do a page refresh to check if the newer version is loaded.</sub>
 
-#### IMPORTANT NOTES for browser compatibility
+## Browser compatibility
 
-The latest stable version of Safari (currently iOS 16.3) is still not supported yet due to its missing the WebAssembly SIMD support (which has been fixed in a preview version). Wasm-vips will fail to initialize.
+Image processing engine requires WebAssembly SIMD support. For Safari, it's not available until iOS 16.4+.
 
 Recommended: latest version of Google Chrome or Microsoft Edge.
 
-<sub>Firefox is also ok. Runs without public file system access though.</sub>
+Also works on: latest Firefox, Safari on iOS 16.4+.
+
 
 ## Intro
 
@@ -88,6 +89,8 @@ workbox generateSW workbox-config.cjs
 - [ ] Quick convertion for a single file/directory in the source file list context menu.
 - [ ] 'Retry' for the errored tasks.
 - [ ] 'Pause' and 'Resume' for the tasks, rather than only allowing aborting.
+- [ ] Allow skipping tasks that seems to freeze the worker.
+    - [ ] Vips loader Worker should be able to response to a signal call to indicate that it's not blocked. 
 - [ ] Save the output directory handle in the indexedDB (with [idb-keyfal](https://www.npmjs.com/package/idb-keyval)) for supported browsers.
 - [ ] More image tools other than converting.
     - [ ] Image Filters (Greyscale, etc.) ([doc](https://www.libvips.org/API/current/libvips-colour.html))

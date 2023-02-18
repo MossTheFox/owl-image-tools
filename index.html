@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <meta name="description"
-    content="Convert or optimize your image files in your browser. All processed on your local machine. Secure and open-sourced." />
+    content="Convert or optimize your image files in your browser. All processed on your local machine." />
 
   <style>
     /* This helps reduce the loading flash on dark mode. */
@@ -50,8 +50,9 @@
 
   <script src="/wasm/vips/vips.js"></script>
 
-  <script>
-    if ('serviceWorker' in navigator) {
+  <script type="module">
+    async function registerSW() {
+      if (!navigator.serviceWorker) return;
       window.addEventListener('load', async () => {
         try {
           const reg = await navigator.serviceWorker.register('/sw.js');
@@ -80,6 +81,8 @@
         }
       });
     }
+
+    await registerSW();
   </script>
 </body>
 

@@ -5,14 +5,13 @@ Changelog
 
 ### Added (TODO)
 
-- Localization for English and Traditional Chinese.
+- Tips for mobile browsers that doesn't support directory input ([ref](https://caniuse.com/input-file-directory)).
 [ ] Tasks can be paused and resume now, as well as retrying failed tasks.
 [ ] Added support to convert single file or specific directory from input list from context menu.
 [ ] Output file list can be kept without clearing now.
 
 ### Fixed (TODO)
 
-[ ] Performance issues caused by context provider rerendering.
 [ ] OPFS file cache created 24h earlier will be automatically cleared on application launch.
 [ ] Safari context menu calling via long touch.
 [ ] JSZip will write to a file (in OPFS or directly to Public FS) when doing compression, rather than put the entire file in the memory.

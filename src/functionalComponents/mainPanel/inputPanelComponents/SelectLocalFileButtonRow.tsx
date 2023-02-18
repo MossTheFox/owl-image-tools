@@ -1,12 +1,13 @@
 import { Box, Button, Typography, Grid, GridProps, Popover } from "@mui/material";
 import { useCallback, useRef, useContext, useMemo, useState } from "react";
 import { FolderOpen, Image as ImageIcon } from '@mui/icons-material';
-import { FS_Mode, isMobileBrowser } from "../../../utils/browserCompability";
+import { FS_Mode, isMobileBrowser, isWebkit } from "../../../utils/browserCompability";
 import { fileListContext as _fileListContext, webkitFileListContext } from "../../../context/fileListContext";
 import useAsync from "../../../hooks/useAsync";
 import { appConfigContext } from "../../../context/appConfigContext";
 import { t } from "i18next";
-import { MarkdownRenderer } from "../../../utils/mdRenderer";
+import { MarkdownRenderer, MarkdownRendererDialogContentText } from "../../../utils/mdRenderer";
+import QuickDialog from "../../../components/styledComponents/QuickDialog";
 
 export default function SelectLocalFileButtonRow(props: GridProps) {
     const { appendInputFsHandles, ready: iterateDirReady } = useContext(_fileListContext);
@@ -42,21 +43,39 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
         setNotifyPopperOpen(false);
     }, []);
 
+    // -- Mobile devices directory picker not supported, show tip dialog --
+    const [dirPickerNotSupportedDialogOpen, setDirPickerNotSupportedDialogOpen] = useState(false);
+    const closeDirPickerNotSupportedDialog = useCallback(() => setDirPickerNotSupportedDialogOpen(false), []);
+    const webkitDirectoryNotSupported = useCallback(() => {
+        if (!siteConfig.tipDisplay['webkitDirectoryNotSupported']) return;
+        setDirPickerNotSupportedDialogOpen(true);
+    }, [siteConfig.tipDisplay]);
+
+    const dirPickerNotSupportedDialogCloseAndDontShowAgain = useCallback(() => {
+        setTipDisplay('webkitDirectoryNotSupported', false);
+        setDirPickerNotSupportedDialogOpen(false);
+    }, [setTipDisplay]);
+    // -- end dir picker not supported tip dialog --
+
     const openFilePicker = useCallback(() => fileInputRef.current?.click(), [fileInputRef]);
     const openWebkitDirectoryPicker = useCallback(() => {
         setNotifyPopperOpen(false);
         setTipDisplay('webkitOpenDirectory', false);
         directoryInputRef.current?.click();
     }, [directoryInputRef, setTipDisplay]);
+
     const openWebkitDirectoryPickerButton = useCallback(() => {
-        if (siteConfig.tipDisplay['webkitOpenDirectory']) {
-            setNotifyPopperOpen(true);
-            return;
+        // ↓ show the tip here
+        if (isMobileBrowser && siteConfig.tipDisplay['webkitDirectoryNotSupported']) {
+            webkitDirectoryNotSupported();
+        } else {
+            if (siteConfig.tipDisplay['webkitOpenDirectory']) {
+                setNotifyPopperOpen(true);
+                return;
+            }
         }
         openWebkitDirectoryPicker();
-    }, [openWebkitDirectoryPicker, siteConfig.tipDisplay]);
-
-
+    }, [openWebkitDirectoryPicker, siteConfig.tipDisplay, webkitDirectoryNotSupported]);
 
     const handleMultipleImageInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.currentTarget.files;
@@ -73,6 +92,22 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
     }, [appendFileList])
 
     return <Grid container {...props}>
+
+        <QuickDialog open={dirPickerNotSupportedDialogOpen} onClose={closeDirPickerNotSupportedDialog}
+            title={t('title.directoryPickerNotSupported')}
+            content={
+                <MarkdownRendererDialogContentText md={t('content.directoryPickerNotSupported')
+                    + (isWebkit && isMobileBrowser ? (t('content.directoryPickerNotSupportedIOS')) : '')
+                } />
+            }
+            keepCloseButton
+            actions={
+                <Button onClick={dirPickerNotSupportedDialogCloseAndDontShowAgain}>
+                    {t('button.dontShowAgain')}
+                </Button>
+            }
+        />
+
         <Grid item xs={6} pr={0.5}>
             <Button fullWidth startIcon={<ImageIcon />} onClick={openFilePicker} variant="outlined"
                 disabled={processing}
@@ -122,7 +157,7 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
                             horizontal: 'left'
                         }}
                     >
-                        <Box p={2} display="flex" flexDirection="column" alignItems="end">
+                        <Box p={2} display="flex" flexDirection="column" alignItems="left">
                             <Box>
                                 <MarkdownRenderer typographyProps={{
                                     color: 'text.secondary',

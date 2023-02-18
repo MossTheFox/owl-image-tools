@@ -57,7 +57,16 @@ export const isWebkit = typeof navigator.standalone === 'boolean';
 
 export const isMacOriOS = /iPad|iPhone|iPod|Mac/.test(navigator.userAgent);
 
-export const isMobileBrowser = navigator.maxTouchPoints > 1;    // Not sure if this is good
+export const isMobileBrowser = (() => {
+    // For Safari:
+    if (isWebkit) {
+        return navigator.maxTouchPoints > 1;
+    }
+    // For non-Safari:
+    // Windows may allow for multi-touch. Test a desktop-only API:
+    if (FS_Mode === 'publicFS') return false;
+    return navigator.maxTouchPoints > 1;
+})();
 
 // File Formats Test (ok whatever)
 

@@ -321,6 +321,7 @@ Notice that some browsers may remove metadata when importing images.`,
         "inputFileListInfo": "File List Info",
         "fileDetail": "File Info",
         "inspectSiteData": "Manage Site Data",
+        "directoryPickerNotSupported": "Directory Picker Not Supported",
     },
     // Keep the period unless it's like "error message: {{msg}}".
     // For Dialog Content, Markdown Parser will be used. Use markdown syntax for formatting.
@@ -387,7 +388,7 @@ This app will run in these three modes depend on the browser it runs on: \n
                 // This one was supposed to be fatal issue but many non-latest browsers still not fully supported.
                 "SIMD": `###### (IMPORTANT) Image processing engine \`wasm-vips\` will not run\n\n` +
                     `Current browser is missing support for [WebAssembly SIMD](https://webassembly.org/roadmap/) `,
-                "SIMDSafari": `For Safari, this issue is only resolved for Preview versions (on current app version released). Try to use this app in Chormium-based browsers or Firefox on desktop devices.`,
+                "SIMDSafari": `For Safari, please use Safari 16.4+. For desktop devices, try using this app in Chormium-based browsers or Firefox on desktop devices then.`,
                 "SIMDNon-Safari": `Try to run this app in the latest version of Google Chorme, Microsoft Edge or Firefox on desktop devices.`,
                 "noFS": `###### File System API Not Supported\n\n` +
                     `**This might make it unstable to processing large number of file.s** Doesn't matter much for small amount of files though.\n\n` +
@@ -430,6 +431,13 @@ Your local files will not be affected.`,
             "clearOPFSTip": "Be careful. If there are some non-empty output file lists that have not been downloaded, clearing OPFS will cause losing access to those files if FS Mode is PrivateFS. \n\nTo check the file structure inside OPFS, you may run `await window.__OPFS_DEBUG()` in the browser console."
         },
         // --- End Site Data Dialog --- //
+
+        "directoryPickerNotSupported": "Mobile browsers does not support directory picker. See: [Directory Input Compatibility](https://caniuse.com/input-file-directory)\n\n"
+            + "Even if the file picker dialog appears, the app may still be unable to access the files you picked.\n\n"
+            + "Try to use the regular import button, or, use Drag and Drop to import files.\n\n",
+
+        "directoryPickerNotSupportedIOS": "**For iOS/iPadOS, you can import directories by dragging them from the Files app and drop them here.**"
+
     }
 } as const;
 
