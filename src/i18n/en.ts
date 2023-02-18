@@ -119,7 +119,7 @@ const en = {
             "filesInTotal": "{{count}} File(s) in total",
             "clearAll": "Clear Files",
             "options": "Options",
-            "webkitDirectoryPickerTip": "The browser may show the file picker dialog with button labeled \"upload\". Your files won't leave your browser. ",
+            "webkitDirectoryPickerTip": "The browser may show the file picker dialog with button labeled \"upload\". \n\nYour files won't leave your browser.",
             "webkitDirectoryPickerTipMobile": "Notice that **mobile browsers** may not support picking directories.\n\nIf supported, you may try to **drag file and folders** to this page from Files app.",
         },
         "configPanel": {
@@ -432,8 +432,8 @@ Your local files will not be affected.`,
         },
         // --- End Site Data Dialog --- //
 
-        "directoryPickerNotSupported": "Mobile browsers does not support directory picker. See: [Directory Input Compatibility](https://caniuse.com/input-file-directory)\n\n"
-            + "Even if the file picker dialog appears, the app may still be unable to access the files you picked.\n\n"
+        "directoryPickerNotSupported": "Mobile browsers does not support directory picker. See: [Directory Input Compatibility](https://caniuse.com/input-file-directory).\n\n"
+            + "The file picker dialog will still be called later, while the app may fail to access the files you picked.\n\n"
             + "Try to use the regular import button, or, use Drag and Drop to import files.\n\n",
 
         "directoryPickerNotSupportedIOS": "**For iOS/iPadOS, you can import directories by dragging them from the Files app and drop them here.**"

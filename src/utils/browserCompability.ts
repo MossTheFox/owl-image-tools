@@ -65,7 +65,10 @@ export const isMobileBrowser = (() => {
     // For non-Safari:
     // Windows may allow for multi-touch. Test a desktop-only API:
     if (FS_Mode === 'publicFS') return false;
-    return navigator.maxTouchPoints > 1;
+    return navigator.maxTouchPoints > 1 && navigator.maxTouchPoints !== 256 ;
+    /*  maxTouchPoints can be 256 when something went wrong. Appeared in Firefox once, so here is an additional step to differ it.
+        https://stackoverflow.com/questions/55833326/wrong-maxtouchpoints-and-ontouchstart-in-document-in-chrome-mobile-emulati/67909182#67909182 
+    */
 })();
 
 // File Formats Test (ok whatever)

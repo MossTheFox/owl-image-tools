@@ -82,7 +82,8 @@
       });
     }
 
-    await registerSW();
+    // Don't use top-level await here...
+    registerSW();
   </script>
 </body>
 

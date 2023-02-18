@@ -45,16 +45,11 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
 
     // -- Mobile devices directory picker not supported, show tip dialog --
     const [dirPickerNotSupportedDialogOpen, setDirPickerNotSupportedDialogOpen] = useState(false);
-    const closeDirPickerNotSupportedDialog = useCallback(() => setDirPickerNotSupportedDialogOpen(false), []);
+
     const webkitDirectoryNotSupported = useCallback(() => {
         if (!siteConfig.tipDisplay['webkitDirectoryNotSupported']) return;
         setDirPickerNotSupportedDialogOpen(true);
     }, [siteConfig.tipDisplay]);
-
-    const dirPickerNotSupportedDialogCloseAndDontShowAgain = useCallback(() => {
-        setTipDisplay('webkitDirectoryNotSupported', false);
-        setDirPickerNotSupportedDialogOpen(false);
-    }, [setTipDisplay]);
     // -- end dir picker not supported tip dialog --
 
     const openFilePicker = useCallback(() => fileInputRef.current?.click(), [fileInputRef]);
@@ -68,6 +63,7 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
         // ↓ show the tip here
         if (isMobileBrowser && siteConfig.tipDisplay['webkitDirectoryNotSupported']) {
             webkitDirectoryNotSupported();
+            return;
         } else {
             if (siteConfig.tipDisplay['webkitOpenDirectory']) {
                 setNotifyPopperOpen(true);
@@ -76,6 +72,19 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
         }
         openWebkitDirectoryPicker();
     }, [openWebkitDirectoryPicker, siteConfig.tipDisplay, webkitDirectoryNotSupported]);
+
+    // The dialog callbacks
+    const closeDirPickerNotSupportedDialog = useCallback(() => {
+        setDirPickerNotSupportedDialogOpen(false);
+        openWebkitDirectoryPicker();
+    }, [openWebkitDirectoryPicker]);
+
+    const dirPickerNotSupportedDialogCloseAndDontShowAgain = useCallback(() => {
+        setTipDisplay('webkitDirectoryNotSupported', false);
+        closeDirPickerNotSupportedDialog();
+    }, [setTipDisplay, closeDirPickerNotSupportedDialog]);
+
+    // End the dialog callbacks
 
     const handleMultipleImageInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.currentTarget.files;
@@ -174,9 +183,11 @@ export default function SelectLocalFileButtonRow(props: GridProps) {
                                     md={t('ui.inputPanel.webkitDirectoryPickerTipMobile')}
                                 />
                             </Box>}
-                            <Button onClick={openWebkitDirectoryPicker}>
-                                {t('button.okAndDontShowAgain')}
-                            </Button>
+                            <Box display="flex" justifyContent="end">
+                                <Button onClick={openWebkitDirectoryPicker}>
+                                    {t('button.okAndDontShowAgain')}
+                                </Button>
+                            </Box>
                         </Box>
                     </Popover>
                 </>

@@ -431,8 +431,8 @@ const zhCN = {
         },
         // --- End Site Data Dialog --- //
 
-        "directoryPickerNotSupported": "移动端浏览器可能不支持导入文件夹，可能是受限于系统文件选择器。参考：[文件夹选择 兼容性](https://caniuse.com/input-file-directory)\n\n"
-            + "即使呼出了文件选择窗口，选择的文件也可能无法被程序获取到。\n\n" 
+        "directoryPickerNotSupported": "移动端浏览器可能不支持导入文件夹，可能是受限于系统文件选择器。参考：[文件夹选择兼容性](https://caniuse.com/input-file-directory)。\n\n"
+            + "稍后依然会尝试呼出一下文件选择窗口。请留意，选择的文件可能无法被程序获取到。\n\n" 
             + "请尝试用普通的文件导入按钮，或者通过 Drag and Drop 来将文件拖入页面吧。\n\n",
 
         "directoryPickerNotSupportedIOS": "**iOS/iPadOS 下，可以从“文件”应用中，将文件夹拖入页面来进行导入。**"

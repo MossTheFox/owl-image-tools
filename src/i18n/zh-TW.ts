@@ -430,8 +430,8 @@ const zhCN = {
             "clearOPFSTip": "請小心，若當前或者其他窗口有在進行轉換任務，如果有使用到私有文件系統作為緩存的話，進行清理可能會導致正在進行的任務出錯。未保存的文件也將被清除。\n\n如果要查看私有文件系統的內容，可以在瀏覽器控制台調用 `await window.__OPFS_DEBUG()`。"
         },
         // --- End Site Data Dialog --- //
-        "directoryPickerNotSupported": "移動端瀏覽器可能不支持導入文件夾，可能是受限於系統文件選擇器。參考：[文件夾選擇 兼容性](https://caniuse.com/input-file-directory)\n\n"
-            + "即使呼出了文件選擇窗口，選擇的文件也可能無法被程序獲取到。\n\n"
+        "directoryPickerNotSupported": "移動端瀏覽器可能不支持導入文件夾，可能是受限於系統文件選擇器。參考：[文件夾選擇兼容性](https://caniuse.com/input-file-directory)。\n\n"
+            + "稍後依然會嘗試呼出一下文件選擇窗口。請留意，選擇的文件可能無法被程序獲取到。\n\n"
             + "請嘗試用普通的文件導入按鈕，或者通過 Drag and Drop 來將文件拖入頁面吧。\n\n",
 
         "directoryPickerNotSupportedIOS": "**iOS/iPadOS 下，可以從“文件”應用中，將文件夾拖入頁面來進行導入。**"
