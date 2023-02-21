@@ -6,6 +6,8 @@ import { parseFileSizeString } from "../../../../utils/randomUtils";
 import ImageFilePreviewBox from "../../../../components/ImageFilePreviewBox";
 import { fileListDialogCallerContext } from "../../../../context/fileListDialog/fileListDialogCallerContext";
 import { t } from "i18next";
+import { isWebkit } from "../../../../utils/browserCompability";
+import useLongTouch from "../../../../hooks/useLongTouch";
 
 // TODO: handle Safari long touch event..... (it doesn't open context menu)
 
@@ -37,6 +39,15 @@ export default function FileTreeItem({
         callContextMenu(anchorPosition);
     }, [callContextMenu]);
 
+    const onLongTapCallback = useCallback((coord: { x: number, y: number }) => {
+        callContextMenu({
+            left: coord.x,
+            top: coord.y
+        });
+    }, [callContextMenu]);
+
+    const longTouchListener = useLongTouch(onLongTapCallback);
+
     // Image Detail in Preview Mode
     const [imageSizeText, setImageSizeText] = useState('');
 
@@ -64,6 +75,8 @@ export default function FileTreeItem({
         ContentProps={{
             // Right Click (or touch hold): Context Menu
             onContextMenu: onRightClick,
+
+            ...isWebkit ? longTouchListener : {}
         }}
 
         label={node.data.kind === 'file' &&

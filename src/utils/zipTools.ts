@@ -43,5 +43,3 @@ export async function createZipInMemory(fileTree: OutputTreeNode[], onUpdate?: (
         }
     })
 }
-
-export { };

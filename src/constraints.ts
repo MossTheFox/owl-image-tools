@@ -1,5 +1,5 @@
-export const VERSION_TEXT = 'Dev 0.1.4';    // <-- Change this when building for prod.
-export const VERSION_TEXT_SECONDARY = '2023-02-18, wasm-vibs version 0.0.4';
+export const VERSION_TEXT = 'Dev 0.1.4b';    // <-- Change this when building for prod.
+export const VERSION_TEXT_SECONDARY = '2023-02-21, wasm-vibs version 0.0.4';
 export const GITHUB_REPO_URL = 'https://github.com/MossTheFox/owl-image-tools';
 
 export const LOCALSTORAGE_KEYS = {

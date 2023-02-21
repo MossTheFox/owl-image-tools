@@ -5,8 +5,7 @@ Changelog
 
 ### Added (TODO)
 
-- Tips for mobile browsers that doesn't support directory input ([ref](https://caniuse.com/input-file-directory)).
-[ ] Tasks can be paused and resume now, as well as retrying failed tasks.
+[ ] Tasks can be paused and resumed, as well as retrying failed tasks.
 [ ] Added support to convert single file or specific directory from input list from context menu.
 [ ] Output file list can be kept without clearing now.
 
@@ -15,6 +14,14 @@ Changelog
 [ ] OPFS file cache created 24h earlier will be automatically cleared on application launch.
 [ ] Safari context menu calling via long touch.
 [ ] JSZip will write to a file (in OPFS or directly to Public FS) when doing compression, rather than put the entire file in the memory.
+
+## Dev 0.1.4b - 2023-02-21
+
+### Added
+- Tips for mobile browsers that doesn't support directory input ([ref](https://caniuse.com/input-file-directory)).
+
+### Fixed
+- Context menu fired by long tap for Safari mobile.
 
 ## Dev 0.1.4 - 2023-02-10
 

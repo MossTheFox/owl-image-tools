@@ -8,6 +8,8 @@ import { OutputTreeNode } from "../../../../context/outputFileListContext";
 import { OutputTreeItemDataDisplayMode } from "../OutputFileListPreview";
 import { outputFileListDialogCallerContext } from "../../../../context/fileListDialog/outputFileListDialogCallerContext";
 import { t } from "i18next";
+import useLongTouch from "../../../../hooks/useLongTouch";
+import { isWebkit } from "../../../../utils/browserCompability";
 
 
 export default function OutputFileTreeItem({
@@ -61,6 +63,15 @@ export default function OutputFileTreeItem({
         callContextMenu(anchorPosition);
     }, [callContextMenu]);
 
+    const onLongTapCallback = useCallback((coord: { x: number, y: number }) => {
+        callContextMenu({
+            left: coord.x,
+            top: coord.y
+        });
+    }, [callContextMenu]);
+
+    const longTouchListener = useLongTouch(onLongTapCallback);
+
     // Image Detail in Preview Mode
     const [imageSizeText, setImageSizeText] = useState('');
 
@@ -88,6 +99,9 @@ export default function OutputFileTreeItem({
         ContentProps={{
             // Right Click (or touch hold): Context Menu
             onContextMenu: onRightClick,
+
+            ...isWebkit ? longTouchListener : {}
+
         }}
 
         label={
