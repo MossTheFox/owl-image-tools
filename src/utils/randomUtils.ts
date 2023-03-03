@@ -157,6 +157,9 @@ export async function estimateStorageUsage(): Promise<
     }
     try {
         const manager = navigator.storage;
+        if (typeof manager.estimate !== 'function') {
+            throw new Error('Storage estimation not supported by current browser.')
+        }
         const estimate = await manager.estimate();
 
         return {

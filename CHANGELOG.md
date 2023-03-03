@@ -15,6 +15,17 @@ Changelog
 [ ] Safari context menu calling via long touch.
 [ ] JSZip will write to a file (in OPFS or directly to Public FS) when doing compression, rather than put the entire file in the memory.
 
+## Dev 0.1.4c - 2023-03-03
+
+### Added
+
+- Tip image for importing directories on iOS/iPadOS devices.
+
+### Fixed
+
+- Missing support for folder context menu long tap for Safari.
+- `navigator.storage` not supported by safari will now give a proper error message to display.
+
 ## Dev 0.1.4b - 2023-02-21
 
 ### Added

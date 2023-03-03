@@ -281,8 +281,13 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
 
     const [outputTrees, setOutputTrees] = useState<OutputTreeNode[]>([]);
     const [outputStatistic, setOutputStatistic] = useState<OutputStatistic>(defaultOutputStatistic);
+
+    /** Record root nodes and Control Rerender */
     const [nodeMap, setNodeMap] = useState<Map<string, OutputTreeNode>>(new Map());
+
+    /** For converting sequence. */
     const nodeArray = useMemo(() => [...nodeMap].map((v) => v[1]), [nodeMap]);
+
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
 
@@ -505,8 +510,6 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
 
     }, [startTime, nodeArray, currentMapNodeIndex, writeLine, convertOne, /* fireAlertSnackbar */]);
 
-
-
     const startConvertion = useCallback((nodes: TreeNode<WebkitFileNodeData>[], config: OutputConfig) => {
         // Original nodes should already be removed from source file list after calling this.
 
@@ -572,6 +575,18 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
         setLoading(false);
         setError(null);
     }, []);
+
+    // const continueTask = useCallback(() => {
+
+    // }, []);
+
+    // const retryOne = useCallback(() => {
+
+    // }, []);
+
+    // const deleteOne = useCallback(() => {
+
+    // }, []);
 
 
     return <outputFileListContext.Provider value={{

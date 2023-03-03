@@ -6,6 +6,8 @@ import { fileListContext as _fileListContext } from "../../../../context/fileLis
 import { OutputTreeNode } from "../../../../context/outputFileListContext";
 import { outputFileListDialogCallerContext } from "../../../../context/fileListDialog/outputFileListDialogCallerContext";
 import { t } from "i18next";
+import useLongTouch from "../../../../hooks/useLongTouch";
+import { isWebkit } from "../../../../utils/browserCompability";
 
 export default function OutputFolderTreeItem({
     node,
@@ -26,10 +28,20 @@ export default function OutputFolderTreeItem({
         callFileListItemContextMenu(anchorPositon, node)
     }, [callFileListItemContextMenu, node]);
 
+    const onLongTapCallback = useCallback((coord: { x: number, y: number }) => {
+        callFileListItemContextMenu({
+            left: coord.x,
+            top: coord.y
+        }, node);
+    }, [callFileListItemContextMenu, node]);
+
+    const longTouchListener = useLongTouch(onLongTapCallback);
+
     return <TreeItem nodeId={node.nodeId}
         ContentProps={{
             // Right Click (or touch hold): Context Menu
-            onContextMenu: callContextMenu
+            onContextMenu: callContextMenu,
+            ...isWebkit ? longTouchListener : {}
         }}
 
         label={

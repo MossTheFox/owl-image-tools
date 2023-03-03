@@ -387,7 +387,7 @@ const zhCN = {
                 // This one was supposed to be fatal issue but many non-latest browsers still not fully supported.
                 "SIMD": `###### (重要) 圖像處理引擎 wasm-vips 無法正常運行\n\n` +
                     `當前瀏覽器對於 WebAssembly SIMD 的支持存在問題。 `,
-                "SIMDSafari": `對於 Safari 瀏覽器，請使用 Safari 16.4+。如果是桌面設備，請用 Chorme 或 Firefox 瀏覽器來使用此應用吧。`,
+                "SIMDSafari": `對於 Safari 瀏覽器，請使用 iOS/iPadOS 16.4+。如果是桌面設備，請用 Chorme 或 Firefox 瀏覽器來使用此應用吧。`,
                 "SIMDNon-Safari": `請嘗試在版本較新的 Google Chorme、Microsoft Edge 或 Firefox 瀏覽器來使用此應用吧。 `,
                 "noFS": `###### 不支持 File System API\n\n` +
                     `**這可能會影響圖片的批量轉換功能。**單次或少量的文件轉換操作不會受到影響。\n\n` +
@@ -434,7 +434,7 @@ const zhCN = {
             + "稍後依然會嘗試呼出一下文件選擇窗口。請留意，選擇的文件可能無法被程序獲取到。\n\n"
             + "請嘗試用普通的文件導入按鈕，或者通過 Drag and Drop 來將文件拖入頁面吧。\n\n",
 
-        "directoryPickerNotSupportedIOS": "**iOS/iPadOS 下，可以從“文件”應用中，將文件夾拖入頁面來進行導入。**"
+        "directoryPickerNotSupportedIOS": "**iOS/iPadOS 下，可以從“文件”應用中，將文件夾拖入頁面來進行導入。**\n\n![拖拽目錄導入示例示例圖片](/image/drag-and-drop-tip.webp)"
     },
 } as const;
 

@@ -17,6 +17,7 @@
     "@mui/material": "^5.11.4",
     "i18next": "^22.4.9",
     "i18next-browser-languagedetector": "^7.0.1",
+    "idb-keyval": "^6.2.0",
     "jszip": "^3.10.1",
     "marked": "^4.2.12",
     "react": "^18.2.0",

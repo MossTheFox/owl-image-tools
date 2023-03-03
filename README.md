@@ -91,7 +91,7 @@ workbox generateSW workbox-config.cjs
 - [ ] 'Pause' and 'Resume' for the tasks, rather than only allowing aborting.
 - [ ] Allow skipping tasks that seems to freeze the worker.
     - [ ] Vips loader Worker should be able to response to a signal call to indicate that it's not blocked. 
-- [ ] Save the output directory handle in the indexedDB (with [idb-keyfal](https://www.npmjs.com/package/idb-keyval)) for supported browsers.
+- [ ] Save the output directory handle in the indexedDB (with [idb-keyval](https://www.npmjs.com/package/idb-keyval)) for supported browsers.
 - [ ] More image tools other than converting.
     - [ ] Image Filters (Greyscale, etc.) ([doc](https://www.libvips.org/API/current/libvips-colour.html))
     - [ ] Resize Images ([doc](https://www.libvips.org/API/current/libvips-resample.html#vips-resize) and [wiki](https://github.com/libvips/libvips/wiki/HOWTO----Image-shrinking)) 

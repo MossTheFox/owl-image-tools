@@ -4,6 +4,8 @@ import { FolderOpen } from "@mui/icons-material";
 import { useContext, useCallback } from "react";
 import { fileListContext as _fileListContext, TreeNode, webkitFileListContext, WebkitFileNodeData } from "../../../../context/fileListContext";
 import { fileListDialogCallerContext } from "../../../../context/fileListDialog/fileListDialogCallerContext";
+import useLongTouch from "../../../../hooks/useLongTouch";
+import { isWebkit } from "../../../../utils/browserCompability";
 
 export default function FolderTreeItem({
     node,
@@ -18,8 +20,6 @@ export default function FolderTreeItem({
 }) {
     const { callFileListItemContextMenu } = useContext(fileListDialogCallerContext);
 
-    const webkitFile = useContext(webkitFileListContext);
-
     const callContextMenu = useCallback((e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -28,13 +28,23 @@ export default function FolderTreeItem({
             left: e.clientX
         };
 
-        callFileListItemContextMenu(anchorPositon, node,)
+        callFileListItemContextMenu(anchorPositon, node);
     }, [node, callFileListItemContextMenu]);
+
+    const onLongTapCallback = useCallback((coord: { x: number, y: number }) => {
+        callFileListItemContextMenu({
+            left: coord.x,
+            top: coord.y
+        }, node);
+    }, [callFileListItemContextMenu, node]);
+
+    const longTouchListener = useLongTouch(onLongTapCallback);
 
     return <TreeItem nodeId={node.nodeId}
         ContentProps={{
             // Right Click (or touch hold): Context Menu
-            onContextMenu: callContextMenu
+            onContextMenu: callContextMenu,
+            ...isWebkit ? longTouchListener : {}
         }}
 
         label={

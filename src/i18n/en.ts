@@ -388,7 +388,7 @@ This app will run in these three modes depend on the browser it runs on: \n
                 // This one was supposed to be fatal issue but many non-latest browsers still not fully supported.
                 "SIMD": `###### (IMPORTANT) Image processing engine \`wasm-vips\` will not run\n\n` +
                     `Current browser is missing support for [WebAssembly SIMD](https://webassembly.org/roadmap/) `,
-                "SIMDSafari": `For Safari, please use Safari 16.4+. For desktop devices, try using this app in Chormium-based browsers or Firefox on desktop devices then.`,
+                "SIMDSafari": `For Safari, please use Safari on iOS/iPadOS 16.4+. For desktop devices, try using this app in Chormium-based browsers or Firefox on desktop devices then.`,
                 "SIMDNon-Safari": `Try to run this app in the latest version of Google Chorme, Microsoft Edge or Firefox on desktop devices.`,
                 "noFS": `###### File System API Not Supported\n\n` +
                     `**This might make it unstable to processing large number of file.s** Doesn't matter much for small amount of files though.\n\n` +
@@ -436,7 +436,7 @@ Your local files will not be affected.`,
             + "The file picker dialog will still be called later, while the app may fail to access the files you picked.\n\n"
             + "Try to use the regular import button, or, use Drag and Drop to import files.\n\n",
 
-        "directoryPickerNotSupportedIOS": "**For iOS/iPadOS, you can import directories by dragging them from the Files app and drop them here.**"
+        "directoryPickerNotSupportedIOS": "**For iOS/iPadOS, you can import directories by dragging them from the Files app and drop them here.**\n\n![Example on dragging from Files App to import directory](/image/drag-and-drop-tip.webp)"
 
     }
 } as const;
