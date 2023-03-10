@@ -7,6 +7,7 @@
 
 import JSZip from "jszip";
 import { OutputTreeNode } from "../context/outputFileListContext";
+import { renameFileForDuplication } from "./FS";
 
 function getPathFromNode(node: OutputTreeNode, root?: OutputTreeNode) {
     let path = node.name;
@@ -21,10 +22,15 @@ function getPathFromNode(node: OutputTreeNode, root?: OutputTreeNode) {
 /** Path example: `nested/test.png` */
 export async function createZipInMemory(fileTree: OutputTreeNode[], onUpdate?: (num: number) => void) {
     const zip = new JSZip();
-    // Folder. Here we begin
+    const existedFilePath: string[] = [];
     for (const node of fileTree) {
         if (node.kind === 'file' && node.file) {
-            zip.file(node.name, node.file);
+            let path = node.name;
+            while (existedFilePath.includes(path)) {
+                path = renameFileForDuplication(path);
+            }
+            zip.file(path, node.file);
+            existedFilePath.push(path);
         }
         if (node.kind === 'directory') {
             for (const child of node.flatChildrenFilesOnly) {
@@ -32,8 +38,13 @@ export async function createZipInMemory(fileTree: OutputTreeNode[], onUpdate?: (
                     // Skip empty
                     continue;
                 }
-                const path = getPathFromNode(child);
+                let path = getPathFromNode(child);
+                while (existedFilePath.includes(path)) {
+                    path = renameFileForDuplication(path);
+                }
                 zip.file(path, child.file);
+                existedFilePath.push(path);
+
             }
         }
     }

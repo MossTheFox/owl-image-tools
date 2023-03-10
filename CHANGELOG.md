@@ -15,6 +15,12 @@ Changelog
 [ ] Safari context menu calling via long touch.
 [ ] JSZip will write to a file (in OPFS or directly to Public FS) when doing compression, rather than put the entire file in the memory.
 
+## Dev 0.1.4d - 2023-03-10
+
+### Fixed
+
+- Fixed an issue caused the ZIP generation not renaming files correctly.
+
 ## Dev 0.1.4c - 2023-03-03
 
 ### Added

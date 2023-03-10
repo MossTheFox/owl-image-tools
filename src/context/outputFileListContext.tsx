@@ -142,7 +142,7 @@ export async function getFileHandle(node: OutputTreeNode, root: FileSystemDirect
         filename = renameFileForDuplication(filename);
         deadloop--;
         if (deadloop < 0) {
-            throw new Error('Error when rename saved file: Too many retry times.', {
+            throw new Error('Error when renaming saved file: Too many retry times.', {
                 cause: 'whatThe'
             });
         }
