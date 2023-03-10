@@ -135,10 +135,13 @@ export async function getFileHandle(node: OutputTreeNode, root: FileSystemDirect
 
     // Now check if the file exises.
 
-
     let filename = node.name;
     let deadloop = 1000;
-    while (await isFileExists(filename, handle)) {
+    const existedFiles: string[] = [];
+    for await (const [name, _] of handle.entries()) {
+        existedFiles.push(name);
+    }
+    while (await isFileExists(filename, existedFiles)) {
         filename = renameFileForDuplication(filename);
         deadloop--;
         if (deadloop < 0) {

@@ -20,6 +20,7 @@ Changelog
 ### Fixed
 
 - Fixed an issue caused the ZIP generation not renaming files correctly.
+- Fixed performance issue when trying to rename files.
 
 ## Dev 0.1.4c - 2023-03-03
 

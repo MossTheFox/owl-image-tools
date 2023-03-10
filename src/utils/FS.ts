@@ -34,11 +34,15 @@ export async function getFileHandleViaPath(path: string, root: FileSystemDirecto
     // wait will i really use this thing?
 }
 
-export async function isFileExists(filename: string, dirHandle: FileSystemDirectoryHandle) {
+export async function isFileExists(filename: string, dirHandleOrFileNameArray: FileSystemDirectoryHandle | string[]) {
     let existed = false;
     try {
-        const check = await dirHandle.getFileHandle(filename);
-        existed = true;
+        if (Array.isArray(dirHandleOrFileNameArray)) {
+            existed = dirHandleOrFileNameArray.includes(filename);
+        } else {
+            const check = await dirHandleOrFileNameArray.getFileHandle(filename);
+            existed = true;
+        }
     } catch (err) {
         if (err instanceof DOMException && (
             err.name === 'NotFoundError' || err.name === 'TypeMismatchError'
