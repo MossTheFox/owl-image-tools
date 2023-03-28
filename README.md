@@ -76,7 +76,8 @@ workbox generateSW workbox-config.cjs
 
 ## Known Issues
 
-When FS Mode is OPFS, the temp files will not be automatically cleaned up if the output file list is not manually cheared.
+- When FS Mode is OPFS, the temp files will not be automatically cleaned up if the output file list is not manually cheared.
+- Still cannot run on Safari due to an Object not cloneable error.
 
 ## TODOs
 

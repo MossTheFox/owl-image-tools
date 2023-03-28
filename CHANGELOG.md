@@ -19,7 +19,7 @@ Changelog
 
 ### Fixed
 
-- Fixed an issue on Safari that `Uint8Array` cannot be cloned.
+- <del>Fixed an issue on Safari that `Uint8Array` cannot be cloned.</del> Not Fixed. Error cause to be tested.
 
 ## Dev 0.1.4d - 2023-03-10
 
