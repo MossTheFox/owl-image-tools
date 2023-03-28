@@ -49,7 +49,6 @@ export default function useLongTouch(
 
         const timeout = setTimeout(() => {
             callback(startPosition);
-            console.log("CALL")
         }, delay);
 
         return () => {

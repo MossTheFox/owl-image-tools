@@ -15,6 +15,12 @@ Changelog
 [ ] Safari context menu calling via long touch.
 [ ] JSZip will write to a file (in OPFS or directly to Public FS) when doing compression, rather than put the entire file in the memory.
 
+## Dev 0.1.4e - 2023-03-28
+
+### Fixed
+
+- Fixed an issue on Safari that `Uint8Array` cannot be cloned.
+
 ## Dev 0.1.4d - 2023-03-10
 
 ### Fixed

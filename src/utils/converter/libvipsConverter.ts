@@ -195,7 +195,7 @@ function fireVipsWorkerTask(
     flatten = false,
     defaultBackgroundVector = [255, 255, 255]
 ) {
-    return new Promise<Uint8Array>((resolve, reject) => {
+    return new Promise<Blob>((resolve, reject) => {
         try {
             // INIT
             if (!worker) {
@@ -222,12 +222,12 @@ function fireVipsWorkerTask(
                 const data = e.data as {
                     code: 'ok' | 'error',
                     message: string,
-                    data: Uint8Array | Error
+                    data: Blob | Error
                 };
 
                 // Handle Errors
                 if (data.code === 'error' && data.message) {
-
+                    import.meta.env.DEV && console.log(data);
                     reject(data.data as Error);
                     if (data.data instanceof Error && (
                         data.data.name === 'RuntimeError'   // wait this seems not right
@@ -239,10 +239,12 @@ function fireVipsWorkerTask(
                 }
 
                 // Resolve here
-                if (data.code === 'ok' && data.data instanceof Uint8Array) {
+                if (data.code === 'ok' && data.data instanceof Blob) {
                     resolve(data.data);
                     return;
                 }
+
+                reject(new Error('Unexpected Worker Response. '));
             };
 
             // CALL

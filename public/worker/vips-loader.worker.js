@@ -56,7 +56,7 @@ function initVips() {
  * @param writeOptions Passed as second param for `writeToBuffer`.
  * @param flatten Do the flatten if has alpha channel.
  * @param defaultBackgroundVector If do the flatten or losing alpha channel data, the background.
- * @returns Uint8Array for output file buffer.
+ * @returns {Promise<Uint8Array>} for output file buffer.
  */
 async function vipsCall(
     uint8Array,
@@ -88,7 +88,7 @@ async function vipsCall(
  * 
  * @param {'ok' | 'error'} code 
  * @param {string} message 
- * @param {Uint8Array | Error} data
+ * @param {Blob | Error} data
  */
 function postBackMessage(code, message, data) {
     self.postMessage({
@@ -113,7 +113,8 @@ self.addEventListener('message', async (e) => {
 
     try {
         const result = await vipsCall(...data.args);
-        postBackMessage('ok', 'done', result);
+        // Safari will throw error if trying to post a Uint8Array. Convert it to Blob.
+        postBackMessage('ok', 'done', new Blob([result.buffer]));
 
     } catch (err) {
         postBackMessage('error', 'Error occurred.', err);
