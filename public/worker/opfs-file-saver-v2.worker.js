@@ -29,10 +29,10 @@ function postBackMessage(code, message, data) {
 self.addEventListener('message', async (e) => {
     try {
         /**
-         * @type {{ type: 'saveFile', path: string, file: Blob, debug?: boolean, override?: boolean }}
+         * @type {{ type: 'saveFile', path: string, file: ArrayBuffer, debug?: boolean, override?: boolean }}
          */
         const data = e.data;
-        if (data && data.type === 'saveFile' && typeof data.path === 'string' && data.file instanceof Blob) {
+        if (data && data.type === 'saveFile' && typeof data.path === 'string' && data.file instanceof ArrayBuffer) {
 
             if (data.debug) {
                 console.log('Request: ', data);
@@ -61,7 +61,7 @@ self.addEventListener('message', async (e) => {
                     fileName = renameFileForDuplication(fileName);
                     deadloop--;
                     if (deadloop < 0) {
-                        throw new Error('Error when rename saved file: Too many retry times.');
+                        throw new Error('Error when renaming saved file: Too many retry times.');
                     }
                 }
             }
@@ -71,7 +71,7 @@ self.addEventListener('message', async (e) => {
 
             // Prepare the buffer and handle.
             // need to ensure the buffer is readable
-            const buffer = new Uint8Array(await data.file.arrayBuffer());
+            const buffer = new Uint8Array(data.file);
 
             /**
              * @type {FileSystemSyncAccessHandle}

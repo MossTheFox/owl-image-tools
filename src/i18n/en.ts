@@ -134,6 +134,7 @@ const en = {
             "PNG": "PNG Settings",
             "GIF": "GIF Settings",
             "WEBP": "WEBP Settings",
+            "AVIF": "AVIF Settings",
             "AVIF_notAvailable": "AVIF Settings (Not available yet)",
             "resetToDefault": "Reset to Default",
             "options": "Options",

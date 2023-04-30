@@ -92,6 +92,13 @@ export type OutputConfig = {
     /** Quantisation effort */
     // GIF_effort: number;
 
+    AVIF_Q: number,
+    AVIF_bitdepth: number,
+    AVIF_loseless: boolean,
+    AVIF_compression: 'hevc' | 'avc' | 'jpeg' | 'av1',
+    AVIF_subsampleMode: 'auto' | 'on' | 'off',
+    AVIF_keepAlphaChannel: boolean,
+
 };
 
 export const defaultOutputConfig: OutputConfig = {
@@ -126,6 +133,12 @@ export const defaultOutputConfig: OutputConfig = {
     GIF_interframeMaxError: 0,
     GIF_interpaletteMaxError: 3,
     GIF_interlace: false,
+    AVIF_Q: 50,
+    AVIF_bitdepth: 12,
+    AVIF_loseless: false,
+    AVIF_compression: 'hevc',
+    AVIF_subsampleMode: 'auto',
+    AVIF_keepAlphaChannel: true,
 };
 
 const TIPS_DIALOG_FLAGS = [

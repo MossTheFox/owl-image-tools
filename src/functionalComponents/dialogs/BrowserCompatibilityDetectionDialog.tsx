@@ -29,8 +29,10 @@ export default function BrowserCompatibilityDetectionDialog() {
     const [open, setOpen] = useState(severity === 'error' ||
         (
             siteConfig.tipDisplay['browserCompatibility'] &&
-            (!compatibilityTestResult.WASM || !compatibilityTestResult.webWorker
-                || FS_Mode === 'noFS' || storageDisabled || !clipboardSupport)
+            (!compatibilityTestResult.WASM
+                || !compatibilityTestResult.webWorker
+                || (FS_Mode === 'noFS' && !isWebkit)
+                || storageDisabled || !clipboardSupport)
         )
     );
 

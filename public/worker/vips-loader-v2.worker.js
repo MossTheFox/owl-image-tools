@@ -50,7 +50,7 @@ function initVips() {
 
 /**
  * Main fn. Catch AbortError if needed.
- * @param uint8Array Input file buffer.
+ * @param {Uint8Array | ArrayBuffer} uint8Array Input file buffer.
  * @param loadStrProps Passed for `newFromBuffer` when creating a Vips Image.
  * @param writeFormatString Passed to `writeToBuffer` for specifying output format.
  * @param writeOptions Passed as second param for `writeToBuffer`.
@@ -68,6 +68,10 @@ async function vipsCall(
 ) {
     if (!vips) {
         vips = await initVips();
+    }
+    if (!(uint8Array instanceof Uint8Array)) {
+        // likely to be a regular ArrayBuffer due to some change.
+        uint8Array = new Uint8Array(uint8Array);
     }
     let img = vips.Image.newFromBuffer(uint8Array, loadStrProps);
     if (flatten && img.hasAlpha()) {
@@ -88,7 +92,7 @@ async function vipsCall(
  * 
  * @param {'ok' | 'error'} code 
  * @param {string} message 
- * @param {Blob | Error} data
+ * @param {ArrayBuffer | Error} data
  */
 function postBackMessage(code, message, data) {
     self.postMessage({
@@ -107,14 +111,14 @@ self.addEventListener('message', async (e) => {
         Turn `arguments` into array before passing to the worker. ([...arguments])
     */
     if (data.type !== 'run' || !Array.isArray(data.args)) {
-        postBackMessage('error', 'Unknown operation');
+        postBackMessage('error', 'Unknown operation', new Error('Invalid Operation.'));
         return;
     }
 
     try {
         const result = await vipsCall(...data.args);
-        // Safari will throw error if trying to post a Uint8Array. Convert it to Blob.
-        postBackMessage('ok', 'done', new Blob([result.buffer]));
+        // Safari will throw error if trying to post a Uint8Array. Convert it to ArrayBuffer.
+        postBackMessage('ok', 'done', result.buffer);
 
     } catch (err) {
         postBackMessage('error', 'Error occurred.', err);

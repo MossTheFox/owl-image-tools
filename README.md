@@ -77,7 +77,6 @@ workbox generateSW workbox-config.cjs
 ## Known Issues
 
 - When FS Mode is OPFS, the temp files will not be automatically cleaned up if the output file list is not manually cheared.
-- Still cannot run on Safari due to an Object not cloneable error.
 
 ## TODOs
 
@@ -86,6 +85,7 @@ workbox generateSW workbox-config.cjs
 - [x] Modify the hardcoded text to support localization.
     - [x] zh-CN and zh-TW
     - [x] English 
+- [x] Update to wasm-vips 0.0.5 with AVIF support when it's ready.
 - [ ] Copy image to clipboard in the context menu.
     - [ ] Test for different browsers:
         - Safari: [Allow `image/png` Only](https://webkit.org/blog/10855/async-clipboard-api/);
@@ -103,7 +103,6 @@ workbox generateSW workbox-config.cjs
 - [ ] A simpler Settings panel for processing filters or changing resolution for images.
     - To save the final result, show menus like "Save As" rather than using the verbose converttion config panel. 
 - [ ]  Add page loading background when static files are loading (the bundle size is now larger than 800 KB, which is probably unfriendly for slow networks).
-- [ ] Update to wasm-vips 0.0.5 with AVIF support when it's ready.
 
 ## License
 

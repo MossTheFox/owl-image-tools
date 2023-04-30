@@ -34,7 +34,7 @@ export async function convertToJPEG(file: Blob, config = {
     defaultBackground: "#ffffff"
 }) {
     const result = await fireVipsWorkerTask(
-        await blobToUint8Array(file), '',
+        await blobToArrayBuffer(file), '',
         '.jpg', {
         'Q': config.Q,
         'strip': config.strip,
@@ -59,7 +59,7 @@ export async function convertToPNG(file: Blob, config = {
 }) {
 
     const result = await fireVipsWorkerTask(
-        await blobToUint8Array(file), '',
+        await blobToArrayBuffer(file), '',
         '.png', {
         'compression': config.compression,
         'strip': config.strip,
@@ -89,7 +89,7 @@ export async function convertToWebp(file: Blob, config = {
     const props = isMultiframePic(file.type) ? 'n=-1' : '';
 
     const result = await fireVipsWorkerTask(
-        await blobToUint8Array(file), props,
+        await blobToArrayBuffer(file), props,
         '.webp', {
         'Q': config.Q,
         'strip': config.strip,
@@ -119,16 +119,49 @@ export async function convertToGIF(file: Blob, config = {
 }) {
     const props = isMultiframePic(file.type) ? 'n=-1' : '';
     const result = await fireVipsWorkerTask(
-        await blobToUint8Array(file), props,
+        await blobToArrayBuffer(file), props,
         '.gif', {
         'bitdepth': config.bitdepth,
         'strip': config.strip,
         'effort': config.effort,
-        // interlace: config.interlace,
+        // 'interlace': config.interlace,
         'dither': config.dither,
         'interframe-maxerror': config["interframe-maxerror"],
         'interpalette-maxerror': config["interpalette-maxerror"],
     },
+        config.flatten, parseBackground(config.defaultBackground)
+    );
+    return new Blob([result], {
+        type: 'image/gif',
+    });
+}
+
+export async function convertToAVIF(file: Blob, config = {
+    bitdepth: 12,
+    effort: 4,
+
+    Q: 50,
+    loseless: false,
+    /** `'hevc' | 'avc' | 'jpeg' | 'av1'` */
+    compression: 'hevc',
+    'subsample-mode': 'auto',
+
+    strip: false,
+    flatten: false,
+    defaultBackground: "#ffffff",
+}) {
+    const result = await fireVipsWorkerTask(
+        await blobToArrayBuffer(file), '',
+        '.avif',
+        {
+            'bitdepth': config.bitdepth,
+            'effort': config.effort,
+            'Q': config.Q,
+            'loseless': config.loseless,
+            'compression': config.compression,
+            'subsample-mode': config["subsample-mode"],
+            'strip': config.strip,
+        },
         config.flatten, parseBackground(config.defaultBackground)
     );
     return new Blob([result], {
@@ -155,7 +188,7 @@ export function parseBackground(hex: string) {
 /**
  * Any error that could occur due to buffer being unreadable should be exposed here.
  */
-const blobToUint8Array = async (blob: Blob) => {
+const blobToArrayBuffer = async (blob: Blob) => {
     let arrayBuffer: ArrayBuffer | null = null;
     try {
         arrayBuffer = await blob.arrayBuffer();
@@ -163,12 +196,12 @@ const blobToUint8Array = async (blob: Blob) => {
     } catch (err) {
         throw errorBuilder('Unable to read File', 'ImageFileUnreadable');
     }
-    const buffer = new Uint8Array(arrayBuffer);
-    return buffer;
+    // const buffer = new Uint8Array(arrayBuffer);
+    return arrayBuffer;
 };
 
 export function isFormatAcceptedByVips(fileExtention: string) {
-    return ['png', 'jpg', 'jpeg', 'webp', 'gif', 'tif', 'tiff'].includes(fileExtention.toLowerCase());
+    return ['png', 'jpg', 'jpeg', 'webp', 'gif', 'tif', 'tiff', 'avif', /* 'heif', */ 'svg'].includes(fileExtention.toLowerCase());
 }
 
 const isMultiframePic = (type: string) => {
@@ -187,7 +220,7 @@ let worker: Worker | null = null;
  * @returns 
  */
 function fireVipsWorkerTask(
-    uint8Array: Parameters<typeof Vips.Image.newFromBuffer>[0],
+    uint8Array: ArrayBuffer,
     loadStrProps: Parameters<typeof Vips.Image.newFromBuffer>[1],
     writeFormatString: Parameters<Vips.Image['writeToBuffer']>[0],
     writeOptions: Parameters<Vips.Image['writeToBuffer']>[1],
@@ -195,7 +228,7 @@ function fireVipsWorkerTask(
     flatten = false,
     defaultBackgroundVector = [255, 255, 255]
 ) {
-    return new Promise<Blob>((resolve, reject) => {
+    return new Promise<ArrayBuffer>((resolve, reject) => {
         try {
             // INIT
             if (!worker) {
@@ -222,7 +255,7 @@ function fireVipsWorkerTask(
                 const data = e.data as {
                     code: 'ok' | 'error',
                     message: string,
-                    data: Blob | Error
+                    data: ArrayBuffer | Error
                 };
 
                 // Handle Errors
@@ -239,7 +272,7 @@ function fireVipsWorkerTask(
                 }
 
                 // Resolve here
-                if (data.code === 'ok' && data.data instanceof Blob) {
+                if (data.code === 'ok' && data.data instanceof ArrayBuffer) {
                     resolve(data.data);
                     return;
                 }
@@ -251,7 +284,7 @@ function fireVipsWorkerTask(
             worker.postMessage({
                 type: 'run',
                 // eslint-disable-next-line
-                args: [...arguments]    
+                args: [...arguments]
                 // ↑ the worker will call the relatived function with the EXACT same arguments.
                 // see `vipsCall` function in `_libvipsConverterTemp.ts`.
             });

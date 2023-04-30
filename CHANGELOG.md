@@ -1,25 +1,21 @@
 Changelog
 ----
 
-## Dev 0.1.5 - TBA
+## Dev 0.1.5 - 2023-04-30
 
-### Added (TODO)
+### Added
 
-[ ] Tasks can be paused and resumed, as well as retrying failed tasks.
-[ ] Added support to convert single file or specific directory from input list from context menu.
-[ ] Output file list can be kept without clearing now.
-
-### Fixed (TODO)
-
-[ ] OPFS file cache created 24h earlier will be automatically cleared on application launch.
-[ ] Safari context menu calling via long touch.
-[ ] JSZip will write to a file (in OPFS or directly to Public FS) when doing compression, rather than put the entire file in the memory.
-
-## Dev 0.1.4e - 2023-03-28
+- AVIF support.
 
 ### Fixed
 
-- <del>Fixed an issue on Safari that `Uint8Array` cannot be cloned.</del> Not Fixed. Error cause to be tested.
+- Safari will be forced to work in no-FS mode due to some weird issues.
+
+## Dev 0.1.4e2.1 - 2023-03-30
+
+### Fixed
+
+- Fixed an issue on Safari that saving files in OPFS will fail due to Object not able to be cloned.
 
 ## Dev 0.1.4d - 2023-03-10
 

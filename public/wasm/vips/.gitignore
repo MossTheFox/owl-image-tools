@@ -1,7 +1,0 @@
-vips*
-# Note: Inside this folder is all the wasm and worker files of wasm-vips.
-# File list: (for wasm-vips 0.0.4)
-# - vips.js
-# - vips.worker.js
-# - vips.wasm
-# - vips-jxl.wasm

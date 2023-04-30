@@ -29,7 +29,10 @@ export const FS_Mode = (() => {
     // DEBUG
     // return 'privateFS';
     if (compatibilityTestResult.publicFS) return 'publicFS';
-    if (compatibilityTestResult.privateFS) return 'privateFS';
+    if (compatibilityTestResult.privateFS
+        // Safari force no-FS Mode
+        && typeof navigator.standalone !== 'boolean'
+    ) return 'privateFS';
     return 'noFS';
 })();
 
@@ -65,7 +68,7 @@ export const isMobileBrowser = (() => {
     // For non-Safari:
     // Windows may allow for multi-touch. Test a desktop-only API:
     if (FS_Mode === 'publicFS') return false;
-    return navigator.maxTouchPoints > 1 && navigator.maxTouchPoints !== 256 ;
+    return navigator.maxTouchPoints > 1 && navigator.maxTouchPoints !== 256;
     /*  maxTouchPoints can be 256 when something went wrong. Appeared in Firefox once, so here is an additional step to differ it.
         https://stackoverflow.com/questions/55833326/wrong-maxtouchpoints-and-ontouchstart-in-document-in-chrome-mobile-emulati/67909182#67909182 
     */

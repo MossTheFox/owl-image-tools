@@ -26,8 +26,8 @@ let vips: (typeof Vips) | null = null;
 // (Not sure if there's a way to build with plug-ins but here is what is already ready to use)
 // avif will be in 0.0.5
 /* DEBUG OUTPUT:
-    vips version:                  8.13.3
-    Emscripten version:            3.1.24
+    vips version:                  8.14.2
+    Emscripten version:            3.1.37
     Concurrency:                   8
     Cache max mem:                 52428800
     Cache max operations:          100
@@ -39,6 +39,7 @@ let vips: (typeof Vips) | null = null;
     Open files:                    0
     JPEG support:                  yes
     JPEG XL support:               yes
+    AVIF support:                  yes
     PNG support:                   yes
     TIFF support:                  yes
     WebP support:                  yes
@@ -46,6 +47,8 @@ let vips: (typeof Vips) | null = null;
     SVG load:                      no
     Text rendering support:        no
 */
+
+const VIPS_LIB_START_URL = '/wasm/vips-0.0.5'
 
 async function initVips() {
     // firefox doesn't supprot dynamic module import in workers (https://bugzil.la/1540913)
@@ -58,21 +61,25 @@ async function initVips() {
     }
     if (!vips) {
         vips = await VipsCreateModule({
-            // local file ** important **
-            mainScriptUrlOrBlob: '/wasm/vips/vips.js',
-            dynamicLibraries: ["/wasm/vips/vips-jxl.wasm"], // To fix an issue for parsing URLs when running in workers 
+
+            mainScriptUrlOrBlob: `${VIPS_LIB_START_URL}/vips.js`,
+            dynamicLibraries: [
+                `vips-jxl.wasm`,
+                `vips-heif.wasm`,
+                `vips-resvg.wasm`
+            ],
             locateFile(url, scriptDirectory) {
-                return `/wasm/vips/${url}`;
+                return `${VIPS_LIB_START_URL}/${url}`;
             },
             print(str) {
-                import.meta.env.DEV && console.log(str);
+                console.log(str);
             },
             printErr(str) {
-                import.meta.env.DEV && console.warn(str);
+                console.warn(str);
             },
             onAbort(what) {
-                import.meta.env.DEV && console.warn(what);
-            }
+                console.warn(what);
+            },
         });
         import.meta.env.DEV && console.log(`${vips.version(0)}.${vips.version(1)}.${vips.version(2)}`);
     }

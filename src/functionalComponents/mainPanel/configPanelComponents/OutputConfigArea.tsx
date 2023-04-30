@@ -10,6 +10,7 @@ import GIFConfig from "./perFormatConfigs/GIFConfig";
 import JPEGConfig from "./perFormatConfigs/JPEGConfig";
 import PNGConfig from "./perFormatConfigs/PNGConfig";
 import WEBPConfig from "./perFormatConfigs/WEBPConfig";
+import AVIFConfig from "./perFormatConfigs/AVIFConfig";
 
 export default function OutputConfigArea(props: BoxProps) {
 
@@ -83,8 +84,12 @@ export default function OutputConfigArea(props: BoxProps) {
                 <WEBPConfig />
             </ConfigPanelAccordion>
 
-            <ConfigPanelAccordion disabled recordIndex={6} summary={t('ui.configPanel.AVIF_notAvailable')}>
-                TODO
+            <ConfigPanelAccordion recordIndex={6} summary={t('ui.configPanel.AVIF')}>
+                <AVIFConfig />
+            </ConfigPanelAccordion>
+
+            <ConfigPanelAccordion recordIndex={7} summary={'SVG 设置 (仅读取)'}>
+                {/* <AVIFConfig /> */}
             </ConfigPanelAccordion>
         </Box>
 

@@ -125,12 +125,15 @@ export function writeOPFSFile(path: string, blob: Blob) {
             });
 
             // ok now
-            worker.postMessage({
-                type: 'saveFile',
-                path,
-                file: blob,
-                debug: import.meta.env.DEV
-            });
+            blob.arrayBuffer().then((buffer) => {
+                worker.postMessage({
+                    type: 'saveFile',
+                    path,
+                    file: buffer,
+                    debug: import.meta.env.DEV
+                });
+            }).catch(err => reject(err));
+
         } catch (err) {
             reject(err);
         }

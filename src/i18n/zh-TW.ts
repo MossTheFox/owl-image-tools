@@ -135,6 +135,7 @@ const zhCN = {
             "PNG": "PNG 設置",
             "GIF": "GIF 設置",
             "WEBP": "WEBP 設置",
+            "AVIF": "AVIF 設置",
             "AVIF_notAvailable": "AVIF 設置 (暫時不可用)",
             "resetToDefault": "重置為默認值",
             "options": "選項",
