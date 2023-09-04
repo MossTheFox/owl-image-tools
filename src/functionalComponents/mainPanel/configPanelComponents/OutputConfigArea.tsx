@@ -84,13 +84,12 @@ export default function OutputConfigArea(props: BoxProps) {
                 <WEBPConfig />
             </ConfigPanelAccordion>
 
-            <ConfigPanelAccordion recordIndex={6} summary={t('ui.configPanel.AVIF')}>
+            {/* <ConfigPanelAccordion recordIndex={6} summary={t('ui.configPanel.AVIF')}>
                 <AVIFConfig />
             </ConfigPanelAccordion>
 
             <ConfigPanelAccordion recordIndex={7} summary={'SVG 设置 (仅读取)'}>
-                {/* <AVIFConfig /> */}
-            </ConfigPanelAccordion>
+            </ConfigPanelAccordion> */}
         </Box>
 
 

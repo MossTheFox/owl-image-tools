@@ -99,6 +99,10 @@ export type OutputConfig = {
     AVIF_subsampleMode: 'auto' | 'on' | 'off',
     AVIF_keepAlphaChannel: boolean,
 
+    SVG_loadEngine: 'browser' | 'resvg',
+    SVG_width: number | 'auto',
+    SVG_height: number | 'auto',
+
 };
 
 export const defaultOutputConfig: OutputConfig = {
@@ -139,6 +143,9 @@ export const defaultOutputConfig: OutputConfig = {
     AVIF_compression: 'hevc',
     AVIF_subsampleMode: 'auto',
     AVIF_keepAlphaChannel: true,
+    SVG_loadEngine: 'resvg',
+    SVG_width: 'auto',
+    SVG_height: 'auto',
 };
 
 const TIPS_DIALOG_FLAGS = [

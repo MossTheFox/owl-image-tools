@@ -13,7 +13,7 @@ export default function AVIFConfig(props: BoxProps) {
     return <Box {...props}>
 
         <Typography variant="body2" fontWeight="bolder" color="textSecondary" gutterBottom>
-            {t('label.WEBP_encodeMode')}
+            编码方式
         </Typography>
         <Box pb={2}>
             <ButtonGroup fullWidth disableElevation size="small" variant="outlined">
@@ -78,20 +78,6 @@ export default function AVIFConfig(props: BoxProps) {
         </Box>
 
         <Box pb={2}>
-
-            {/* ⚠ vips 1.18.3 does NOT support GIF interlace. */}
-
-            {/* <CheckboxWithTooltop containerBoxProps={{ pb: 2 }}
-                label={t('label.GIF_interlace')}
-                tooltip={t('tooltip.GIF_interlace')}
-                checkboxProps={{
-                    checked: outputConfig.GIF_interlace,
-                    onChange: (e, v) => {
-                        updateOutputConfig('GIF_interlace', v);
-                    }
-                }}
-            /> */}
-
 
             <TypographyWithTooltip variant="body2" fontWeight="bolder" color="textSecondary" gutterBottom
                 tooltip={'每像素的位数。默认 12。'}
