@@ -26,7 +26,7 @@ export default function OutputFileTreeItem({
         callNodePreviewDialog
     } = useContext(outputFileListDialogCallerContext);
 
-    const { activeFileProgress } = useContext(outputFileListContext);
+    const { activeFileProgress, activeFileKey } = useContext(outputFileListContext);
 
     /** Rerender cannot detect the node change (since it's the same object)
      * so here is an update on every rerender.
@@ -115,7 +115,7 @@ export default function OutputFileTreeItem({
             >
                 {/* Progress Bar BG Box */}
                 <Box position="absolute" width='100%' height={0} left={0} top={0} zIndex={-1}>
-                    <Box width={`${((Math.max(node.convertProgress, activeFileProgress)) * 100).toFixed(2)}%`} height="3rem" bgcolor={(theme) => theme.palette.primary.main}
+                    <Box width={`${((activeFileKey === node.nodeId ? activeFileProgress : node.convertProgress) * 100).toFixed(2)}%`} height="3rem" bgcolor={(theme) => theme.palette.primary.main}
                         sx={{
                             transition: 'width 0.25s, opacity 0.25s 0.5s',
                             opacity: node.finished ? 0 : 0.25

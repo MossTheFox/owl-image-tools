@@ -4,7 +4,7 @@ import { loggerContext } from "./loggerContext";
 import { defaultFileListStatistic, FileListStatistic, getAllNodeInTree, TreeNode, WebkitFileNodeData } from "./fileListContext";
 import { defaultOutputConfig, OutputConfig } from "./appConfigContext";
 import { parseDateDelta, parseFileSizeString } from "../utils/randomUtils";
-import { convertToGIF, convertToJPEG, convertToPNG, convertToWebp, isFormatAcceptedByVips, vipsProgressCallbackHandler } from "../utils/converter/libvipsConverter";
+import { convertToAVIF, convertToGIF, convertToJPEG, convertToPNG, convertToWebp, isFormatAcceptedByVips, vipsProgressCallbackHandler } from "../utils/converter/libvipsConverter";
 import { FS_Mode } from "../utils/browserCompability";
 import { isFileExists, renameFileForDuplication } from "../utils/FS";
 import { convertViaCanvas } from "../utils/converter/canvasConverter";
@@ -189,6 +189,7 @@ interface OutputFileListContext {
     loading: boolean,
     /** Active one task's progress */
     activeFileProgress: number,
+    activeFileKey: string,
     /** 
      * Fatal error only, like ROOT file handle fail to access.
      * 
@@ -255,6 +256,20 @@ async function doConvertion(blob: Blob, targetExt: string, config: OutputConfig)
             });
             break;
 
+        case 'avif':
+            resultBuffer = await convertToAVIF(blob, {
+                "subsample-mode": C.AVIF_subsampleMode,
+                bitdepth: C.AVIF_bitdepth,
+                compression: C.AVIF_compression,
+                defaultBackground: C.imageBaseColor,
+                flatten: !C.AVIF_keepAlphaChannel,
+                effort: 4,
+                Q: C.AVIF_Q,
+                lossless: C.AVIF_lossless,
+                strip: !C.keepMetaData,
+            });
+            break;
+
         default:
             throw new Error('Unknown target format: ' + targetExt);
     }
@@ -275,7 +290,8 @@ export const outputFileListContext = createContext<OutputFileListContext>({
     startConvertion(nodes) { throw new Error('Not init'); },
     clearAll() { throw new Error('Not init'); },
     terminateTask() { throw new Error('Not init'); },
-    activeFileProgress: 0
+    activeFileProgress: 0,
+    activeFileKey: ''
 });
 
 export function OutputFileListContextProvider({ children }: { children: React.ReactNode }) {
@@ -320,7 +336,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
     }, [fireAlertSnackbar]);
 
     const [activeTaskPogress, setActiveTaskPogress] = useState(0);
-
+    const [activeFileKey, setActiveFileKey] = useState('');
     /**
      * Main convet fn.
      */
@@ -481,6 +497,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
         };
 
         setActiveTaskPogress(0);
+        setActiveFileKey(curr.nodeId);
         convertOne(curr).then((file) => {
             if (stateChanged) return;
             if (!file) return;
@@ -494,6 +511,8 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
             curr.convertProgress = 1;
 
             setActiveTaskPogress(1);
+            setActiveFileKey('');
+
             // and update task index
             setCurrentMapNodeIndex((prev) => prev + 1);
 
@@ -614,7 +633,8 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
         startConvertion,
         clearAll,
         terminateTask,
-        activeFileProgress: activeTaskPogress
+        activeFileProgress: activeTaskPogress,
+        activeFileKey
     }}>
         {children}
     </outputFileListContext.Provider>

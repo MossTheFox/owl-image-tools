@@ -23,16 +23,16 @@ export default function WEBPConfig(props: BoxProps) {
             <ButtonGroup fullWidth disableElevation size="small" variant="outlined">
                 <Button variant={outputConfig.WEBP_lossless ? 'outlined' : 'contained'}
                     onClick={() => updateOutputConfig('WEBP_lossless', false)}
-                >{t('label.WEBP_lossy')}</Button>
+                >{t('label.lossy')}</Button>
                 <Button variant={outputConfig.WEBP_lossless ? 'contained' : 'outlined'}
                     onClick={() => updateOutputConfig('WEBP_lossless', true)}
-                >{t('label.WEBP_loseless')}</Button>
+                >{t('label.loseless')}</Button>
             </ButtonGroup>
         </Box>
 
         <Box pb={1}>
             <CheckboxWithTooltop
-                label={t('label.WEBP_keepAlphaChannel')}
+                label={t('label.keepAlphaChannel')}
                 tooltip={t('tooltip.WEBP_keepAlphaChannel')}
                 checkboxProps={{
                     checked: outputConfig.WEBP_keepAlphaChannel,

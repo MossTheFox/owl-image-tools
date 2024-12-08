@@ -141,7 +141,7 @@ export async function convertToAVIF(file: Blob, config = {
     effort: 4,
 
     Q: 50,
-    loseless: false,
+    lossless: false,
     /** `'hevc' | 'avc' | 'jpeg' | 'av1'` */
     compression: 'hevc',
     'subsample-mode': 'auto',
@@ -157,7 +157,7 @@ export async function convertToAVIF(file: Blob, config = {
             'bitdepth': config.bitdepth,
             'effort': config.effort,
             'Q': config.Q,
-            'loseless': config.loseless,
+            'lossless': config.lossless,
             'compression': config.compression,
             'subsample-mode': config["subsample-mode"],
             'strip': config.strip,

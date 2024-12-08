@@ -62,7 +62,7 @@ export default function PNGConfig(props: BoxProps) {
                     <MarkdownRendererNoGutterBottom md={t('tooltip.PNG_bitdepth')} />
                 }
             >
-                {t('label.PNG_bitdepth')}
+                {t('label.bitdepth')}
             </TypographyWithTooltip>
             <Box overflow="auto">
                 <ButtonGroup size="small" variant="outlined" disableElevation

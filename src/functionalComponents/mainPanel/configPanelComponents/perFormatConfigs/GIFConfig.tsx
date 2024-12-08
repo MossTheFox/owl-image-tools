@@ -16,7 +16,7 @@ export default function GIFConfig(props: BoxProps) {
 
         <Box pb={1}>
             <CheckboxWithTooltop
-                label={t('label.GIF_keepAlphaChannel')}
+                label={t('label.keepAlphaChannel')}
                 tooltip={
                     <MarkdownRendererNoGutterBottom md={t('tooltip.GIF_keepAlphaChannel')} />
                 }
@@ -50,7 +50,7 @@ export default function GIFConfig(props: BoxProps) {
                     })} />
                 }
             >
-                {t('label.GIF_bitdepth')}
+                {t('label.bitdepth')}
             </TypographyWithTooltip>
 
             <SliderWithInput value={outputConfig.GIF_bitdepth}

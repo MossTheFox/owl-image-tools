@@ -253,20 +253,14 @@ const zhCN = {
         "GIF_interlace": "交错 (渐进式 GIF)",
         "PNG_strip": "丢弃透明度信息",
         "PNG_compressionLevel": "压缩等级",
-        "PNG_bitdepth": "位深 (Bit Depth)",
         "PNG_quantisationQuality": "色彩量化质量",
         "PNG_dithering": "Dithering",
-        "GIF_keepAlphaChannel": "保留透明度信息",
-        "GIF_bitdepth": "位深 (Bitdepth)",
         "GIF_dithering": "GIF Dithering",
         "GIF_interframeMaxerror": "帧间最大误差",
         "GIF_interpaletteMaxerror": "纹理最大误差",
         "WEBP_quality": "图像质量",
         "WEBP_alphaQuality": "有损压缩透明度信息保真度",
         "WEBP_encodeMode": "编码模式",
-        "WEBP_lossy": "有损压缩",
-        "WEBP_loseless": "无损编码",
-        "WEBP_keepAlphaChannel": "保留透明度信息",
         "WEBP_lossyCompressionPresets": "有损压缩方式预设",
         "WEBP_compressionPresets": {
             "default": "默认",
@@ -275,7 +269,16 @@ const zhCN = {
             "drawing": "绘画",
             "icon": "图标",
             "text": "文本"
-        }
+        },
+        "AVIF_subsampleMode": "次采样",
+        "AVIF_compression": "压缩模式",
+
+        "lossy": "有损压缩",
+        "loseless": "无损编码",
+        "bitdepth": "位深 (Bit Depth)",
+        "keepAlphaChannel": "保留透明度信息",
+        "quality": "质量",
+
     },
 
     // Tooltips, mostly in the config panel. Will be rendered with markdown format.

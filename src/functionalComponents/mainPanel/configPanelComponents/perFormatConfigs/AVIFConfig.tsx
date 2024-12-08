@@ -17,19 +17,18 @@ export default function AVIFConfig(props: BoxProps) {
         </Typography>
         <Box pb={2}>
             <ButtonGroup fullWidth disableElevation size="small" variant="outlined">
-                <Button variant={outputConfig.AVIF_loseless ? 'outlined' : 'contained'}
-                    onClick={() => updateOutputConfig('AVIF_loseless', false)}
-                >{t('label.WEBP_lossy')}</Button>
-                <Button variant={outputConfig.AVIF_loseless ? 'contained' : 'outlined'}
-                    onClick={() => updateOutputConfig('AVIF_loseless', true)}
-                >{t('label.WEBP_loseless')}</Button>
+                <Button variant={outputConfig.AVIF_lossless ? 'outlined' : 'contained'}
+                    onClick={() => updateOutputConfig('AVIF_lossless', false)}
+                >{t('label.lossy')}</Button>
+                <Button variant={outputConfig.AVIF_lossless ? 'contained' : 'outlined'}
+                    onClick={() => updateOutputConfig('AVIF_lossless', true)}
+                >{t('label.loseless')}</Button>
             </ButtonGroup>
         </Box>
 
         <Box pb={1}>
             <CheckboxWithTooltop
-                label={t('label.WEBP_keepAlphaChannel')}
-                tooltip={t('tooltip.WEBP_keepAlphaChannel')}
+                label={t('label.keepAlphaChannel')}
                 checkboxProps={{
                     checked: outputConfig.AVIF_keepAlphaChannel,
                     onChange: (e, v) => updateOutputConfig('AVIF_keepAlphaChannel', v)
@@ -37,34 +36,55 @@ export default function AVIFConfig(props: BoxProps) {
             />
         </Box>
 
-        <Collapse in={!outputConfig.AVIF_loseless}>
+        <Collapse in={!outputConfig.AVIF_lossless}>
             <Box>
                 <Box pb={2}>
                     <Typography variant="body2" color="textSecondary" fontWeight="bolder" gutterBottom>
-                        {t('label.WEBP_quality')}
+                        {t('label.quality')}
                     </Typography>
                     <SliderWithInput
                         min={0} max={100} step={1}
                         value={outputConfig.AVIF_Q}
                         onChange={(n) => updateOutputConfig('AVIF_Q', n)}
-                        label="WEBP quality"
+                        label="Quality"
                     />
                 </Box>
             </Box>
+
+            <Box hidden pb={2}>
+                <Typography variant="body2" color="textSecondary" fontWeight="bolder" gutterBottom>
+                    {t('label.AVIF_compression')}
+                </Typography>
+                <ButtonGroup fullWidth variant="outlined" disableElevation size="small"
+                    sx={{ overflow: 'auto' }}
+                >
+                    {([/* 'hevc', 'avc', */ 'jpeg', 'av1'] as const).map((v) =>
+                        <Button key={v} variant={outputConfig.AVIF_compression === v ? 'contained' : 'outlined'}
+                            onClick={() => updateOutputConfig('AVIF_compression', v)}
+                            sx={{
+                                minWidth: 'unset !important',
+                                whiteSpace: 'nowrap',
+                            }}
+                        >
+                            {v}
+                        </Button>
+                    )}
+
+                </ButtonGroup>
+            </Box>
+            
         </Collapse>
 
         <Box pb={2}>
-            <TypographyWithTooltip variant="body2" color="textSecondary" fontWeight="bolder" gutterBottom
-                tooltip="默认为 HEVC。"
-            >
-                {'压缩格式'}
-            </TypographyWithTooltip>
+            <Typography variant="body2" color="textSecondary" fontWeight="bolder" gutterBottom>
+                {t('label.AVIF_subsampleMode')}
+            </Typography>
             <ButtonGroup fullWidth variant="outlined" disableElevation size="small"
                 sx={{ overflow: 'auto' }}
             >
-                {(['hevc', 'avc', 'jpeg', 'av1'] as const).map((v) =>
-                    <Button key={v} variant={outputConfig.AVIF_compression === v ? 'contained' : 'outlined'}
-                        onClick={() => updateOutputConfig('AVIF_compression', v)}
+                {(['auto', 'on', 'off'] as const).map((v) =>
+                    <Button key={v} variant={outputConfig.AVIF_subsampleMode === v ? 'contained' : 'outlined'}
+                        onClick={() => updateOutputConfig('AVIF_subsampleMode', v)}
                         sx={{
                             minWidth: 'unset !important',
                             whiteSpace: 'nowrap',
@@ -77,20 +97,22 @@ export default function AVIFConfig(props: BoxProps) {
             </ButtonGroup>
         </Box>
 
-        <Box pb={2}>
+
+
+        {/* <Box pb={2}>
 
             <TypographyWithTooltip variant="body2" fontWeight="bolder" color="textSecondary" gutterBottom
-                tooltip={'每像素的位数。默认 12。'}
+                tooltip={'Default: 12'}
             >
-                {t('label.GIF_bitdepth')}
+                {t('label.bitdepth')}
             </TypographyWithTooltip>
 
             <SliderWithInput value={outputConfig.AVIF_bitdepth}
                 onChange={(n) => updateOutputConfig('AVIF_bitdepth', n)}
-                min={1} max={16} step={1} label="GIF bitdepth"
+                min={1} max={16} step={1} label="bitdepth"
                 sliderProps={{ marks: true }}
             />
-        </Box>
+        </Box> */}
     </Box>
 
 }

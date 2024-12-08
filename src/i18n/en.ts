@@ -252,10 +252,8 @@ const en = {
         "GIF_interlace": "Interlace",
         "PNG_strip": "Remove Alpha Channel",
         "PNG_compressionLevel": "Compression Level",
-        "PNG_bitdepth": "Bit Depth",
         "PNG_quantisationQuality": "Quantisation Quality",
         "PNG_dithering": "Dithering",
-        "GIF_keepAlphaChannel": "Keep Alpha Channel",
         "GIF_bitdepth": "Bitdepth",
         "GIF_dithering": "GIF Dithering",
         "GIF_interframeMaxerror": "Interframe Max Error",
@@ -263,9 +261,6 @@ const en = {
         "WEBP_quality": "Quality",
         "WEBP_alphaQuality": "Alpha Quality (Lossy Mode)",
         "WEBP_encodeMode": "Encode Mode",
-        "WEBP_lossy": "Lossy",
-        "WEBP_loseless": "Loseless",
-        "WEBP_keepAlphaChannel": "Keep Alpha Channel",
         "WEBP_lossyCompressionPresets": "Lossy Compression Presets",
         "WEBP_compressionPresets": {
             "default": "Default",
@@ -274,7 +269,14 @@ const en = {
             "drawing": "Drawing",
             "icon": "Icon",
             "text": "Text"
-        }
+        },
+        "AVIF_subsampleMode": "Subsample Mode",
+        "AVIF_compression": "Compression",
+        "lossy": "Lossy",
+        "loseless": "Loseless",
+        "bitdepth": "Bit Depth",
+        "keepAlphaChannel": "Keep Alpha Channel",
+        "quality": "Quality",
     },
 
     // Tooltips, mostly in the config panel. Will be rendered with markdown format.
