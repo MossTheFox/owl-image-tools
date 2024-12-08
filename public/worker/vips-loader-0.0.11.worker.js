@@ -1,6 +1,6 @@
 // @ts-check
 
-const VIPS_LIB_START_URL = '/wasm/vips-0.0.5'
+const VIPS_LIB_START_URL = '/wasm/vips-0.0.11'
 
 importScripts(`${VIPS_LIB_START_URL}/vips.js`);
 
@@ -8,6 +8,9 @@ importScripts(`${VIPS_LIB_START_URL}/vips.js`);
 
 // Need to reload it.
 
+/**
+ * @type {import("wasm-vips")}
+ */
 let vips = null;
 
 function initVips() {
@@ -83,6 +86,9 @@ async function vipsCall(
         img.delete();
         img = flattened;
     }
+    img.onProgress = (percent) => {
+        postBackMessage('ok', 'progress', percent);
+    };
     const result = img.writeToBuffer(writeFormatString, writeOptions);
     img.delete();
     return result;
@@ -94,7 +100,7 @@ async function vipsCall(
  * 
  * @param {'ok' | 'error'} code 
  * @param {string} message 
- * @param {ArrayBuffer | Error} data
+ * @param {number | ArrayBuffer | Error} data
  */
 function postBackMessage(code, message, data) {
     self.postMessage({
@@ -103,6 +109,8 @@ function postBackMessage(code, message, data) {
         data
     });
 }
+
+const initPromise = initVips();
 
 self.addEventListener('message', async (e) => {
     const data = e.data;
@@ -117,6 +125,8 @@ self.addEventListener('message', async (e) => {
         return;
     }
 
+    await initPromise;
+
     try {
         const result = await vipsCall(...data.args);
         // Safari will throw error if trying to post a Uint8Array. Convert it to ArrayBuffer.
@@ -127,3 +137,5 @@ self.addEventListener('message', async (e) => {
     }
 
 });
+
+// auto init.

@@ -2,7 +2,7 @@
     <img src="public/image/icon-512.png" width="256px" alt="App logo">
 </p>
 
-# Owl Image Tools (图片工具箱)
+# Owl Image Tools
 
 A simple image conversion tool that runs in your browser, powered by [wasm-vibs](https://github.com/kleisauke/wasm-vips).
 
@@ -10,7 +10,7 @@ A simple image conversion tool that runs in your browser, powered by [wasm-vibs]
 
 Language Support: `zh-CN`, `zh-TW` (via Google Translation), `en`.
 
-<sub>If you've visited this page before, you will need to wait for the Service Worker to update itself before accessing to the newer version of the page (if any) since Service Worker will always serve the local cached version to you. Do a page refresh to check if the newer version is loaded.</sub>
+<sub>If you've visited this page before, you will need to wait for the Service Worker to update itself before accessing to the newer version of the page (if any) since Service Worker will always serve the local cached version to you. Do a page refresh to check if the newer version is loaded. Or, terminate the service worker in the web app's settings page to remove cached data.</sub>
 
 ## Browser compatibility
 
@@ -25,7 +25,7 @@ Also works on: latest Firefox, Safari on iOS 16.4+.
 
 A experimental Web App built with React. No back-end. No analysis scripts. A pure client-side app.
 
-(The screenshots are not the latest version, but the look is mostly the same)
+(The screenshots were not the latest version, but the look is mostly the same)
 
 <p>
     <img src="public/image/screenshot1.png" width="66%">
@@ -82,27 +82,11 @@ workbox generateSW workbox-config.cjs
 
 > <sub>or, never-to-be-done(s)</sub>
 
-- [x] Modify the hardcoded text to support localization.
-    - [x] zh-CN and zh-TW
-    - [x] English 
-- [x] Update to wasm-vips 0.0.5 with AVIF support when it's ready.
-- [ ] Copy image to clipboard in the context menu.
-    - [ ] Test for different browsers:
-        - Safari: [Allow `image/png` Only](https://webkit.org/blog/10855/async-clipboard-api/);
-        - [Chrome](https://stackoverflow.com/questions/68897154/list-of-supported-mime-types-for-clipboard-write) and [Firefox](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/write) are mostly the same.
-        - Which means it might need to use the canvas to do a convertion first for non-PNGs.
-- [ ] Quick convertion for a single file/directory in the source file list context menu.
-- [ ] 'Retry' for the errored tasks.
-- [ ] 'Pause' and 'Resume' for the tasks, rather than only allowing aborting.
-- [ ] Allow skipping tasks that seems to freeze the worker.
-    - [ ] Vips loader Worker should be able to response to a signal call to indicate that it's not blocked. 
-- [ ] Save the output directory handle in the indexedDB (with [idb-keyval](https://www.npmjs.com/package/idb-keyval)) for supported browsers.
-- [ ] More image tools other than converting.
-    - [ ] Image Filters (Greyscale, etc.) ([doc](https://www.libvips.org/API/current/libvips-colour.html))
-    - [ ] Resize Images ([doc](https://www.libvips.org/API/current/libvips-resample.html#vips-resize) and [wiki](https://github.com/libvips/libvips/wiki/HOWTO----Image-shrinking)) 
-- [ ] A simpler Settings panel for processing filters or changing resolution for images.
-    - To save the final result, show menus like "Save As" rather than using the verbose converttion config panel. 
-- [ ]  Add page loading background when static files are loading (the bundle size is now larger than 800 KB, which is probably unfriendly for slow networks).
+React context rework. Native react context makes rerendering heavily impact the performance.
+
+UI rework and file tree view glitches fix.
+
+A complete user interface rework is also required.
 
 ## License
 

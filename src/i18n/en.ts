@@ -3,9 +3,10 @@ const en = {
         "title": "Owl Image Tools"
     },
     "global": {
-        "knownIssues": `Known Issues:
-- For file types that cannot be decoded by wasm-vips (e.g. SVG, ICO), a PNG file will be generated with the HTML canvas before passing to vips for further processing. Meta data and alpha channel will be lost during this process.
-- APNG is not supported.`
+        "knownIssues": ''
+//         `Known Issues:
+// - For file types that cannot be decoded by wasm-vips (e.g. SVG, ICO), a PNG file will be generated with the HTML canvas before passing to vips for further processing. Meta data and alpha channel will be lost during this process.
+// - APNG is not supported.`
     },
     "lang": {
         "followSystem": "Follow System",

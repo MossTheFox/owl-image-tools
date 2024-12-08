@@ -1,5 +1,6 @@
 import { Divider, Link, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, TypographyProps } from '@mui/material';
 import { marked } from 'marked';
+import { memo } from 'react';
 
 export function markdownGetParsedTokens(md: string) {
     return marked.lexer(md);
@@ -8,7 +9,7 @@ export function markdownGetParsedTokens(md: string) {
 /**
  * For `DialogContentText`, set text color (`color`) as 'text.secondary'.
  */
-export function MarkdownRenderer(
+const MarkdownRendererSub = memo(function MarkdownRendererSub(
     {
         md,
         typographyProps
@@ -144,7 +145,23 @@ export function MarkdownRenderer(
             }
         })}
     </>
-}
+});
+
+
+export const MarkdownRenderer = memo(function MarkdownRenderer (
+    {
+        md,
+        typographyProps,
+    }: {
+        md: string | marked.Token[],
+        typographyProps?: TypographyProps
+    }) {
+
+    const tokens = md;
+
+    return <MarkdownRendererSub md={tokens} typographyProps={typographyProps} />
+
+});
 
 export function MarkdownRendererNoGutterBottom({
     md,

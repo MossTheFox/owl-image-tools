@@ -4,7 +4,7 @@ import { loggerContext } from "./loggerContext";
 import { defaultFileListStatistic, FileListStatistic, getAllNodeInTree, TreeNode, WebkitFileNodeData } from "./fileListContext";
 import { defaultOutputConfig, OutputConfig } from "./appConfigContext";
 import { parseDateDelta, parseFileSizeString } from "../utils/randomUtils";
-import { convertToGIF, convertToJPEG, convertToPNG, convertToWebp, isFormatAcceptedByVips } from "../utils/converter/libvipsConverter";
+import { convertToGIF, convertToJPEG, convertToPNG, convertToWebp, isFormatAcceptedByVips, vipsProgressCallbackHandler } from "../utils/converter/libvipsConverter";
 import { FS_Mode } from "../utils/browserCompability";
 import { isFileExists, renameFileForDuplication } from "../utils/FS";
 import { convertViaCanvas } from "../utils/converter/canvasConverter";
@@ -187,6 +187,8 @@ interface OutputFileListContext {
 
     /** isProcessing */
     loading: boolean,
+    /** Active one task's progress */
+    activeFileProgress: number,
     /** 
      * Fatal error only, like ROOT file handle fail to access.
      * 
@@ -273,6 +275,7 @@ export const outputFileListContext = createContext<OutputFileListContext>({
     startConvertion(nodes) { throw new Error('Not init'); },
     clearAll() { throw new Error('Not init'); },
     terminateTask() { throw new Error('Not init'); },
+    activeFileProgress: 0
 });
 
 export function OutputFileListContextProvider({ children }: { children: React.ReactNode }) {
@@ -316,6 +319,8 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
         }
     }, [fireAlertSnackbar]);
 
+    const [activeTaskPogress, setActiveTaskPogress] = useState(0);
+
     /**
      * Main convet fn.
      */
@@ -344,8 +349,11 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
 
         writeLine(t('logger.startProcessingFile', { name: node.originalNode.data.file.name, ext }));
 
+        vipsProgressCallbackHandler.callback = (progress) => {
+            setActiveTaskPogress(progress);
+        }
         let resultBuffer = await doConvertion(originalFile, ext, C);
-
+        vipsProgressCallbackHandler.callback = null;
         if (FS_Mode !== 'noFS' && outputFolderHandle) {
 
             // Here is the thing: Buffer from file object can stay away from memory.
@@ -472,6 +480,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
             });
         };
 
+        setActiveTaskPogress(0);
         convertOne(curr).then((file) => {
             if (stateChanged) return;
             if (!file) return;
@@ -484,6 +493,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
             curr.finished = true;
             curr.convertProgress = 1;
 
+            setActiveTaskPogress(1);
             // and update task index
             setCurrentMapNodeIndex((prev) => prev + 1);
 
@@ -604,6 +614,7 @@ export function OutputFileListContextProvider({ children }: { children: React.Re
         startConvertion,
         clearAll,
         terminateTask,
+        activeFileProgress: activeTaskPogress
     }}>
         {children}
     </outputFileListContext.Provider>

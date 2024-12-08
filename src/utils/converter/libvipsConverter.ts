@@ -214,6 +214,11 @@ const isMultiframePic = (type: string) => {
 
 let worker: Worker | null = null;
 
+export const vipsProgressCallbackHandler = {
+    /** progress: 0 ~ 1 */
+    callback: null as null | ((progress: number) => void)
+}
+
 /**
  * For how vips is called in the worker, check `vipsCall()` in `_libvipsConverterTemp.ts` for the typed caller function in `vips-loader.worker.js`.
  * 
@@ -250,13 +255,22 @@ function fireVipsWorkerTask(
 
             worker.onmessage = async (e) => {
 
-                import.meta.env.DEV && console.log(e);
+                import.meta.env.DEV && console.log(e.data);
 
                 const data = e.data as {
                     code: 'ok' | 'error',
-                    message: string,
+                    message: Omit<string, 'progress'>,
                     data: ArrayBuffer | Error
+                } | {
+                    code: 'ok',
+                    message: 'progress',
+                    data: number
                 };
+
+                if (data.code === 'ok' && data.message === 'progress') {
+                    vipsProgressCallbackHandler.callback && vipsProgressCallbackHandler.callback(+data.data / 100);
+                    return;
+                }
 
                 // Handle Errors
                 if (data.code === 'error' && data.message) {
