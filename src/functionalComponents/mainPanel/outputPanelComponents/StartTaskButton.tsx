@@ -55,7 +55,11 @@ export default function StartTaskButton(props: BoxProps) {
     const fireOpenDirPicker = useAsync(openDirPicker, handleGet, handleErr);
 
     const opfs = useCallback(async () => {
-        await clearCurrentActiveTempFolders();
+        try {
+            await clearCurrentActiveTempFolders();
+        } catch (err) {
+            console.log(err);
+        }
         return await createOPFSTempFolder();
     }, []);
 
