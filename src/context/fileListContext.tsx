@@ -3,7 +3,6 @@ import { randomUUIDv4 } from "../utils/randomUtils";
 import { ACCEPT_MIMEs, checkIsFilenameAccepted, extToMime } from "../utils/imageMIMEs";
 import useAsync from "../hooks/useAsync";
 import { loggerContext } from "./loggerContext";
-import { dragAndDropAPILimitDetector } from "../utils/browserCompability";
 import { appConfigContext } from "./appConfigContext";
 import QuickDialog from "../components/styledComponents/QuickDialog";
 import { Button } from "@mui/material";
@@ -295,89 +294,109 @@ export function FileListContext({ children }: { children: React.ReactNode }) {
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
+function createDeferredPromise<T>() {
+    const obj: {
+        resolve: (arg: T) => void,
+        reject: (reason: unknown) => void,
+        promise: Promise<T>
+    } = {} as any;
+    obj.promise = new Promise((resolve, reject) => {
+        obj.resolve = resolve;
+        obj.reject = reject;
+    });
+    return obj;
+}
+
+async function readEntriesAsync(reader: FileSystemDirectoryReader) {
+    const deferred = createDeferredPromise<FileSystemEntry[]>();
+    reader.readEntries((entries) => {
+        deferred.resolve(entries);
+    }, (err) => {
+        deferred.reject(err);
+    })
+    return deferred.promise;
+}
+
 /** 
  * For files, will only record image/*
  * Abortable. 
 */
-function iterateDirectoryEntry(
+async function iterateDirectoryEntry(
     entry: FileSystemDirectoryEntry,
     node: TreeNode<WebkitFileNodeData>,
     nodeMap?: Map<string, TreeNode<WebkitFileNodeData>>,
     abortSignal?: AbortSignal
 ) {
-    return new Promise<void>((resolve, reject) => {
-        const reader = entry.createReader();
-        reader.readEntries(async (entries) => {
-            if (entries.length === 100) {
-                dragAndDropAPILimitDetector.detected = true;
+    if (node.data.kind === 'file') return;
+    const reader = entry.createReader();
+
+    const entries: FileSystemEntry[] = [];
+
+    let _lastChunk: FileSystemEntry[] = [];
+    do {
+        _lastChunk = await readEntriesAsync(reader);
+        entries.push(..._lastChunk);
+    } while (_lastChunk.length);
+
+    node.children = [];
+    node.data.childrenCount = 0;
+
+    for (const entry of entries) {
+        if (abortSignal?.aborted) {
+            return;
+        }
+        if (entry.isFile) {
+            const deferred = createDeferredPromise<File>();
+            (entry as FileSystemFileEntry).file((file) => {
+                    deferred.resolve(file)
+                }, (err) => {
+                    // reject the main promise
+                    deferred.reject(err);
+                });
+            const file = await deferred.promise
+
+            // Error occurred when getting File object. Stop the whole process
+            if (!file) {
+                return;
             }
-            if (node.data.kind === 'file') return;
-            node.children = [];
-            node.data.childrenCount = 0;
-            for (const entry of entries) {
-                if (abortSignal?.aborted) {
-                    reject(new Error('Aborted'));
-                    return;
+
+            // Count in image files only
+            // IMPORTANT: Firefox don't parst file MIME here. CHECK extentions
+            // IMPORTANT 2: Browsers don't parse HEIF file MIME. Check here.
+            if (file.type.startsWith('image/') || checkIsFilenameAccepted(file.name)) {
+                const newNode = new TreeNode<WebkitFileNodeData>({
+                    kind: 'file',
+                    file
+                }, node);
+
+                // Record here
+                if (nodeMap) {
+                    nodeMap.set(newNode.nodeId, newNode);
                 }
-                if (entry.isFile) {
-                    const file = await new Promise<File | null>((resolveFile, rejectFile) => {
-                        (entry as FileSystemFileEntry).file((file) => {
-                            resolveFile(file)
-                        }, (err) => {
-                            // reject the main promise
-                            reject(err);
-                            resolveFile(null);
-                        })
-                    });
-                    // Error occurred when getting File object. Stop the whole process
-                    if (!file) {
-                        return;
-                    }
 
-                    // Count in image files only
-                    // IMPORTANT: Firefox don't parst file MIME here. CHECK extentions
-                    // IMPORTANT 2: Browsers don't parse HEIF file MIME. Check here.
-                    if (file.type.startsWith('image/') || checkIsFilenameAccepted(file.name)) {
-                        const newNode = new TreeNode<WebkitFileNodeData>({
-                            kind: 'file',
-                            file
-                        }, node);
-
-                        // Record here
-                        if (nodeMap) {
-                            nodeMap.set(newNode.nodeId, newNode);
-                        }
-
-                        node.children.push(newNode);
-                        node.data.childrenCount++;
-                    }
-                    continue;
-                }
-                if (entry.isDirectory) {
-                    const dirNode = new TreeNode<WebkitFileNodeData>({
-                        kind: 'directory',
-                        name: entry.name,
-                        childrenCount: 0
-                    }, node);
-                    await iterateDirectoryEntry(entry as FileSystemDirectoryEntry, dirNode, nodeMap, abortSignal);
-                    // Ignore Empty dir             ↓ TypeScript... Should have define it more properly but whatever
-                    if (dirNode.children.length && dirNode.data.kind === 'directory') {
-                        node.data.childrenCount += dirNode.data.childrenCount;
-
-                        if (nodeMap) {
-                            nodeMap.set(dirNode.nodeId, dirNode);
-                        }
-
-                        node.children.push(dirNode);
-                    }
-                    continue;
-                }
+                node.children.push(newNode);
+                node.data.childrenCount++;
             }
-            resolve();
-        }, (err) => {
-            reject(err);
-        });
-    });
+            continue;
+        }
+        if (entry.isDirectory) {
+            const dirNode = new TreeNode<WebkitFileNodeData>({
+                kind: 'directory',
+                name: entry.name,
+                childrenCount: 0
+            }, node);
+            await iterateDirectoryEntry(entry as FileSystemDirectoryEntry, dirNode, nodeMap, abortSignal);
+            // Ignore Empty dir             ↓ TypeScript... Should have define it more properly but whatever
+            if (dirNode.children.length && dirNode.data.kind === 'directory') {
+                node.data.childrenCount += dirNode.data.childrenCount;
+                if (nodeMap) {
+                    nodeMap.set(dirNode.nodeId, dirNode);
+                }
+                node.children.push(dirNode);
+            }
+            continue;
+        }
+    }
 }
 
 interface WebkitFileListContext {
@@ -435,10 +454,6 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
     const [nodeMap, setNodeMap] = useState<Map<string, TreeNode<WebkitFileNodeData>>>(new Map());
     const [ready, setReady] = useState(true);
     const [error, setError] = useState<Error | null>(null);
-
-    // const [allowDrop, setAllowDrop] = useState(true);
-    // Drag and Drop limit detection dialog
-    const [DaDDialogOPen, setDaDDialogOpen] = useState(false);
 
     // File List from input (webkitdirectory) element or clipboard
     const appendFileList = useCallback((fileList: FileList | File[], webkitDirectory = false) => {
@@ -602,11 +617,6 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
             setNodeMap((prev) => new Map([...prev, ...additionalMap]));
             setReady(true);
             setError(null);
-
-            // ANNNNNNND...
-            if (dragAndDropAPILimitDetector.detected) {
-                setDaDDialogOpen(true);
-            }
         }
 
     }, []);
@@ -735,15 +745,6 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
         return inputFileTreeRoots;
     }, [inputFileTreeRoots]);
 
-
-    // Drag and drop notification dialog...
-    const { siteConfig, setTipDisplay } = useContext(appConfigContext);
-    const closeDialog = useCallback(() => setDaDDialogOpen(false), []);
-    const dontPopNextTime = useCallback(() => {
-        setTipDisplay('dragAndDropEntryLimit', false);
-        setDaDDialogOpen(false);
-    }, [setTipDisplay]);
-
     return <webkitFileListContext.Provider value={{
         inputFileTreeRoots,
         setInputFileTreeRoots,
@@ -758,19 +759,6 @@ export function WebkitDirectoryFileListContext({ children }: { children: React.R
         // allowDrop,
         // setAllowDrop
     }}>
-        <QuickDialog open={DaDDialogOPen && siteConfig.tipDisplay['dragAndDropEntryLimit']}
-            onClose={closeDialog}
-            title={t('title.dragAndDropFileListIntergrityTip')}
-            actions={
-                <Button onClick={dontPopNextTime}>
-                    {t('button.okAndDontShowAgain')}
-                </Button>
-            }
-            content={<MarkdownRenderer
-                md={t('content.dragAndDropFileListIntegrityDialogContent')}
-                typographyProps={{ color: 'text.secondary' }} />
-            }
-        />
         {children}
     </webkitFileListContext.Provider>
 }

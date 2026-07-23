@@ -317,7 +317,6 @@ const zhCN = {
     "title": {
         "failToImportDirectory": "添加文件夾失敗",
         "failToImportFile": "添加文件失敗",
-        "dragAndDropFileListIntergrityTip": "Drag and Drop 文件列表完整性問題",
         "aboutFSMode": "關於文件系統訪問模式",
         "resetTipDisplayPreference": "將重置所有提示信息",
         "browserCompatibilityTip": "瀏覽器兼容性提示",
@@ -335,10 +334,6 @@ const zhCN = {
         "failToImportFile": "添加文件時發生錯誤。",
         "errorMessage": "錯誤信息: {{msg}}",
         "failToClearOPFS": "清理私有文件系統緩存目錄時遇到問題。",
-
-        "dragAndDropFileListIntegrityDialogContent": `檢測到潛在的文件列表完整性問題: \n
-**你的瀏覽器可能限制了單個文件夾內的項目數量** (限制為 100)，超過此限制的文件在導入時會被跳過。 \n
-可以嘗試使用文件夾選擇按鈕，或者手動進行多次的導入。 `,
 
         // --- Tip on Panels --- // 
         "inputPanelTip": `在文件列表的文件上，**鼠標右擊** 或 **觸摸長按** 以顯示更多操作。 \n

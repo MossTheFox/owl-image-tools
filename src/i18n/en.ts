@@ -317,7 +317,6 @@ Notice that some browsers may remove metadata when importing images.`,
     "title": {
         "failToImportDirectory": "Fail to Import Directory",
         "failToImportFile": "Fail to Import File",
-        "dragAndDropFileListIntergrityTip": "Drag and Drop File List Integrity Issue",
         "aboutFSMode": "About File System Mode",
         "resetTipDisplayPreference": "Reset All Tips",
         "browserCompatibilityTip": "Browser Compatibility Notice",
@@ -335,10 +334,6 @@ Notice that some browsers may remove metadata when importing images.`,
         "failToImportFile": "Error occurred when importing file(s). ",
         "errorMessage": "Error message: {{msg}}",
         "failToClearOPFS": "Error occurred when clearing OPFS. ",
-
-        "dragAndDropFileListIntegrityDialogContent": `Potential file list integrity issue detected: \n
-**Your browser seems to be limiting the max entries that can be read from a directory** (limited to 100). Directories with more than 100 files (or folders) will not be fully imported.\n
-May try to use the directory picker button, or do manually imports for several times.`,
 
         // --- Tip on Panels --- // 
         "inputPanelTip": `**Right click** or **touch hold** on the files in the list to show more actions.\n

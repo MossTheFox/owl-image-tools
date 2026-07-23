@@ -318,7 +318,6 @@ const zhCN = {
     "title": {
         "failToImportDirectory": "添加文件夹失败",
         "failToImportFile": "添加文件失败",
-        "dragAndDropFileListIntergrityTip": "Drag and Drop 文件列表完整性问题",
         "aboutFSMode": "关于文件系统访问模式",
         "resetTipDisplayPreference": "将重置所有提示信息",
         "browserCompatibilityTip": "浏览器兼容性提示",
@@ -336,10 +335,6 @@ const zhCN = {
         "failToImportFile": "添加文件时发生错误。",
         "errorMessage": "错误信息: {{msg}}",
         "failToClearOPFS": "清理私有文件系统缓存目录时遇到问题。",
-
-        "dragAndDropFileListIntegrityDialogContent": `检测到潜在的文件列表完整性问题: \n
-**你的浏览器可能限制了单个文件夹内的项目数量** (限制为 100)，超过此限制的文件在导入时会被跳过。\n
-可以尝试使用文件夹选择按钮，或者手动进行多次的导入。`,
 
         // --- Tip on Panels --- // 
         "inputPanelTip": `在文件列表的文件上，**鼠标右击** 或 **触摸长按** 以显示更多操作。\n

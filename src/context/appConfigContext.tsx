@@ -151,7 +151,6 @@ export const defaultOutputConfig: OutputConfig = {
 const TIPS_DIALOG_FLAGS = [
     'browserCompatibility', 'webkitOpenDirectory', 'webkitDirectoryNotSupported',
     'fileListTip', 'outputFileListTip',
-    'dragAndDropEntryLimit',
 ] as const;
 
 // Site Config
