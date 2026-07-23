@@ -1,0 +1,16 @@
+vips
+vips*
+# Note: Inside these folders are libs of wasm-vips.
+# File list: (for wasm-vips 0.0.4)
+# - vips.js
+# - vips.worker.js
+# - vips.wasm
+# - vips-jxl.wasm
+
+# File List: (for wasm-vips 0.0.5)
+# - vips.js
+# - vips.worker.js
+# - vips.wasm
+# - vips-heif.wasm
+# - vips-resvg.wasm
+# - vips-jxl.wasm
